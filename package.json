@@ -5,7 +5,9 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "dev:hub": "pnpm --filter @antiphon/hub dev"
+    "dev:hub": "pnpm --filter @antiphon/hub dev",
+    "lint": "echo 'TODO: ESLint'",
+    "format": "echo 'TODO: Prettier'"
   },
   "dependencies": {
     "@vitest/ui": "^4.0.18",
