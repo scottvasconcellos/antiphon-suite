@@ -2,3 +2,11 @@ node_modules
 dist
 coverage
 .DS_Store
+.env*
+.npmrc
+*.pem
+*.key
+*.p12
+*.pfx
+secrets*.json
+credentials*.json
