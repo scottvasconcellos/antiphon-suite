@@ -1,16 +1,7 @@
 import { DEFAULT_HUB_SNAPSHOT } from "./defaults";
 import { type HubGateway, type HubStore } from "./ports";
-import { type EntitledApp, type HubState } from "./types";
-
-function upsertApp(entitlements: EntitledApp[], app: EntitledApp): EntitledApp[] {
-  const index = entitlements.findIndex((candidate) => candidate.id === app.id);
-  if (index === -1) {
-    return [...entitlements, app];
-  }
-  const copy = [...entitlements];
-  copy[index] = app;
-  return copy;
-}
+import { applyHubEvent } from "./hubEngineCore";
+import { type HubState } from "./types";
 
 export class HubEngine {
   constructor(
@@ -28,20 +19,13 @@ export class HubEngine {
         this.gateway.fetchTransactions()
       ]);
 
-      const snapshot = this.store.save({
-        ...base,
+      const next = applyHubEvent(base, {
+        type: "BOOTSTRAP_SYNCED",
         entitlements,
         offlineCache,
         transactions
       });
-
-      return {
-        snapshot,
-        status: {
-          mode: "ready",
-          message: "Hub connected to entitlement authority."
-        }
-      };
+      return { ...next, snapshot: this.store.save(next.snapshot) };
     } catch (error) {
       return {
         snapshot: base,
@@ -62,39 +46,22 @@ export class HubEngine {
       this.gateway.fetchTransactions()
     ]);
 
-    const snapshot = this.store.save({
-      ...current,
+    const next = applyHubEvent(current, {
+      type: "SIGNED_IN",
       session,
       entitlements,
       offlineCache,
       transactions
     });
-
-    return {
-      snapshot,
-      status: {
-        mode: "ready",
-        message: "Identity authenticated and ownership refreshed."
-      }
-    };
+    return { ...next, snapshot: this.store.save(next.snapshot) };
   }
 
   async signOut(): Promise<HubState> {
     const current = this.store.load();
     await this.gateway.signOut();
 
-    const snapshot = this.store.save({
-      ...current,
-      session: null
-    });
-
-    return {
-      snapshot,
-      status: {
-        mode: "ready",
-        message: "Signed out. Existing offline cache remains available."
-      }
-    };
+    const next = applyHubEvent(current, { type: "SIGNED_OUT" });
+    return { ...next, snapshot: this.store.save(next.snapshot) };
   }
 
   async refreshEntitlements(): Promise<HubState> {
@@ -105,20 +72,13 @@ export class HubEngine {
       this.gateway.fetchTransactions()
     ]);
 
-    const snapshot = this.store.save({
-      ...current,
+    const next = applyHubEvent(current, {
+      type: "ENTITLEMENTS_REFRESHED",
       entitlements,
       offlineCache,
       transactions
     });
-
-    return {
-      snapshot,
-      status: {
-        mode: "ready",
-        message: "Entitlements refreshed."
-      }
-    };
+    return { ...next, snapshot: this.store.save(next.snapshot) };
   }
 
   async installApp(appId: string): Promise<HubState> {
@@ -126,19 +86,8 @@ export class HubEngine {
     const nextApp = await this.gateway.installApp(appId);
     const transactions = await this.gateway.fetchTransactions();
 
-    const snapshot = this.store.save({
-      ...current,
-      entitlements: upsertApp(current.entitlements, nextApp),
-      transactions
-    });
-
-    return {
-      snapshot,
-      status: {
-        mode: "ready",
-        message: `Install transaction completed for ${nextApp.name}.`
-      }
-    };
+    const next = applyHubEvent(current, { type: "APP_INSTALLED", app: nextApp, transactions });
+    return { ...next, snapshot: this.store.save(next.snapshot) };
   }
 
   async applyUpdate(appId: string): Promise<HubState> {
@@ -146,46 +95,19 @@ export class HubEngine {
     const nextApp = await this.gateway.applyUpdate(appId);
     const transactions = await this.gateway.fetchTransactions();
 
-    const snapshot = this.store.save({
-      ...current,
-      entitlements: upsertApp(current.entitlements, nextApp),
-      transactions
-    });
-
-    return {
-      snapshot,
-      status: {
-        mode: "ready",
-        message: `Update transaction completed for ${nextApp.name}.`
-      }
-    };
+    const next = applyHubEvent(current, { type: "APP_UPDATED", app: nextApp, transactions });
+    return { ...next, snapshot: this.store.save(next.snapshot) };
   }
 
   async syncTransactions(): Promise<HubState> {
     const current = this.store.load();
     const transactions = await this.gateway.fetchTransactions();
-    const snapshot = this.store.save({
-      ...current,
-      transactions
-    });
-
-    return {
-      snapshot,
-      status: {
-        mode: "ready",
-        message: "Transaction log synchronized."
-      }
-    };
+    const next = applyHubEvent(current, { type: "TRANSACTIONS_SYNCED", transactions });
+    return { ...next, snapshot: this.store.save(next.snapshot) };
   }
 
   reset(): HubState {
-    const snapshot = this.store.save(DEFAULT_HUB_SNAPSHOT);
-    return {
-      snapshot,
-      status: {
-        mode: "configuration-error",
-        message: "Hub reset. Configure VITE_ANTIPHON_API_URL to continue."
-      }
-    };
+    const next = applyHubEvent(DEFAULT_HUB_SNAPSHOT, { type: "RESET" });
+    return { ...next, snapshot: this.store.save(next.snapshot) };
   }
 }

@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "./.tmp-engine-smoke",
+    "rootDir": "./src"
+  },
+  "include": ["src/domain/types.ts", "src/domain/defaults.ts", "src/domain/hubEngineCore.ts"]
+}

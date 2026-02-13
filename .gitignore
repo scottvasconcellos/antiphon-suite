@@ -2,6 +2,7 @@ node_modules
 dist
 coverage
 apps/layer0-hub/.tmp-structure-smoke
+apps/layer0-hub/.tmp-engine-smoke
 .DS_Store
 **/.DS_Store
 .env*

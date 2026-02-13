@@ -92,6 +92,7 @@ async function run() {
 
   runStep("pnpm", ["build"]);
   runStep("pnpm", ["typecheck"]);
+  runStep("node", ["scripts/engine-smoke.mjs"]);
   runStep("node", ["scripts/structure-smoke.mjs"]);
   verifyHubBuildOutput();
 
