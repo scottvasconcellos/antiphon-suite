@@ -48,7 +48,7 @@ Layer 1 converts Layer 0 philosophy into executable delivery boundaries for the 
 - Domain/services/UI separation baseline: complete.
 - HTTP gateway interface for auth/entitlements/updates: complete.
 - Runtime mock fallback: removed (configuration is explicit via `VITE_ANTIPHON_API_URL`).
-- Real backend implementation: pending.
+- Local Layer 0 authority backend (`apps/layer0-authority`): complete for MVP endpoint contract.
 - Native process installer orchestration: pending.
 - Telemetry pipeline and policy controls: pending.
 
