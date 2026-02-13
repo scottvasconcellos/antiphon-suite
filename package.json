@@ -1,0 +1,10 @@
+{
+  "name": "antiphon-suite-monorepo",
+  "private": true,
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "dev": "pnpm --filter @antiphon/layer0-hub dev",
+    "build": "pnpm --filter @antiphon/layer0-hub build",
+    "typecheck": "pnpm --filter @antiphon/layer0-hub typecheck"
+  }
+}
