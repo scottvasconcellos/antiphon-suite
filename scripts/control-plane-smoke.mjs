@@ -119,12 +119,20 @@ async function run() {
     'from "./controlPlaneReasonTaxonomy";',
     'from "./controlPlaneReasonTaxonomy.js";'
   );
+  multiAppSource = multiAppSource.replace(
+    'from "./appCatalog";',
+    'from "./appCatalog.js";'
+  );
   writeFileSync(multiAppPath, multiAppSource, "utf-8");
   const updateChannelPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/updateChannelPolicy.js");
   let updateChannelSource = readFileSync(updateChannelPath, "utf-8");
   updateChannelSource = updateChannelSource.replace(
     'from "./controlPlaneReasonTaxonomy";',
     'from "./controlPlaneReasonTaxonomy.js";'
+  );
+  updateChannelSource = updateChannelSource.replace(
+    'from "./appCatalog";',
+    'from "./appCatalog.js";'
   );
   writeFileSync(updateChannelPath, updateChannelSource, "utf-8");
   const updateRecoveryPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/updateRecoveryPolicy.js");
@@ -288,6 +296,26 @@ async function run() {
   for (const fixture of appCatalogFixtures) {
     const normalized = appCatalog.normalizeAppCatalog(fixture.catalog);
     assertEqual(normalized, fixture.expected, `App catalog normalization mismatch: ${fixture.name}`);
+  }
+
+  const layerManifestFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-layer-app-manifest-snapshots.json"), "utf-8")
+  );
+  for (const fixture of layerManifestFixtures) {
+    const normalized = appCatalog.normalizeLayerAppManifests(fixture.manifests);
+    assertEqual(normalized, fixture.expectedNormalizedManifests, `Layer app manifest normalization mismatch: ${fixture.name}`);
+    const catalog = appCatalog.layerManifestsToCatalogEntries(fixture.manifests, fixture.installedVersions);
+    assertEqual(catalog, fixture.expectedCatalog, `Layer app manifest catalog bridge mismatch: ${fixture.name}`);
+    const decisions = multiAppEntitlement.decideMultiAppEntitlementsFromManifests(
+      fixture.manifests,
+      fixture.grantedEntitlements,
+      fixture.decisionInput
+    );
+    assertEqual(decisions, fixture.expectedEntitlements, `Layer app manifest entitlement bridge mismatch: ${fixture.name}`);
+    const updateManifest = fixture.manifests.find((manifest) => manifest.id === fixture.expectedUpdateSelection.appId);
+    assert(updateManifest, `Layer app manifest update target missing: ${fixture.name}`);
+    const updateDecision = updateChannelPolicy.selectUpdateByManifestPolicy(updateManifest, fixture.updateCandidates);
+    assertEqual(updateDecision, fixture.expectedUpdateSelection, `Layer app manifest update policy mismatch: ${fixture.name}`);
   }
 
   const multiAppFixtures = JSON.parse(
@@ -531,6 +559,14 @@ async function run() {
       fixture.requestedVersion
     );
     assertEqual(actual, fixture.expected, `Control-plane contract compatibility mismatch: ${fixture.name}`);
+  }
+
+  const legacyContractFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-contract-legacy-compat-snapshots.json"), "utf-8")
+  );
+  for (const fixture of legacyContractFixtures) {
+    const actual = controlPlaneContracts.evaluateContractCompatibility(fixture.contract, fixture.requestedVersion);
+    assertEqual(actual, fixture.expected, `Control-plane legacy contract compatibility mismatch: ${fixture.name}`);
   }
 
   const uiContractFixtures = JSON.parse(

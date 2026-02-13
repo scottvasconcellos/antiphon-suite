@@ -7,6 +7,38 @@ export type AppCatalogEntry = {
   requiredEntitlements: string[];
 };
 
+export type LayerAppManifest = {
+  id: string;
+  name: string;
+  version: string;
+  entrypoint: string;
+  requiredEntitlements: string[];
+  updateChannel: "stable" | "beta";
+};
+
+export function normalizeLayerAppManifests(manifests: LayerAppManifest[]): LayerAppManifest[] {
+  return [...manifests]
+    .map((manifest) => ({
+      ...manifest,
+      requiredEntitlements: [...manifest.requiredEntitlements].sort((a, b) => a.localeCompare(b))
+    }))
+    .sort((a, b) => a.id.localeCompare(b.id));
+}
+
+export function layerManifestsToCatalogEntries(
+  manifests: LayerAppManifest[],
+  installedVersions: Record<string, string | null> = {}
+): AppCatalogEntry[] {
+  return normalizeLayerAppManifests(manifests).map((manifest) => ({
+    appId: manifest.id,
+    version: manifest.version,
+    channel: manifest.updateChannel,
+    installedVersion: installedVersions[manifest.id] ?? null,
+    availableVersion: manifest.version,
+    requiredEntitlements: [...manifest.requiredEntitlements]
+  }));
+}
+
 export function normalizeAppCatalog(entries: AppCatalogEntry[]): AppCatalogEntry[] {
   return [...entries]
     .map((entry) => ({

@@ -1,4 +1,5 @@
 import { remediationForReason } from "./controlPlaneReasonTaxonomy";
+import { type LayerAppManifest, normalizeLayerAppManifests } from "./appCatalog";
 
 export type UpdateCandidate = {
   appId: string;
@@ -79,4 +80,16 @@ export function selectUpdateByChannelPolicy(input: UpdatePolicyInput): UpdatePol
     reasonCode: "ok_update_candidate_selected",
     remediation: remediationForReason("ok_version_supported")
   };
+}
+
+export function selectUpdateByManifestPolicy(
+  manifest: LayerAppManifest,
+  candidates: UpdateCandidate[]
+): UpdatePolicyDecision {
+  const normalizedManifest = normalizeLayerAppManifests([manifest])[0];
+  return selectUpdateByChannelPolicy({
+    appId: normalizedManifest.id,
+    allowedChannel: normalizedManifest.updateChannel,
+    candidates
+  });
 }

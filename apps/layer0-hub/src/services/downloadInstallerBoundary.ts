@@ -15,6 +15,7 @@ export type InstallerResultCode =
 export type DownloadProviderResult = {
   ok: boolean;
   reasonCode: DownloadProviderResultCode;
+  artifact?: ArtifactDescriptor;
 };
 
 export type InstallerResult =
@@ -25,8 +26,13 @@ export type DownloadProvider = {
   fetchPackage(action: InstallUpdateAction, appId: string): Promise<DownloadProviderResult>;
 };
 
+export type ArtifactDescriptor = {
+  filePath: string;
+  checksum: string;
+};
+
 export type Installer = {
-  applyPackage(action: InstallUpdateAction, app: EntitledApp): Promise<InstallerResult>;
+  applyPackage(action: InstallUpdateAction, app: EntitledApp, artifact?: ArtifactDescriptor): Promise<InstallerResult>;
 };
 
 export function createInstallUpdateExecutor(boundary: {
@@ -45,7 +51,7 @@ export function createInstallUpdateExecutor(boundary: {
       return { ok: false, reasonCode: fetched.reasonCode === "failed_download_step" ? "failed_download_step" : "failed_gateway" };
     }
 
-    const installed = await boundary.installer.applyPackage(action, app);
+    const installed = await boundary.installer.applyPackage(action, app, fetched.artifact);
     if (!installed.ok) {
       return { ok: false, reasonCode: installed.reasonCode };
     }
@@ -60,12 +66,20 @@ export function createDeterministicStubBoundary(outputs: Record<string, { provid
     }
   };
   const installer: Installer = {
-    async applyPackage(action, app) {
+    async applyPackage(action, app, artifact) {
       const fallback: InstallerResult = {
         ok: false,
         reasonCode: action === "install" ? "failed_install_step" : "failed_update_step"
       };
-      return outputs[`${action}:${app.id}`]?.installer ?? fallback;
+      const entry = outputs[`${action}:${app.id}`];
+      if (entry?.provider.ok && entry.provider.artifact && artifact) {
+        const samePath = entry.provider.artifact.filePath === artifact.filePath;
+        const sameChecksum = entry.provider.artifact.checksum === artifact.checksum;
+        if (!samePath || !sameChecksum) {
+          return fallback;
+        }
+      }
+      return entry?.installer ?? fallback;
     }
   };
   return { provider, installer };

@@ -1,5 +1,6 @@
 import { decideEntitlement, type EntitlementDecisionInput } from "../domain/entitlementDecision";
 import { remediationForReason } from "./controlPlaneReasonTaxonomy";
+import { type LayerAppManifest, normalizeLayerAppManifests } from "./appCatalog";
 
 export type MultiAppEntitlementInput = {
   appId: string;
@@ -48,4 +49,19 @@ export function decideMultiAppEntitlements(inputs: MultiAppEntitlementInput[]): 
         remediation: remediationForReason("ok_version_supported")
       };
     });
+}
+
+export function decideMultiAppEntitlementsFromManifests(
+  manifests: LayerAppManifest[],
+  grantedEntitlements: string[],
+  decisionInput: EntitlementDecisionInput
+): MultiAppEntitlementDecision[] {
+  return decideMultiAppEntitlements(
+    normalizeLayerAppManifests(manifests).map((manifest) => ({
+      appId: manifest.id,
+      requiredEntitlements: manifest.requiredEntitlements,
+      grantedEntitlements,
+      decisionInput
+    }))
+  );
 }

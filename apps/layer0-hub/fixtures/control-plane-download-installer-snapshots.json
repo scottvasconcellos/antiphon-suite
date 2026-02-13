@@ -31,7 +31,11 @@
       "install:antiphon.download.app": {
         "provider": {
           "ok": true,
-          "reasonCode": "ok_download_ready"
+          "reasonCode": "ok_download_ready",
+          "artifact": {
+            "filePath": "/tmp/antiphon/download-app.pkg",
+            "checksum": "sha256:demo123"
+          }
         },
         "installer": {
           "ok": true,

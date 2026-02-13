@@ -10,6 +10,7 @@ export type UpdateRollbackDecision = {
     | "blocked_channel_policy"
     | "blocked_no_update_available";
   remediation: string;
+  artifactRecovery: "retain_last_known_good" | "clear_corrupt_descriptor" | "none";
 };
 
 export const UPDATE_ROLLBACK_REASON_CODES = [
@@ -21,14 +22,20 @@ export const UPDATE_ROLLBACK_REASON_CODES = [
 
 export function applyUpdateRollback(
   app: EntitledApp,
-  options: { fallbackChannel?: "stable" | "beta"; clearCacheRequired?: boolean } = {}
+  options: {
+    fallbackChannel?: "stable" | "beta";
+    clearCacheRequired?: boolean;
+    artifactDescriptor?: { filePath: string; checksum: string } | null;
+    descriptorCorrupt?: boolean;
+  } = {}
 ): UpdateRollbackDecision {
   if (!app.installedVersion) {
     return {
       appId: app.id,
       preservedInstalledVersion: null,
       reasonCode: "blocked_no_last_known_good",
-      remediation: remediationForReason("blocked_no_update_available")
+      remediation: remediationForReason("blocked_no_update_available"),
+      artifactRecovery: "none"
     };
   }
   if (options.fallbackChannel === "stable" && app.updateAvailable) {
@@ -36,7 +43,17 @@ export function applyUpdateRollback(
       appId: app.id,
       preservedInstalledVersion: app.installedVersion,
       reasonCode: "blocked_channel_policy",
-      remediation: remediationForReason("blocked_channel_policy")
+      remediation: remediationForReason("blocked_channel_policy"),
+      artifactRecovery: "retain_last_known_good"
+    };
+  }
+  if (options.descriptorCorrupt) {
+    return {
+      appId: app.id,
+      preservedInstalledVersion: app.installedVersion,
+      reasonCode: "blocked_no_update_available",
+      remediation: remediationForReason("blocked_no_update_available"),
+      artifactRecovery: "clear_corrupt_descriptor"
     };
   }
   if (options.clearCacheRequired) {
@@ -44,13 +61,15 @@ export function applyUpdateRollback(
       appId: app.id,
       preservedInstalledVersion: app.installedVersion,
       reasonCode: "blocked_no_update_available",
-      remediation: remediationForReason("blocked_no_update_available")
+      remediation: remediationForReason("blocked_no_update_available"),
+      artifactRecovery: "retain_last_known_good"
     };
   }
   return {
     appId: app.id,
     preservedInstalledVersion: app.installedVersion,
     reasonCode: "ok_update_rollback_applied",
-    remediation: remediationForReason("ok_update_candidate_selected")
+    remediation: remediationForReason("ok_update_candidate_selected"),
+    artifactRecovery: options.artifactDescriptor ? "retain_last_known_good" : "none"
   };
 }

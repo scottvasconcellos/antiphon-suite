@@ -1,0 +1,93 @@
+[
+  {
+    "name": "manifest-normalization-and-catalog-bridge",
+    "manifests": [
+      {
+        "id": "antiphon.layer.zeta",
+        "name": "Zeta",
+        "version": "1.0.0",
+        "entrypoint": "apps/zeta/main",
+        "requiredEntitlements": ["feat_b", "feat_a"],
+        "updateChannel": "beta"
+      },
+      {
+        "id": "antiphon.layer.alpha",
+        "name": "Alpha",
+        "version": "2.0.0",
+        "entrypoint": "apps/alpha/main",
+        "requiredEntitlements": ["feat_core"],
+        "updateChannel": "stable"
+      }
+    ],
+    "installedVersions": {
+      "antiphon.layer.alpha": "1.9.0",
+      "antiphon.layer.zeta": null
+    },
+    "expectedNormalizedManifests": [
+      {
+        "id": "antiphon.layer.alpha",
+        "name": "Alpha",
+        "version": "2.0.0",
+        "entrypoint": "apps/alpha/main",
+        "requiredEntitlements": ["feat_core"],
+        "updateChannel": "stable"
+      },
+      {
+        "id": "antiphon.layer.zeta",
+        "name": "Zeta",
+        "version": "1.0.0",
+        "entrypoint": "apps/zeta/main",
+        "requiredEntitlements": ["feat_a", "feat_b"],
+        "updateChannel": "beta"
+      }
+    ],
+    "expectedCatalog": [
+      {
+        "appId": "antiphon.layer.alpha",
+        "version": "2.0.0",
+        "channel": "stable",
+        "installedVersion": "1.9.0",
+        "availableVersion": "2.0.0",
+        "requiredEntitlements": ["feat_core"]
+      },
+      {
+        "appId": "antiphon.layer.zeta",
+        "version": "1.0.0",
+        "channel": "beta",
+        "installedVersion": null,
+        "availableVersion": "1.0.0",
+        "requiredEntitlements": ["feat_a", "feat_b"]
+      }
+    ],
+    "grantedEntitlements": ["feat_core", "feat_a", "feat_b"],
+    "decisionInput": {
+      "identity": { "authenticated": true },
+      "license": { "owned": true, "revoked": false },
+      "offlineCache": { "cacheState": "valid", "offlineDaysRemaining": 7 }
+    },
+    "expectedEntitlements": [
+      {
+        "appId": "antiphon.layer.alpha",
+        "outcome": "Authorized",
+        "reasonCode": "ok_version_supported",
+        "remediation": "none"
+      },
+      {
+        "appId": "antiphon.layer.zeta",
+        "outcome": "Authorized",
+        "reasonCode": "ok_version_supported",
+        "remediation": "none"
+      }
+    ],
+    "updateCandidates": [
+      { "appId": "antiphon.layer.alpha", "channel": "stable", "version": "2.0.0" },
+      { "appId": "antiphon.layer.alpha", "channel": "beta", "version": "2.1.0-beta.1" }
+    ],
+    "expectedUpdateSelection": {
+      "appId": "antiphon.layer.alpha",
+      "selectedVersion": "2.0.0",
+      "reasonCode": "ok_update_candidate_selected",
+      "remediation": "none"
+    }
+  }
+]

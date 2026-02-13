@@ -10,12 +10,18 @@
       "installState": "installed",
       "updateAvailable": true
     },
-    "options": {},
+    "options": {
+      "artifactDescriptor": {
+        "filePath": "/tmp/antiphon/rollback.pkg",
+        "checksum": "sha256:ok"
+      }
+    },
     "expected": {
       "appId": "antiphon.rollback.app",
       "preservedInstalledVersion": "1.9.0",
       "reasonCode": "ok_update_rollback_applied",
-      "remediation": "none"
+      "remediation": "none",
+      "artifactRecovery": "retain_last_known_good"
     }
   },
   {
@@ -34,7 +40,34 @@
       "appId": "antiphon.rollback.app",
       "preservedInstalledVersion": null,
       "reasonCode": "blocked_no_last_known_good",
-      "remediation": "none"
+      "remediation": "none",
+      "artifactRecovery": "none"
+    }
+  },
+  {
+    "name": "rollback-corrupt-descriptor-cleared",
+    "app": {
+      "id": "antiphon.rollback.app",
+      "name": "Rollback App",
+      "version": "2.0.0",
+      "installedVersion": "1.9.0",
+      "owned": true,
+      "installState": "installed",
+      "updateAvailable": true
+    },
+    "options": {
+      "descriptorCorrupt": true,
+      "artifactDescriptor": {
+        "filePath": "/tmp/antiphon/corrupt.pkg",
+        "checksum": "sha256:bad"
+      }
+    },
+    "expected": {
+      "appId": "antiphon.rollback.app",
+      "preservedInstalledVersion": "1.9.0",
+      "reasonCode": "blocked_no_update_available",
+      "remediation": "none",
+      "artifactRecovery": "clear_corrupt_descriptor"
     }
   }
 ]
