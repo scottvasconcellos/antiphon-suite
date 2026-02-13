@@ -20,3 +20,4 @@
 ## Telemetry DTO Snapshot
 - Authority-facing telemetry DTO snapshot is locked at `apps/layer0-hub/fixtures/music-telemetry-snapshots.json`.
 - DTO builder lives in `apps/layer0-hub/src/services/musicTelemetryDto.ts`.
+- Schema constant is `AUTHORITY_MUSIC_TELEMETRY_SCHEMA_VERSION` in `apps/layer0-hub/src/domain/musicTelemetryContracts.ts`.

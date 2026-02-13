@@ -5,6 +5,7 @@ import { runMusicPipeline } from "../domain/hubMusicOrchestrator";
 import { selectMusicEngine } from "../domain/musicEngineRegistry";
 import { type EntitledApp, type HubSnapshot, type HubState } from "../domain/types";
 import { UiMusicProjectionAdapter } from "../domain/uiMusicProjectionAdapter";
+import { toAuthorityMusicTelemetryDto } from "./musicTelemetryDto";
 
 const STUB_APPS: EntitledApp[] = [
   {
@@ -107,6 +108,10 @@ export class StubHubEngine implements HubEngineContract {
   runMusicIntelligence() {
     const selected = selectMusicEngine(this.snapshot, this.options.musicEngineId);
     return runMusicPipeline(this.snapshot, selected, UiMusicProjectionAdapter);
+  }
+
+  buildMusicTelemetry() {
+    return toAuthorityMusicTelemetryDto(this.snapshot, this.runMusicIntelligence());
   }
 
   reset(): HubState {

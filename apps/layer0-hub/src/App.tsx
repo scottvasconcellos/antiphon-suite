@@ -3,7 +3,13 @@ import { SectionCard } from "./components/SectionCard";
 import { type HubState } from "./domain/types";
 import { buildHubEngine } from "./services/buildHubEngine";
 import { runHubTask } from "./services/hubRuntime";
-import { toDisplayDate, toHubViewModel, toInstallActionLabel, toTransactionLabel } from "./services/hubViewModel";
+import {
+  toDisplayDate,
+  toEngineSummaryLine,
+  toHubViewModel,
+  toInstallActionLabel,
+  toTransactionLabel
+} from "./services/hubViewModel";
 
 const INITIAL_EMAIL = "producer@antiphon.audio";
 const built = buildHubEngine();
@@ -64,9 +70,7 @@ export default function App() {
 
       <p className="status-line">{vm.statusLine}</p>
       <p className="status-line">{vm.intelligenceHeadline}: {vm.intelligenceDetail}</p>
-      <p className="status-line">
-        Engine {vm.intelligenceEngineId} [{vm.intelligenceEngineName} v{vm.intelligenceEngineVersion}] ({vm.intelligenceSelectionSource})
-      </p>
+      <p className="status-line">{toEngineSummaryLine(vm)}</p>
       <p className="status-line">Selection: {vm.intelligenceSelectionReason}</p>
 
       <section className="grid-layout">

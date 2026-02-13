@@ -1,34 +1,16 @@
 import { type MusicPipelineResult } from "../domain/musicEngineContracts";
+import {
+  AUTHORITY_MUSIC_TELEMETRY_SCHEMA_VERSION,
+  type AuthorityMusicTelemetryDto
+} from "../domain/musicTelemetryContracts";
 import { type HubSnapshot } from "../domain/types";
-
-export type AuthorityMusicTelemetryDto = {
-  schemaVersion: "1.0.0";
-  engine: {
-    id: string;
-    name: string;
-    version: string;
-    source: "requested" | "default";
-    reason: string;
-  };
-  decision: {
-    status: "ready" | "runtime-error";
-    lane: "authenticate" | "install" | "create" | "none";
-    confidencePct: number;
-  };
-  context: {
-    hasSession: boolean;
-    ownedCount: number;
-    installedCount: number;
-    offlineDaysRemaining: number;
-  };
-};
 
 export function toAuthorityMusicTelemetryDto(
   snapshot: HubSnapshot,
   pipeline: MusicPipelineResult
 ): AuthorityMusicTelemetryDto {
   return {
-    schemaVersion: "1.0.0",
+    schemaVersion: AUTHORITY_MUSIC_TELEMETRY_SCHEMA_VERSION,
     engine: {
       id: pipeline.engineId,
       name: pipeline.engineName,

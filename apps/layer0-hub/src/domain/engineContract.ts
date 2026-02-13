@@ -1,5 +1,6 @@
 import { type HubState } from "./types";
 import { type MusicPipelineResult } from "./musicEngineContracts";
+import { type AuthorityMusicTelemetryDto } from "./musicTelemetryContracts";
 
 export type HubEngineContract = {
   bootstrap(): Promise<HubState>;
@@ -10,5 +11,6 @@ export type HubEngineContract = {
   applyUpdate(appId: string): Promise<HubState>;
   syncTransactions(): Promise<HubState>;
   runMusicIntelligence(): MusicPipelineResult;
+  buildMusicTelemetry(): AuthorityMusicTelemetryDto;
   reset(): HubState;
 };

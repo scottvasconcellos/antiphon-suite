@@ -6,6 +6,7 @@ import { type HubGateway, type HubStore } from "./ports";
 import { UiMusicProjectionAdapter } from "./uiMusicProjectionAdapter";
 import { applyHubEvent } from "./hubEngineCore";
 import { type HubState } from "./types";
+import { toAuthorityMusicTelemetryDto } from "../services/musicTelemetryDto";
 
 export class HubEngine implements HubEngineContract {
   constructor(
@@ -115,6 +116,12 @@ export class HubEngine implements HubEngineContract {
     const snapshot = this.store.load();
     const selected = selectMusicEngine(snapshot, this.options.musicEngineId);
     return runMusicPipeline(snapshot, selected, UiMusicProjectionAdapter);
+  }
+
+  buildMusicTelemetry() {
+    const snapshot = this.store.load();
+    const intelligence = this.runMusicIntelligence();
+    return toAuthorityMusicTelemetryDto(snapshot, intelligence);
   }
 
   reset(): HubState {

@@ -70,3 +70,7 @@ export function toDisplayDate(value: string | null): string {
   }
   return new Date(value).toLocaleString();
 }
+
+export function toEngineSummaryLine(vm: HubViewModel): string {
+  return `Engine ${vm.intelligenceEngineId} [${vm.intelligenceEngineName} v${vm.intelligenceEngineVersion}] (${vm.intelligenceSelectionSource})`;
+}

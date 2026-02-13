@@ -10,6 +10,7 @@
     "src/domain/defaults.ts",
     "src/domain/ports.ts",
     "src/domain/musicEngineContracts.ts",
+    "src/domain/musicTelemetryContracts.ts",
     "src/domain/hubMusicOrchestrator.ts",
     "src/domain/musicEngineRegistry.ts",
     "src/domain/uiMusicProjectionAdapter.ts",
