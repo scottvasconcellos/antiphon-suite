@@ -37,3 +37,4 @@
 ## Verification
 - `pnpm test:engine` validates deterministic transition behavior and invariants.
 - `pnpm test:engine` also validates minimal `HubEngine` class paths with a headless fake gateway/store.
+- `pnpm test:engine` validates orchestrator -> `StubHubEngine` -> `MusicIntelligence` adapter determinism.

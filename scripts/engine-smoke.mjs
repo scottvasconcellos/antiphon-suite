@@ -33,10 +33,17 @@ async function run() {
     .replace('from "../domain/defaults";', 'from "../domain/defaults.js";')
     .replace('from "../domain/hubEngineCore";', 'from "../domain/hubEngineCore.js";');
   writeFileSync(stubPath, stubSource, "utf-8");
+  const adapterPath = join(process.cwd(), "apps/layer0-hub/.tmp-engine-smoke/services/musicIntelligenceAdapter.js");
+  const adapterSource = readFileSync(adapterPath, "utf-8").replace(
+    'from "../domain/musicIntelligenceEngine";',
+    'from "../domain/musicIntelligenceEngine.js";'
+  );
+  writeFileSync(adapterPath, adapterSource, "utf-8");
   const core = await import(pathToFileURL(join(basePath, "hubEngineCore.js")).href);
   const defaults = await import(pathToFileURL(join(basePath, "defaults.js")).href);
   const hubEngineModule = await import(pathToFileURL(enginePath).href);
   const stubModule = await import(pathToFileURL(stubPath).href);
+  const intelligenceAdapter = await import(pathToFileURL(adapterPath).href);
 
   const seed = structuredClone(defaults.DEFAULT_HUB_SNAPSHOT);
   const payload = {
@@ -106,6 +113,14 @@ async function run() {
   const stubA = await stubEngineA.bootstrap();
   const stubB = await stubEngineB.bootstrap();
   assert(JSON.stringify(stubA) === JSON.stringify(stubB), "StubHubEngine bootstrap should be deterministic.");
+
+  const orchestratorEngineA = new stubModule.StubHubEngine();
+  const orchestratorEngineB = new stubModule.StubHubEngine();
+  await orchestratorEngineA.bootstrap();
+  await orchestratorEngineB.bootstrap();
+  const e2eA = intelligenceAdapter.runMusicIntelligence((await orchestratorEngineA.signIn("producer@antiphon.audio")).snapshot);
+  const e2eB = intelligenceAdapter.runMusicIntelligence((await orchestratorEngineB.signIn("producer@antiphon.audio")).snapshot);
+  assert(JSON.stringify(e2eA) === JSON.stringify(e2eB), "Orchestrator -> engine -> adapter path must be deterministic.");
 }
 
 run().catch((error) => {

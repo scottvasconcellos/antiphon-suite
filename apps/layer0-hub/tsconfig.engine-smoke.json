@@ -11,6 +11,8 @@
     "src/domain/ports.ts",
     "src/domain/hubEngineCore.ts",
     "src/domain/hubEngine.ts",
-    "src/services/stubHubEngine.ts"
+    "src/domain/musicIntelligenceEngine.ts",
+    "src/services/stubHubEngine.ts",
+    "src/services/musicIntelligenceAdapter.ts"
   ]
 }
