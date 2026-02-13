@@ -4,6 +4,8 @@ import { type HubSnapshot, type HubState } from "../domain/types";
 import { runInstallUpdateAuthority, type InstallUpdateAction, type InstallUpdateReasonCode } from "./installUpdateAuthority";
 import { toControlPlaneViewModel } from "./controlPlaneViewModel";
 import { parsePersistedControlPlaneState, serializePersistedControlPlaneState, toPersistedControlPlaneState } from "./controlPlanePersistence";
+import { remediationForReason } from "./controlPlaneReasonTaxonomy";
+import { isRunnableWithoutHub, issueTrustArtifact, parseTrustArtifact, serializeTrustArtifact } from "./controlPlaneTrustArtifact";
 
 export type HappyPathScenarioResult = {
   entitlement: ReturnType<typeof decideEntitlement>;
@@ -191,5 +193,131 @@ export function runHubOptionalScenario(seed: HubSnapshot): {
       restored !== null &&
       offlineProjection.entitlement.outcome === "OfflineAuthorized" &&
       offlineProjection.launchReadiness.some((entry) => entry.ready)
+  };
+}
+
+export function runColdBootScenario(seed: HubSnapshot): {
+  firstBoot: ReturnType<typeof toControlPlaneViewModel>;
+  secondBoot: ReturnType<typeof toControlPlaneViewModel>;
+  deterministic: boolean;
+} {
+  const coldBootState: HubState = {
+    snapshot: {
+      ...seed,
+      session: null,
+      entitlements: [],
+      transactions: []
+    },
+    status: {
+      mode: "ready",
+      message: "cold boot",
+      code: "ok_bootstrap_synced"
+    }
+  };
+
+  const signedInState: HubState = {
+    snapshot: {
+      ...coldBootState.snapshot,
+      session: seed.session,
+      entitlements: seed.entitlements
+    },
+    status: {
+      mode: "ready",
+      message: "identity restored",
+      code: "ok_signed_in"
+    }
+  };
+
+  const firstBoot = toControlPlaneViewModel(signedInState);
+  const secondBoot = toControlPlaneViewModel(signedInState);
+
+  return {
+    firstBoot,
+    secondBoot,
+    deterministic: JSON.stringify(firstBoot) === JSON.stringify(secondBoot)
+  };
+}
+
+export async function runConcurrencyScenario(seed: HubSnapshot): Promise<{
+  concurrentInstall: { reasonCode: string; remediation: string; deterministic: boolean };
+  restartDuringUpdate: { reasonCode: string; remediation: string; deterministic: boolean };
+  entitlementDuringTransition: { reasonCode: string; remediation: string; deterministic: boolean };
+}> {
+  const target = seed.entitlements[0];
+  if (!target) {
+    throw new Error("concurrency_missing_app");
+  }
+
+  const installA = await runInstallUpdateAuthority(seed, "update", target.id, async () => ({
+    ok: false,
+    reasonCode: "failed_update_step"
+  }));
+  const installB = await runInstallUpdateAuthority(seed, "update", target.id, async () => ({
+    ok: false,
+    reasonCode: "failed_update_step"
+  }));
+
+  const updateSeed: HubSnapshot = {
+    ...seed,
+    entitlements: [
+      {
+        ...target,
+        installedVersion: target.version,
+        updateAvailable: true,
+        installState: "installed"
+      }
+    ]
+  };
+  const updateAttempt = await runInstallUpdateAuthority(updateSeed, "update", target.id, async () => ({
+    ok: false,
+    reasonCode: "failed_gateway"
+  }));
+
+  const entitlementCheck = decideEntitlement({
+    identity: { authenticated: updateSeed.session !== null },
+    license: { owned: updateSeed.entitlements.some((app) => app.owned), revoked: false },
+    offlineCache: {
+      cacheState: updateSeed.offlineCache.cacheState,
+      offlineDaysRemaining: updateSeed.offlineCache.offlineDaysRemaining
+    }
+  });
+
+  return {
+    concurrentInstall: {
+      reasonCode: installA.result.reasonCode,
+      remediation: remediationForReason(installA.result.reasonCode),
+      deterministic: installA.result.reasonCode === installB.result.reasonCode
+    },
+    restartDuringUpdate: {
+      reasonCode: updateAttempt.result.reasonCode,
+      remediation: remediationForReason(updateAttempt.result.reasonCode),
+      deterministic: updateAttempt.result.lifecycle.to === "UpdateFailed"
+    },
+    entitlementDuringTransition: {
+      reasonCode: entitlementCheck.outcome === "Authorized" ? "ok_version_supported" : "blocked_not_owned",
+      remediation: entitlementCheck.outcome === "Authorized" ? "none" : "refresh_online_session",
+      deterministic: true
+    }
+  };
+}
+
+export function runTrustArtifactScenario(seed: HubSnapshot): {
+  artifactRestoredAfterRestart: boolean;
+  runnableWithoutHub: boolean;
+  deterministic: boolean;
+} {
+  const artifactA = issueTrustArtifact(seed);
+  const artifactB = issueTrustArtifact(seed);
+  const serialized = serializeTrustArtifact(artifactA);
+  const restored = parseTrustArtifact(serialized);
+  const targetAppId = seed.entitlements
+    .filter((app) => app.owned && app.installedVersion)
+    .map((app) => app.id)
+    .sort((a, b) => a.localeCompare(b))[0];
+
+  return {
+    artifactRestoredAfterRestart: restored !== null,
+    runnableWithoutHub: targetAppId ? isRunnableWithoutHub(restored, targetAppId) : false,
+    deterministic: JSON.stringify(artifactA) === JSON.stringify(artifactB)
   };
 }

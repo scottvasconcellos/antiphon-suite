@@ -119,6 +119,14 @@ async function run() {
     'from "./controlPlanePersistence";',
     'from "./controlPlanePersistence.js";'
   );
+  scenarioRunnerSource = scenarioRunnerSource.replace(
+    'from "./controlPlaneReasonTaxonomy";',
+    'from "./controlPlaneReasonTaxonomy.js";'
+  );
+  scenarioRunnerSource = scenarioRunnerSource.replace(
+    'from "./controlPlaneTrustArtifact";',
+    'from "./controlPlaneTrustArtifact.js";'
+  );
   writeFileSync(scenarioRunnerPath, scenarioRunnerSource, "utf-8");
 
   const entitlement = await import(pathToFileURL(join(domainRoot, "entitlementDecision.js")).href);
@@ -322,6 +330,31 @@ async function run() {
   for (const fixture of hubOptionalFixtures) {
     const actual = controlPlaneScenarioRunner.runHubOptionalScenario(fixture.seed);
     assertEqual(actual, fixture.expected, `Control-plane hub-optional snapshot mismatch: ${fixture.name}`);
+  }
+
+  const coldBootFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-cold-boot-snapshots.json"), "utf-8")
+  );
+  for (const fixture of coldBootFixtures) {
+    const actual = controlPlaneScenarioRunner.runColdBootScenario(fixture.seed);
+    assertEqual(actual.deterministic, fixture.expected.deterministic, `Control-plane cold-boot determinism mismatch: ${fixture.name}`);
+    assertEqual(actual.firstBoot, actual.secondBoot, `Control-plane cold-boot projections diverged: ${fixture.name}`);
+  }
+
+  const concurrencyFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-concurrency-snapshots.json"), "utf-8")
+  );
+  for (const fixture of concurrencyFixtures) {
+    const actual = await controlPlaneScenarioRunner.runConcurrencyScenario(fixture.seed);
+    assertEqual(actual, fixture.expected, `Control-plane concurrency snapshot mismatch: ${fixture.name}`);
+  }
+
+  const trustArtifactFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-trust-artifact-snapshots.json"), "utf-8")
+  );
+  for (const fixture of trustArtifactFixtures) {
+    const actual = controlPlaneScenarioRunner.runTrustArtifactScenario(fixture.seed);
+    assertEqual(actual, fixture.expected, `Control-plane trust artifact snapshot mismatch: ${fixture.name}`);
   }
 
   const launchReadinessFixtures = JSON.parse(

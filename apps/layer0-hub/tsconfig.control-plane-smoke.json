@@ -21,6 +21,7 @@
     "src/services/controlPlaneUiContract.ts",
     "src/services/controlPlaneTrustEnvelope.ts",
     "src/services/publicControlPlane.ts",
-    "src/services/controlPlaneReasonTaxonomy.ts"
+    "src/services/controlPlaneReasonTaxonomy.ts",
+    "src/services/controlPlaneTrustArtifact.ts"
   ]
 }

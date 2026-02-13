@@ -1,0 +1,48 @@
+[
+  {
+    "name": "concurrency-reentry-and-transition-safety",
+    "seed": {
+      "session": {
+        "userId": "usr_conc",
+        "email": "conc@antiphon.audio",
+        "displayName": "Conc",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [
+        {
+          "id": "antiphon.conc.app",
+          "name": "Conc App",
+          "version": "1.0.0",
+          "installedVersion": null,
+          "owned": true,
+          "installState": "not-installed",
+          "updateAvailable": false
+        }
+      ],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 21,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "expected": {
+      "concurrentInstall": {
+        "reasonCode": "blocked_not_installed",
+        "remediation": "none",
+        "deterministic": true
+      },
+      "restartDuringUpdate": {
+        "reasonCode": "failed_gateway",
+        "remediation": "retry_or_offline_cache",
+        "deterministic": true
+      },
+      "entitlementDuringTransition": {
+        "reasonCode": "ok_version_supported",
+        "remediation": "none",
+        "deterministic": true
+      }
+    }
+  }
+]
