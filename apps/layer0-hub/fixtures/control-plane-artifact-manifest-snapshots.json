@@ -1,0 +1,85 @@
+[
+  {
+    "name": "artifact-manifest-normalization-stable-order",
+    "input": {
+      "schema": "antiphon.artifact-manifest",
+      "version": 1,
+      "appId": "antiphon.layer.alpha",
+      "appVersion": "2.0.0",
+      "channel": "stable",
+      "digestAlgorithm": "sha256",
+      "files": [
+        {
+          "path": "bin/alpha.exe",
+          "size": 124,
+          "sha256": "BB"
+        },
+        {
+          "path": "README.txt",
+          "size": 12,
+          "sha256": "AA"
+        }
+      ],
+      "signature": {
+        "signature": "sig-placeholder",
+        "algorithm": "ed25519",
+        "keyId": "layer-alpha-k1"
+      }
+    },
+    "expectedNormalized": {
+      "schema": "antiphon.artifact-manifest",
+      "version": 1,
+      "appId": "antiphon.layer.alpha",
+      "appVersion": "2.0.0",
+      "channel": "stable",
+      "digestAlgorithm": "sha256",
+      "files": [
+        {
+          "path": "bin/alpha.exe",
+          "size": 124,
+          "sha256": "bb"
+        },
+        {
+          "path": "README.txt",
+          "size": 12,
+          "sha256": "aa"
+        }
+      ],
+      "signature": {
+        "keyId": "layer-alpha-k1",
+        "algorithm": "ed25519",
+        "signature": "sig-placeholder"
+      }
+    },
+    "expectedSerialized": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.alpha\",\n  \"appVersion\": \"2.0.0\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"bin/alpha.exe\",\n      \"size\": 124,\n      \"sha256\": \"bb\"\n    },\n    {\n      \"path\": \"README.txt\",\n      \"size\": 12,\n      \"sha256\": \"aa\"\n    }\n  ],\n  \"signature\": {\n    \"keyId\": \"layer-alpha-k1\",\n    \"algorithm\": \"ed25519\",\n    \"signature\": \"sig-placeholder\"\n  }\n}",
+    "expectedParse": {
+      "manifest": {
+        "schema": "antiphon.artifact-manifest",
+        "version": 1,
+        "appId": "antiphon.layer.alpha",
+        "appVersion": "2.0.0",
+        "channel": "stable",
+        "digestAlgorithm": "sha256",
+        "files": [
+          {
+            "path": "bin/alpha.exe",
+            "size": 124,
+            "sha256": "bb"
+          },
+          {
+            "path": "README.txt",
+            "size": 12,
+            "sha256": "aa"
+          }
+        ],
+        "signature": {
+          "keyId": "layer-alpha-k1",
+          "algorithm": "ed25519",
+          "signature": "sig-placeholder"
+        }
+      },
+      "reasonCode": "ok_artifact_manifest_loaded",
+      "remediation": "none"
+    }
+  }
+]

@@ -1,12 +1,13 @@
 import { decideEntitlement } from "../domain/entitlementDecision";
 import { transitionLifecycleState } from "../domain/installUpdateStateMachine";
 import { type HubSnapshot, type HubState } from "../domain/types";
-import { runInstallUpdateAuthority, type InstallUpdateAction, type InstallUpdateReasonCode } from "./installUpdateAuthority";
+import { runInstallUpdateAuthority, runInstallUpdateAuthorityWithArtifactExecutor, type InstallUpdateAction, type InstallUpdateReasonCode } from "./installUpdateAuthority";
 import { toControlPlaneViewModel } from "./controlPlaneViewModel";
 import { parsePersistedControlPlaneState, serializePersistedControlPlaneState, toPersistedControlPlaneState } from "./controlPlanePersistence";
 import { remediationForReason } from "./controlPlaneReasonTaxonomy";
 import { isRunnableWithoutHub, issueTrustArtifact, parseTrustArtifact, serializeTrustArtifact } from "./controlPlaneTrustArtifact";
 import { evaluateClockDrift, evaluateMixedEntitlementTimestamps } from "./clockDriftPolicy";
+import { applyUpdateRollback } from "./updateRecoveryPolicy";
 
 export type HappyPathScenarioResult = {
   entitlement: ReturnType<typeof decideEntitlement>;
@@ -502,5 +503,95 @@ export function runTrustArtifactScenario(seed: HubSnapshot): {
     artifactRestoredAfterRestart: restored !== null,
     runnableWithoutHub: targetAppId ? isRunnableWithoutHub(restored, targetAppId) : false,
     deterministic: JSON.stringify(artifactA) === JSON.stringify(artifactB)
+  };
+}
+
+export async function runArtifactInstallUpdateScenario(input: {
+  seed: HubSnapshot;
+  appId: string;
+  installManifestRaw: string;
+  updateManifestRaw: string;
+  payloadFiles: Record<string, string>;
+  targetDir: string;
+}): Promise<{
+  install: { reasonCode: string; lifecycleTo: string };
+  update: { reasonCode: string; lifecycleTo: string };
+  updateFailureRollback: {
+    reasonCode: string;
+    rollbackReasonCode: string;
+    rollbackPrepared: boolean;
+    finalInstalledVersion: string | null;
+  };
+}> {
+  const install = await runInstallUpdateAuthorityWithArtifactExecutor(
+    input.seed,
+    "install",
+    input.appId,
+    {
+      manifestRaw: input.installManifestRaw,
+      payloadFiles: input.payloadFiles,
+      targetDir: input.targetDir,
+      fileSystem: {}
+    }
+  );
+
+  const updateSeed: HubSnapshot = {
+    ...install.snapshot,
+    entitlements: install.snapshot.entitlements.map((app) =>
+      app.id === input.appId ? { ...app, updateAvailable: true } : app
+    )
+  };
+
+  const update = await runInstallUpdateAuthorityWithArtifactExecutor(
+    updateSeed,
+    "update",
+    input.appId,
+    {
+      manifestRaw: input.updateManifestRaw,
+      payloadFiles: input.payloadFiles,
+      targetDir: input.targetDir,
+      fileSystem: install.fileSystem
+    }
+  );
+
+  const failingUpdate = await runInstallUpdateAuthorityWithArtifactExecutor(
+    updateSeed,
+    "update",
+    input.appId,
+    {
+      manifestRaw: input.updateManifestRaw,
+      payloadFiles: input.payloadFiles,
+      targetDir: input.targetDir,
+      fileSystem: install.fileSystem,
+      inject: { mode: "partial_apply" }
+    }
+  );
+  const failedApp = updateSeed.entitlements.find((app) => app.id === input.appId);
+  if (!failedApp) {
+    throw new Error("artifact_update_missing_app");
+  }
+  const rollback = applyUpdateRollback(
+    {
+      ...failedApp,
+      installedVersion: install.snapshot.entitlements.find((app) => app.id === input.appId)?.installedVersion ?? failedApp.installedVersion
+    },
+    {}
+  );
+
+  return {
+    install: {
+      reasonCode: install.result.reasonCode,
+      lifecycleTo: install.result.lifecycle.to
+    },
+    update: {
+      reasonCode: update.result.reasonCode,
+      lifecycleTo: update.result.lifecycle.to
+    },
+    updateFailureRollback: {
+      reasonCode: failingUpdate.result.reasonCode,
+      rollbackReasonCode: rollback.reasonCode,
+      rollbackPrepared: failingUpdate.result.artifactRollback?.rollbackPrepared ?? false,
+      finalInstalledVersion: rollback.preservedInstalledVersion
+    }
   };
 }

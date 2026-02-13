@@ -54,7 +54,18 @@ async function run() {
     'from "./downloadInstallerBoundary";',
     'from "./downloadInstallerBoundary.js";'
   );
+  authoritySource = authoritySource.replace(
+    'from "./artifactInstallerExecution";',
+    'from "./artifactInstallerExecution.js";'
+  );
   writeFileSync(authorityPath, authoritySource, "utf-8");
+  const artifactExecPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/artifactInstallerExecution.js");
+  let artifactExecSource = readFileSync(artifactExecPath, "utf-8");
+  artifactExecSource = artifactExecSource.replace(
+    'from "./artifactManifestContract";',
+    'from "./artifactManifestContract.js";'
+  );
+  writeFileSync(artifactExecPath, artifactExecSource, "utf-8");
   const controlPlaneVmPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneViewModel.js");
   let controlPlaneVmSource = readFileSync(controlPlaneVmPath, "utf-8");
   controlPlaneVmSource = controlPlaneVmSource.replace(
@@ -176,6 +187,10 @@ async function run() {
     'from "./clockDriftPolicy";',
     'from "./clockDriftPolicy.js";'
   );
+  scenarioRunnerSource = scenarioRunnerSource.replace(
+    'from "./updateRecoveryPolicy";',
+    'from "./updateRecoveryPolicy.js";'
+  );
   writeFileSync(scenarioRunnerPath, scenarioRunnerSource, "utf-8");
 
   const entitlement = await import(pathToFileURL(join(domainRoot, "entitlementDecision.js")).href);
@@ -242,6 +257,12 @@ async function run() {
   const publicControlPlane = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/publicControlPlane.js")).href
   );
+  const artifactManifestContract = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/artifactManifestContract.js")).href
+  );
+  const artifactInstallerExecution = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/artifactInstallerExecution.js")).href
+  );
 
   const entitlementFixtures = JSON.parse(readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/entitlement-decision-snapshots.json"), "utf-8"));
   for (const fixture of entitlementFixtures) {
@@ -296,6 +317,34 @@ async function run() {
   for (const fixture of appCatalogFixtures) {
     const normalized = appCatalog.normalizeAppCatalog(fixture.catalog);
     assertEqual(normalized, fixture.expected, `App catalog normalization mismatch: ${fixture.name}`);
+  }
+
+  const artifactManifestFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-artifact-manifest-snapshots.json"), "utf-8")
+  );
+  for (const fixture of artifactManifestFixtures) {
+    const normalized = artifactManifestContract.normalizeArtifactManifest(fixture.input);
+    assertEqual(normalized, fixture.expectedNormalized, `Artifact manifest normalization mismatch: ${fixture.name}`);
+    const serialized = artifactManifestContract.serializeArtifactManifest(fixture.input);
+    assertEqual(serialized, fixture.expectedSerialized, `Artifact manifest serialization mismatch: ${fixture.name}`);
+    const parsed = artifactManifestContract.parseArtifactManifest(serialized);
+    assertEqual(parsed, fixture.expectedParse, `Artifact manifest parse mismatch: ${fixture.name}`);
+  }
+
+  const artifactInstallerFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-artifact-installer-snapshots.json"), "utf-8")
+  );
+  for (const fixture of artifactInstallerFixtures) {
+    const actual = artifactInstallerExecution.applyArtifactManifest(fixture.input);
+    if (fixture.expected.ok) {
+      assertEqual(actual, fixture.expected, `Artifact installer snapshot mismatch: ${fixture.name}`);
+    } else {
+      assertEqual(
+        { ok: actual.ok, reasonCode: actual.reasonCode, remediation: actual.remediation },
+        fixture.expected,
+        `Artifact installer failure mismatch: ${fixture.name}`
+      );
+    }
   }
 
   const layerManifestFixtures = JSON.parse(
@@ -516,6 +565,14 @@ async function run() {
     assertEqual(actual, fixture.expected, `Control-plane trust artifact snapshot mismatch: ${fixture.name}`);
   }
 
+  const artifactFlowFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-artifact-flow-snapshots.json"), "utf-8")
+  );
+  for (const fixture of artifactFlowFixtures) {
+    const actual = await controlPlaneScenarioRunner.runArtifactInstallUpdateScenario(fixture.input);
+    assertEqual(actual, fixture.expected, `Control-plane artifact flow mismatch: ${fixture.name}`);
+  }
+
   const clockDriftFixtures = JSON.parse(
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-clock-drift-snapshots.json"), "utf-8")
   );
@@ -632,6 +689,9 @@ async function run() {
       ...updateChannelPolicy.UPDATE_CHANNEL_REASON_CODES,
       ...updateRecoveryPolicy.UPDATE_ROLLBACK_REASON_CODES,
       ...clockDriftPolicy.CLOCK_DRIFT_POLICY_REASON_CODES
+      ,
+      ...artifactManifestContract.ARTIFACT_MANIFEST_REASON_CODES,
+      ...artifactInstallerExecution.ARTIFACT_INSTALLER_REASON_CODES
     ])].sort();
     assertEqual(actual, fixture.expectedReasonCodes, `Control-plane reason coverage mismatch: ${fixture.name}`);
     for (const code of actual) {

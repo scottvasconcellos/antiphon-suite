@@ -1,0 +1,116 @@
+[
+  {
+    "name": "artifact-apply-success",
+    "input": {
+      "appId": "antiphon.layer.alpha",
+      "manifestRaw": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.alpha\",\n  \"appVersion\": \"2.0.0\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"README.txt\",\n      \"size\": 5,\n      \"sha256\": \"a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1\"\n    }\n  ]\n}",
+      "payloadFiles": {
+        "README.txt": "hello"
+      },
+      "targetDir": "/opt/antiphon/alpha",
+      "fileSystem": {
+        "/opt/antiphon/alpha/old.txt": "old"
+      }
+    },
+    "expected": {
+      "ok": true,
+      "reasonCode": "ok_artifact_apply_completed",
+      "remediation": "none",
+      "targetFiles": [
+        "README.txt"
+      ],
+      "rollback": {
+        "appId": "antiphon.layer.alpha",
+        "previousTargetHash": "83c4a1cc83c4a1cc83c4a1cc83c4a1cc83c4a1cc83c4a1cc83c4a1cc83c4a1cc",
+        "manifestVersion": "2.0.0:stable",
+        "rollbackPrepared": true
+      },
+      "fileSystem": {
+        "/opt/antiphon/alpha/README.txt": "hello"
+      }
+    }
+  },
+  {
+    "name": "artifact-missing-file",
+    "input": {
+      "appId": "antiphon.layer.alpha",
+      "manifestRaw": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.alpha\",\n  \"appVersion\": \"2.0.0\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"README.txt\",\n      \"size\": 5,\n      \"sha256\": \"a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1\"\n    }\n  ]\n}",
+      "payloadFiles": {},
+      "targetDir": "/opt/antiphon/alpha",
+      "fileSystem": {
+        "/opt/antiphon/alpha/old.txt": "old"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "reasonCode": "artifact_missing_file",
+      "remediation": "retry_install"
+    }
+  },
+  {
+    "name": "artifact-digest-mismatch-injected",
+    "input": {
+      "appId": "antiphon.layer.alpha",
+      "manifestRaw": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.alpha\",\n  \"appVersion\": \"2.0.0\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"README.txt\",\n      \"size\": 5,\n      \"sha256\": \"a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1\"\n    }\n  ]\n}",
+      "payloadFiles": {
+        "README.txt": "hello"
+      },
+      "targetDir": "/opt/antiphon/alpha",
+      "fileSystem": {
+        "/opt/antiphon/alpha/old.txt": "old"
+      },
+      "inject": {
+        "mode": "digest_mismatch"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "reasonCode": "artifact_digest_mismatch",
+      "remediation": "retry_install"
+    }
+  },
+  {
+    "name": "artifact-partial-apply-injected",
+    "input": {
+      "appId": "antiphon.layer.alpha",
+      "manifestRaw": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.alpha\",\n  \"appVersion\": \"2.0.0\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"README.txt\",\n      \"size\": 5,\n      \"sha256\": \"a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1\"\n    }\n  ]\n}",
+      "payloadFiles": {
+        "README.txt": "hello"
+      },
+      "targetDir": "/opt/antiphon/alpha",
+      "fileSystem": {
+        "/opt/antiphon/alpha/old.txt": "old"
+      },
+      "inject": {
+        "mode": "partial_apply"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "reasonCode": "artifact_partial_apply",
+      "remediation": "retry_update"
+    }
+  },
+  {
+    "name": "artifact-rollback-fail-injected",
+    "input": {
+      "appId": "antiphon.layer.alpha",
+      "manifestRaw": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.alpha\",\n  \"appVersion\": \"2.0.0\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"README.txt\",\n      \"size\": 5,\n      \"sha256\": \"a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1\"\n    }\n  ]\n}",
+      "payloadFiles": {
+        "README.txt": "hello"
+      },
+      "targetDir": "/opt/antiphon/alpha",
+      "fileSystem": {
+        "/opt/antiphon/alpha/old.txt": "old"
+      },
+      "inject": {
+        "mode": "rollback_fail"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "reasonCode": "artifact_rollback_failed",
+      "remediation": "rebuild_cache"
+    }
+  }
+]

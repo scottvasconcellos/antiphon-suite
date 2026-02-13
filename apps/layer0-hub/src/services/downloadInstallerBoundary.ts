@@ -29,6 +29,9 @@ export type DownloadProvider = {
 export type ArtifactDescriptor = {
   filePath: string;
   checksum: string;
+  manifestRaw?: string;
+  payloadFiles?: Record<string, string>;
+  targetDir?: string;
 };
 
 export type Installer = {

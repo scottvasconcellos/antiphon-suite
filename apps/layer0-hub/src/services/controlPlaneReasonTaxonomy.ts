@@ -39,6 +39,16 @@ export const CONTROL_PLANE_REASON_TAXONOMY = {
   invalid_trust_artifact_shape: "rebuild_trust_artifact",
   unsupported_trust_artifact_version: "upgrade_or_downgrade_to_supported_version",
   trust_artifact_clock_skew: "refresh_online_session"
+  ,
+  ok_artifact_manifest_loaded: "none",
+  invalid_artifact_manifest_json: "rebuild_artifact_manifest",
+  invalid_artifact_manifest_shape: "rebuild_artifact_manifest",
+  unsupported_artifact_manifest_version: "upgrade_or_downgrade_to_supported_version",
+  ok_artifact_apply_completed: "none",
+  artifact_missing_file: "retry_install",
+  artifact_digest_mismatch: "retry_install",
+  artifact_partial_apply: "retry_update",
+  artifact_rollback_failed: "rebuild_cache"
 } as const;
 
 export type ControlPlaneReasonCode = keyof typeof CONTROL_PLANE_REASON_TAXONOMY;

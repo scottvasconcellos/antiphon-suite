@@ -1,6 +1,7 @@
 import { transitionLifecycleState, type AppLifecycleState } from "../domain/installUpdateStateMachine";
 import { type EntitledApp, type HubSnapshot } from "../domain/types";
 import { createInstallUpdateExecutor, type DownloadProvider, type Installer } from "./downloadInstallerBoundary";
+import { applyArtifactManifest, type ArtifactApplyResult, type VirtualFileSystem } from "./artifactInstallerExecution";
 
 export type InstallUpdateAction = "install" | "update";
 
@@ -15,11 +16,33 @@ export type InstallUpdateReasonCode =
   | "failed_download_step"
   | "failed_install_step"
   | "failed_update_step"
-  | "failed_gateway";
+  | "failed_gateway"
+  | "artifact_missing_file"
+  | "artifact_digest_mismatch"
+  | "artifact_partial_apply"
+  | "artifact_rollback_failed"
+  | "invalid_artifact_manifest_json"
+  | "invalid_artifact_manifest_shape"
+  | "unsupported_artifact_manifest_version";
 
 export type InstallUpdateStepResult =
   | { ok: true; app: EntitledApp }
-  | { ok: false; reasonCode: "failed_download_step" | "failed_install_step" | "failed_update_step" | "failed_gateway" };
+  | {
+      ok: false;
+      reasonCode:
+        | "failed_download_step"
+        | "failed_install_step"
+        | "failed_update_step"
+        | "failed_gateway"
+        | "artifact_missing_file"
+        | "artifact_digest_mismatch"
+        | "artifact_partial_apply"
+        | "artifact_rollback_failed"
+        | "invalid_artifact_manifest_json"
+        | "invalid_artifact_manifest_shape"
+        | "unsupported_artifact_manifest_version";
+      artifactRollback?: ArtifactApplyResult["rollback"];
+    };
 
 export type InstallUpdateAuthorityResult = {
   ok: boolean;
@@ -29,6 +52,7 @@ export type InstallUpdateAuthorityResult = {
     from: AppLifecycleState;
     to: AppLifecycleState;
   };
+  artifactRollback?: ArtifactApplyResult["rollback"];
 };
 
 export const INSTALL_UPDATE_REASON_CODES = [
@@ -42,7 +66,14 @@ export const INSTALL_UPDATE_REASON_CODES = [
   "failed_download_step",
   "failed_install_step",
   "failed_update_step",
-  "failed_gateway"
+  "failed_gateway",
+  "artifact_missing_file",
+  "artifact_digest_mismatch",
+  "artifact_partial_apply",
+  "artifact_rollback_failed",
+  "invalid_artifact_manifest_json",
+  "invalid_artifact_manifest_shape",
+  "unsupported_artifact_manifest_version"
 ] as const;
 
 type InstallUpdateStepExecutor = (action: InstallUpdateAction, appId: string) => Promise<InstallUpdateStepResult>;
@@ -131,7 +162,8 @@ export async function runInstallUpdateAuthority(
         ok: false,
         reasonCode: stepResult.reasonCode,
         appId,
-        lifecycle: { from, to: failureTransition.to }
+        lifecycle: { from, to: failureTransition.to },
+        ...(stepResult.artifactRollback ? { artifactRollback: stepResult.artifactRollback } : {})
       }
     };
   }
@@ -167,4 +199,64 @@ export async function runInstallUpdateAuthorityWithBoundary(
       getApp: (id) => snapshot.entitlements.find((entry) => entry.id === id) ?? null
     })
   );
+}
+
+export async function runInstallUpdateAuthorityWithArtifactExecutor(
+  snapshot: HubSnapshot,
+  action: InstallUpdateAction,
+  appId: string,
+  input: {
+    manifestRaw: string;
+    payloadFiles: VirtualFileSystem;
+    targetDir: string;
+    fileSystem: VirtualFileSystem;
+    inject?: { mode?: "none" | "missing_file" | "digest_mismatch" | "partial_apply" | "rollback_fail"; missingPath?: string };
+  }
+): Promise<{ snapshot: HubSnapshot; result: InstallUpdateAuthorityResult; fileSystem: VirtualFileSystem }> {
+  const app = snapshot.entitlements.find((candidate) => candidate.id === appId);
+  if (!app) {
+    const result = await runInstallUpdateAuthority(snapshot, action, appId, async () => ({ ok: false, reasonCode: "failed_gateway" }));
+    return {
+      ...result,
+      fileSystem: input.fileSystem
+    };
+  }
+
+  let fileSystemAfter = input.fileSystem;
+
+  const result = await runInstallUpdateAuthority(snapshot, action, appId, async () => {
+    const applied = applyArtifactManifest({
+      appId,
+      manifestRaw: input.manifestRaw,
+      payloadFiles: input.payloadFiles,
+      targetDir: input.targetDir,
+      fileSystem: fileSystemAfter,
+      inject: input.inject
+    });
+
+    fileSystemAfter = applied.fileSystem;
+
+    if (!applied.ok) {
+      return {
+        ok: false,
+        reasonCode: applied.reasonCode,
+        artifactRollback: applied.rollback
+      };
+    }
+
+    return {
+      ok: true,
+      app: {
+        ...app,
+        installedVersion: app.version,
+        installState: "installed",
+        updateAvailable: action === "install"
+      }
+    };
+  });
+
+  return {
+    ...result,
+    fileSystem: fileSystemAfter
+  };
 }

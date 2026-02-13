@@ -24,6 +24,12 @@ export type PersistedControlPlaneState = {
   offlineCache: OfflineCacheState;
   installState: PersistedInstallState[];
   appCatalog?: AppCatalogEntry[];
+  rollbackMetadata?: Array<{
+    appId: string;
+    previousTargetHash: string;
+    manifestVersion: string;
+    rollbackPrepared: boolean;
+  }>;
   entitlementDecision: PersistedEntitlementDecision | null;
 };
 
@@ -34,7 +40,8 @@ function stableSortInstallState(state: PersistedInstallState[]): PersistedInstal
 export function toPersistedControlPlaneState(
   snapshot: HubSnapshot,
   entitlementDecision: PersistedEntitlementDecision | null,
-  appCatalog: AppCatalogEntry[] = []
+  appCatalog: AppCatalogEntry[] = [],
+  rollbackMetadata: PersistedControlPlaneState["rollbackMetadata"] = []
 ): PersistedControlPlaneState {
   return {
     schema: CONTROL_PLANE_CACHE_SCHEMA,
@@ -49,6 +56,11 @@ export function toPersistedControlPlaneState(
       }))
     ),
     ...(appCatalog.length > 0 ? { appCatalog: normalizeAppCatalog(appCatalog) } : {}),
+    ...(rollbackMetadata.length > 0
+      ? {
+          rollbackMetadata: [...rollbackMetadata].sort((a, b) => a.appId.localeCompare(b.appId))
+        }
+      : {}),
     entitlementDecision
   };
 }
@@ -143,6 +155,27 @@ function isValidAppCatalog(value: unknown): value is AppCatalogEntry[] | undefin
   });
 }
 
+function isValidRollbackMetadata(value: unknown): value is PersistedControlPlaneState["rollbackMetadata"] | undefined {
+  if (value === undefined) {
+    return true;
+  }
+  if (!Array.isArray(value)) {
+    return false;
+  }
+  return value.every((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      return false;
+    }
+    const candidate = entry as Record<string, unknown>;
+    return (
+      typeof candidate.appId === "string" &&
+      typeof candidate.previousTargetHash === "string" &&
+      typeof candidate.manifestVersion === "string" &&
+      typeof candidate.rollbackPrepared === "boolean"
+    );
+  });
+}
+
 export function parsePersistedControlPlaneState(raw: string): PersistedControlPlaneState | null {
   return parsePersistedControlPlaneStateWithReport(raw).state;
 }
@@ -207,6 +240,9 @@ export function parsePersistedControlPlaneStateWithReport(
   if (!isValidAppCatalog(candidate.appCatalog)) {
     return { state: null, reasonCode: "invalid_root_shape", remediation: "rebuild_cache" };
   }
+  if (!isValidRollbackMetadata(candidate.rollbackMetadata)) {
+    return { state: null, reasonCode: "invalid_root_shape", remediation: "rebuild_cache" };
+  }
 
   if (
     options?.nowIso &&
@@ -232,6 +268,11 @@ export function parsePersistedControlPlaneStateWithReport(
     offlineCache: candidate.offlineCache,
     installState: stableSortInstallState(candidate.installState),
     ...(candidate.appCatalog ? { appCatalog: normalizeAppCatalog(candidate.appCatalog) } : {}),
+    ...(candidate.rollbackMetadata
+      ? {
+          rollbackMetadata: [...candidate.rollbackMetadata].sort((a, b) => a.appId.localeCompare(b.appId))
+        }
+      : {}),
     entitlementDecision: candidate.entitlementDecision
   };
   return {
