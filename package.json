@@ -7,6 +7,7 @@
     "dev:hub": "pnpm --filter @antiphon/layer0-hub dev",
     "dev:authority": "pnpm --filter @antiphon/layer0-authority dev",
     "build": "pnpm --filter @antiphon/layer0-authority build && pnpm --filter @antiphon/layer0-hub build",
-    "typecheck": "pnpm --filter @antiphon/layer0-authority typecheck && pnpm --filter @antiphon/layer0-hub typecheck"
+    "typecheck": "pnpm --filter @antiphon/layer0-authority typecheck && pnpm --filter @antiphon/layer0-hub typecheck",
+    "test": "node scripts/foundation-smoke.mjs"
   }
 }

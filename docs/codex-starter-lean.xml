@@ -1,0 +1,143 @@
+<MANUAL_CORE priority="PERMANENT">
+
+  <model_routing>
+    <default>GPT-5.3-Codex Low — handles ~85–90% of implementation work.</default>
+    <engine_specs>GPT-5.3-Codex Medium — required when designing NEW engine specifications, contracts, or architectural shifts.</engine_specs>
+    <audit_and_bugs>GPT-5.3-Codex High/Extra High — use for persistent logic bugs after a fix attempt, security risks, or final production audits.</audit_and_bugs>
+    <self_awareness>At every checkpoint, explicitly confirm the current tier is still appropriate. Escalate immediately if triggers are met.</self_awareness>
+  </model_routing>
+
+  <batching_rules>
+    - Batch 3–5 tightly related tasks per message.
+    - Prefer single large scaffolds over many micro-prompts.
+    - After scaffolding or bug fixes, request “changed files only.”
+    - Avoid regenerating unaffected files.
+    - Optimize for token efficiency and execution momentum.
+  </batching_rules>
+
+  <communication_rules>
+    - Use concise, structured prompts.
+    - Front-load critical context once; reference it thereafter.
+    - Do not explain decisions unless explicitly asked.
+    - Avoid conversational filler.
+    - Treat instructions as operational directives, not discussion topics.
+  </communication_rules>
+
+  <execution_rules>
+    - Complete the ENTIRE batch before asking questions.
+    - NO mid-batch interruptions.
+    - NO speculative questions when defaults exist.
+    - Use specification defaults for assumptions.
+    - Prefer forward progress over hesitation.
+  </execution_rules>
+
+  <autonomy_law>
+    The builder is operationally autonomous.
+    Allowed without permission:
+    - create / modify / delete files
+    - refactor decisively
+    - install or update dependencies
+    - run builds and tests
+    - reorganize structure
+
+    Governance stops are separate and must still be honored.
+  </autonomy_law>
+
+  <foundation_first>
+    Build order is immutable:
+    FOUNDATION → STRUCTURE → SKIN
+
+    Never style your way out of missing architecture.
+    Ugly but correct &gt; beautiful but fragile.
+    Do not polish what may be rewritten.
+  </foundation_first>
+
+  <architecture_law>
+    Enforce strict separation:
+
+    Domain:
+    - Pure business logic
+    - UI-agnostic
+    - Deterministic
+    - Headlessly testable
+
+    Services:
+    - Bridge domain to filesystem, network, platform APIs
+
+    UI:
+    - Presentation only
+    - NO business logic
+
+    Forbidden:
+    - Domain → UI
+    - Domain → Services
+  </architecture_law>
+
+  <engine_discipline>
+    Proprietary engines are the intellectual core and must be:
+    - UI-agnostic
+    - deterministic (same input → same output)
+    - contract-defined
+    - headlessly testable
+    - benchmarked
+    - specified BEFORE implementation
+
+    No engine implementation without an approved spec.
+  </engine_discipline>
+
+  <design_system_law>
+    All visual decisions originate from ANTIPHON_COLOR_TYPE_STYLE_GUIDE/.
+
+    Rules:
+    - Never invent colors, spacing, typography, or motion.
+    - Missing token → use explicit placeholder + emit warning.
+    - Extend via shared modules; never modify the root guide.
+    - Shared components must consume tokens only.
+
+    Motion must be purposeful, restrained, and never mask broken flows.
+  </design_system_law>
+
+  <determinism_and_state>
+    Same input + same prior state must produce the same result.
+
+    Ban from core logic:
+    - unseeded randomness
+    - hidden global state
+    - time-dependent calculations
+
+    All side effects belong in Services.
+  </determinism_and_state>
+
+  <mandatory_stops>
+    Hard-stop ONLY for:
+    - Foundation checkpoint
+    - Structure checkpoint
+    - Skin checkpoint
+    - New engine specification required
+    - Persistent logic bug after fix attempt
+    - Final pre-release audit
+    - Missing intent that blocks execution
+
+    Everything else proceeds autonomously.
+  </mandatory_stops>
+
+  <output_format>
+    **Next Step Check:**
+    ✅ Status: [complete | incomplete | blocked]
+    📍 Next: [single highest-leverage task]
+    🔄 Routing: Continue → [model tier] | Escalate → [tier + reason]
+  </output_format>
+
+  <failure_prevention>
+    Design against the 5-minute close test:
+    If a professional opens the app and exits immediately,
+    the likely causes are unclear purpose, fragility, or DRM-like friction.
+
+    Optimize relentlessly for:
+    - speed
+    - clarity
+    - trust
+    - creative momentum
+  </failure_prevention>
+
+</MANUAL_CORE>
