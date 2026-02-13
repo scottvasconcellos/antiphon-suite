@@ -40,17 +40,20 @@ Layer 1 converts Layer 0 philosophy into executable delivery boundaries for the 
 - Install state transitions must be deterministic (`not-installed`, `installing`, `installed`, `error`).
 - The UI must avoid storefront behavior and remain utility-focused.
 - Entitlement checks must fail clearly and recover cleanly without user anxiety patterns.
+- No implicit mock fallback in runtime flows; if backend is not configured, surface a configuration error.
 
 ## Current Implementation Status
 - Baseline workspace scaffold: complete.
 - Layer 0 functional shell in `apps/layer0-hub`: complete.
-- Local mock domain for auth/entitlements/install/update/cache: complete.
-- Network-backed entitlement API integration: pending.
+- Domain/services/UI separation baseline: complete.
+- HTTP gateway interface for auth/entitlements/updates: complete.
+- Runtime mock fallback: removed (configuration is explicit via `VITE_ANTIPHON_API_URL`).
+- Real backend implementation: pending.
 - Native process installer orchestration: pending.
 - Telemetry pipeline and policy controls: pending.
 
 ## Immediate Next Build Steps
-1. Replace mock service with a typed HTTP adapter (`auth`, `entitlements`, `updates`).
+1. Implement backend endpoints expected by the Hub gateway (`/auth/session`, `/entitlements`, `/installs/:id`, `/updates/:id`, `/offline-cache/status`).
 2. Add install transaction log and recoverable error states.
 3. Add cache encryption + OS keychain integration for local entitlement material.
 4. Introduce desktop shell bridge (Electron/Tauri) for native install execution.

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { SectionCard } from "./components/SectionCard";
-import { mockHubService } from "./domain/mockHubService";
-import { type EntitledApp, type HubSnapshot } from "./domain/types";
+import { type EntitledApp, type HubState } from "./domain/types";
+import { buildHubEngine } from "./services/buildHubEngine";
 
 const INITIAL_EMAIL = "producer@antiphon.audio";
+const built = buildHubEngine();
 
 function formatDate(value: string | null): string {
   if (!value) {
@@ -23,37 +24,46 @@ function installActionLabel(app: EntitledApp): string {
 }
 
 export default function App() {
-  const [snapshot, setSnapshot] = useState<HubSnapshot | null>(null);
+  const [hubState, setHubState] = useState<HubState>(built.initialState);
   const [emailInput, setEmailInput] = useState(INITIAL_EMAIL);
   const [busyState, setBusyState] = useState<string | null>(null);
 
   useEffect(() => {
-    void mockHubService.load().then(setSnapshot);
+    if (!built.engine) {
+      return;
+    }
+    void built.engine.bootstrap().then(setHubState);
   }, []);
 
   const status = useMemo(() => {
-    if (!snapshot) {
-      return "Booting entitlement spine...";
+    if (hubState.status.mode !== "ready") {
+      return hubState.status.message;
     }
-    if (!snapshot.session) {
+    if (!hubState.snapshot.session) {
       return "Signed out: offline cache remains available for existing installs.";
     }
     return "Signed in: ownership state synced and ready for install authority actions.";
-  }, [snapshot]);
+  }, [hubState]);
 
-  async function runAction(actionId: string, task: () => Promise<HubSnapshot>) {
+  async function runAction(actionId: string, task: () => Promise<HubState>) {
     setBusyState(actionId);
     try {
       const next = await task();
-      setSnapshot(next);
+      setHubState(next);
+    } catch (error) {
+      setHubState((current) => ({
+        ...current,
+        status: {
+          mode: "runtime-error",
+          message: error instanceof Error ? error.message : "Unexpected failure."
+        }
+      }));
     } finally {
       setBusyState(null);
     }
   }
 
-  if (!snapshot) {
-    return <div className="page-shell">Loading Layer 0 Hub...</div>;
-  }
+  const snapshot = hubState.snapshot;
 
   const installedCount = snapshot.entitlements.filter((app) => app.installedVersion).length;
 
@@ -106,16 +116,16 @@ export default function App() {
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => runAction("sign-in", () => mockHubService.signIn(emailInput))}
-              disabled={busyState !== null || emailInput.trim().length < 5}
+              onClick={() => built.engine && runAction("sign-in", () => built.engine!.signIn(emailInput))}
+              disabled={busyState !== null || emailInput.trim().length < 5 || !built.engine}
             >
               {busyState === "sign-in" ? "Signing in..." : "Sign in"}
             </button>
             <button
               type="button"
               className="btn"
-              onClick={() => runAction("sign-out", () => mockHubService.signOut())}
-              disabled={busyState !== null || !snapshot.session}
+              onClick={() => built.engine && runAction("sign-out", () => built.engine!.signOut())}
+              disabled={busyState !== null || !snapshot.session || !built.engine}
             >
               Sign out
             </button>
@@ -147,12 +157,19 @@ export default function App() {
                     <button
                       type="button"
                       className="btn btn-small"
-                      disabled={busyState !== null || !snapshot.session || !app.owned || app.installState === "installing"}
+                      disabled={
+                        busyState !== null ||
+                        !snapshot.session ||
+                        !app.owned ||
+                        app.installState === "installing" ||
+                        !built.engine
+                      }
                       onClick={() =>
+                        built.engine &&
                         runAction(actionId, () =>
                           app.updateAvailable
-                            ? mockHubService.applyUpdate(app.id)
-                            : mockHubService.installApp(app.id)
+                            ? built.engine!.applyUpdate(app.id)
+                            : built.engine!.installApp(app.id)
                         )
                       }
                     >
@@ -178,8 +195,8 @@ export default function App() {
           <button
             type="button"
             className="btn"
-            onClick={() => runAction("refresh", () => mockHubService.refreshEntitlements())}
-            disabled={busyState !== null || !snapshot.session}
+            onClick={() => built.engine && runAction("refresh", () => built.engine!.refreshEntitlements())}
+            disabled={busyState !== null || !snapshot.session || !built.engine}
           >
             {busyState === "refresh" ? "Refreshing..." : "Refresh entitlements"}
           </button>

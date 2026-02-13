@@ -1,3 +1,5 @@
+export type InstallState = "not-installed" | "installing" | "installed" | "error";
+
 export type HubSession = {
   userId: string;
   email: string;
@@ -11,7 +13,7 @@ export type EntitledApp = {
   version: string;
   installedVersion: string | null;
   owned: boolean;
-  installState: "not-installed" | "installing" | "installed" | "error";
+  installState: InstallState;
   updateAvailable: boolean;
 };
 
@@ -26,4 +28,18 @@ export type HubSnapshot = {
   session: HubSession | null;
   entitlements: EntitledApp[];
   offlineCache: OfflineCacheState;
+};
+
+export type HubConfig = {
+  apiBaseUrl: string;
+};
+
+export type HubRuntimeStatus = {
+  mode: "ready" | "configuration-error" | "runtime-error";
+  message: string;
+};
+
+export type HubState = {
+  snapshot: HubSnapshot;
+  status: HubRuntimeStatus;
 };

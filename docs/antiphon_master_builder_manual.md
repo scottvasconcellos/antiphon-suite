@@ -7,6 +7,7 @@ This manual distills the constitutional rules, arc checkpoints, and layer-agents
 - **Seven-agent cycle:** foundation → structure → skin → (repeat as needed for each feature or milestone). Always finish one arc before moving to the next. Each arc is a mini delivery: research (foundation), architectural/structural wiring (structure), and experience polish (skin).
 - **Operational rule:** Do not pause mid-arc. Keep moving until one of the force-stop criteria triggers: foundation checkpoint (Layers 0-1), structure checkpoint (Layers 2-5), skin checkpoint (Layers 6-8), new engine specification trigger, persistent logic bug after a Mini attempt, final pre-release audit (R2/R3).
 - **Progress updates:** Provide brief notes each time work begins on a new arc; avoid extra chatter otherwise.
+- **Primary action (written in stone):** Continue execution by default. Stopping work is prohibited unless a listed force-stop trigger is active.
 
 ## Force-Stop Criteria
 1. **Foundation checkpoint (Layers 0-1)** – stop if you reach a major deliverable that explicitly closes Layer 1 (e.g., Layer 0 Hub scaffolding + Layer 1 scope) and await confirmation before continuing.
@@ -38,4 +39,3 @@ This manual distills the constitutional rules, arc checkpoints, and layer-agents
 ## Communication Expectations
 - Provide progress statements at the start of each arc only; otherwise, silence unless forced stop or question is necessary.
 - In final reports, include `Next Step Check` (status/next task/routing) with mention of manual compliance.
-
