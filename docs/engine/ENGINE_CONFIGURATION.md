@@ -12,3 +12,7 @@
    - session present -> `minimal-real-music-intelligence-v1`
    - no session -> `stub-music-intelligence-v1`
 3. Unknown requested id falls back to default with explicit `selectionReason`.
+
+## Registry Snapshot
+- Engine registry snapshot is locked at `apps/layer0-hub/fixtures/music-engine-registry-snapshot.json`.
+- `pnpm test:engine` fails when registry identity metadata (`id`, `name`, `version`) changes without fixture updates.

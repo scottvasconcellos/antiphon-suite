@@ -183,6 +183,13 @@ async function run() {
 
   const registryIds = registry.getRegisteredMusicEngineIds();
   assert(JSON.stringify(registryIds) === JSON.stringify([...registryIds].sort()), "Engine registry IDs must be deterministic.");
+  const manifestFixture = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/music-engine-registry-snapshot.json"), "utf-8")
+  );
+  assert(
+    JSON.stringify(registry.getMusicEngineManifest()) === JSON.stringify(manifestFixture),
+    "Engine registry manifest snapshot mismatch."
+  );
   const defaultSignedOut = registry.selectMusicEngine(defaults.DEFAULT_HUB_SNAPSHOT).engine.id;
   assert(defaultSignedOut === stubMusicEngine.StubMusicIntelligenceEngine.id, "Signed-out default must select stub engine.");
   const signedInSnapshot = {

@@ -8,6 +8,12 @@ const ENGINE_REGISTRY: Record<string, MusicEnginePlugin> = {
   [MinimalRealMusicIntelligenceEngine.id]: MinimalRealMusicIntelligenceEngine
 };
 
+export type MusicEngineManifestEntry = {
+  id: string;
+  name: string;
+  version: string;
+};
+
 export type MusicEngineSelection = {
   engine: MusicEnginePlugin;
   source: "requested" | "default";
@@ -16,6 +22,17 @@ export type MusicEngineSelection = {
 
 export function getRegisteredMusicEngineIds(): string[] {
   return Object.keys(ENGINE_REGISTRY).sort();
+}
+
+export function getMusicEngineManifest(): MusicEngineManifestEntry[] {
+  return getRegisteredMusicEngineIds().map((id) => {
+    const engine = ENGINE_REGISTRY[id];
+    return {
+      id: engine.id,
+      name: engine.name,
+      version: engine.version
+    };
+  });
 }
 
 export function selectMusicEngine(snapshot: HubSnapshot, requestedEngineId?: string): MusicEngineSelection {
