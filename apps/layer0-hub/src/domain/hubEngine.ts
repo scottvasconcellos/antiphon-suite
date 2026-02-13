@@ -1,6 +1,9 @@
 import { DEFAULT_HUB_SNAPSHOT } from "./defaults";
 import { type HubEngineContract } from "./engineContract";
+import { runMusicPipeline } from "./hubMusicOrchestrator";
 import { type HubGateway, type HubStore } from "./ports";
+import { StubMusicIntelligenceEngine } from "./musicIntelligenceEngine";
+import { UiMusicProjectionAdapter } from "./uiMusicProjectionAdapter";
 import { applyHubEvent } from "./hubEngineCore";
 import { type HubState } from "./types";
 
@@ -105,6 +108,10 @@ export class HubEngine implements HubEngineContract {
     const transactions = await this.gateway.fetchTransactions();
     const next = applyHubEvent(current, { type: "TRANSACTIONS_SYNCED", transactions });
     return { ...next, snapshot: this.store.save(next.snapshot) };
+  }
+
+  runMusicIntelligence() {
+    return runMusicPipeline(this.store.load(), StubMusicIntelligenceEngine, UiMusicProjectionAdapter);
   }
 
   reset(): HubState {

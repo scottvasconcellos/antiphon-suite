@@ -1,7 +1,10 @@
 import { type HubEngineContract } from "../domain/engineContract";
 import { DEFAULT_HUB_SNAPSHOT } from "../domain/defaults";
 import { applyHubEvent } from "../domain/hubEngineCore";
+import { runMusicPipeline } from "../domain/hubMusicOrchestrator";
+import { StubMusicIntelligenceEngine } from "../domain/musicIntelligenceEngine";
 import { type EntitledApp, type HubSnapshot, type HubState } from "../domain/types";
+import { UiMusicProjectionAdapter } from "../domain/uiMusicProjectionAdapter";
 
 const STUB_APPS: EntitledApp[] = [
   {
@@ -97,6 +100,10 @@ export class StubHubEngine implements HubEngineContract {
     const next = applyHubEvent(this.snapshot, { type: "TRANSACTIONS_SYNCED", transactions: [] });
     this.snapshot = next.snapshot;
     return next;
+  }
+
+  runMusicIntelligence() {
+    return runMusicPipeline(this.snapshot, StubMusicIntelligenceEngine, UiMusicProjectionAdapter);
   }
 
   reset(): HubState {

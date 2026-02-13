@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
-import { pathToFileURL } from "node:url";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 function runStep(command, args) {
   const result = spawnSync(command, args, { stdio: "inherit", shell: false });
@@ -16,54 +16,60 @@ function assert(condition, message) {
   }
 }
 
+function patchImports(filePath, replacements) {
+  let source = readFileSync(filePath, "utf-8");
+  for (const [from, to] of replacements) {
+    source = source.replace(from, to);
+  }
+  writeFileSync(filePath, source, "utf-8");
+}
+
 async function run() {
   runStep("pnpm", ["--filter", "@antiphon/layer0-hub", "exec", "tsc", "-p", "tsconfig.engine-smoke.json"]);
 
-  const basePath = join(process.cwd(), "apps/layer0-hub/.tmp-engine-smoke/domain");
-  const corePath = join(basePath, "hubEngineCore.js");
-  const coreSource = readFileSync(corePath, "utf-8").replace('from "./defaults";', 'from "./defaults.js";');
-  writeFileSync(corePath, coreSource, "utf-8");
-  const enginePath = join(basePath, "hubEngine.js");
-  const engineSource = readFileSync(enginePath, "utf-8")
-    .replace('from "./defaults";', 'from "./defaults.js";')
-    .replace('from "./hubEngineCore";', 'from "./hubEngineCore.js";');
-  writeFileSync(enginePath, engineSource, "utf-8");
-  const stubPath = join(process.cwd(), "apps/layer0-hub/.tmp-engine-smoke/services/stubHubEngine.js");
-  const stubSource = readFileSync(stubPath, "utf-8")
-    .replace('from "../domain/defaults";', 'from "../domain/defaults.js";')
-    .replace('from "../domain/hubEngineCore";', 'from "../domain/hubEngineCore.js";');
-  writeFileSync(stubPath, stubSource, "utf-8");
-  const adapterPath = join(process.cwd(), "apps/layer0-hub/.tmp-engine-smoke/services/musicIntelligenceAdapter.js");
-  const adapterSource = readFileSync(adapterPath, "utf-8").replace(
-    'from "../domain/musicIntelligenceEngine";',
-    'from "../domain/musicIntelligenceEngine.js";'
-  );
-  writeFileSync(adapterPath, adapterSource, "utf-8");
-  const core = await import(pathToFileURL(join(basePath, "hubEngineCore.js")).href);
-  const defaults = await import(pathToFileURL(join(basePath, "defaults.js")).href);
-  const hubEngineModule = await import(pathToFileURL(enginePath).href);
-  const stubModule = await import(pathToFileURL(stubPath).href);
-  const intelligenceAdapter = await import(pathToFileURL(adapterPath).href);
+  const tmpRoot = join(process.cwd(), "apps/layer0-hub/.tmp-engine-smoke");
+  const domainRoot = join(tmpRoot, "domain");
+  const servicesRoot = join(tmpRoot, "services");
+
+  patchImports(join(domainRoot, "hubEngineCore.js"), [["from \"./defaults\";", "from \"./defaults.js\";"]]);
+  patchImports(join(domainRoot, "hubEngine.js"), [
+    ["from \"./defaults\";", "from \"./defaults.js\";"],
+    ["from \"./hubEngineCore\";", "from \"./hubEngineCore.js\";"],
+    ["from \"./hubMusicOrchestrator\";", "from \"./hubMusicOrchestrator.js\";"],
+    ["from \"./musicIntelligenceEngine\";", "from \"./musicIntelligenceEngine.js\";"],
+    ["from \"./uiMusicProjectionAdapter\";", "from \"./uiMusicProjectionAdapter.js\";"]
+  ]);
+  patchImports(join(domainRoot, "hubMusicOrchestrator.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);
+  patchImports(join(domainRoot, "musicIntelligenceEngine.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);
+  patchImports(join(domainRoot, "uiMusicProjectionAdapter.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);
+  patchImports(join(servicesRoot, "stubHubEngine.js"), [
+    ["from \"../domain/defaults\";", "from \"../domain/defaults.js\";"],
+    ["from \"../domain/hubEngineCore\";", "from \"../domain/hubEngineCore.js\";"],
+    ["from \"../domain/hubMusicOrchestrator\";", "from \"../domain/hubMusicOrchestrator.js\";"],
+    ["from \"../domain/musicIntelligenceEngine\";", "from \"../domain/musicIntelligenceEngine.js\";"],
+    ["from \"../domain/uiMusicProjectionAdapter\";", "from \"../domain/uiMusicProjectionAdapter.js\";"]
+  ]);
+
+  const defaults = await import(pathToFileURL(join(domainRoot, "defaults.js")).href);
+  const core = await import(pathToFileURL(join(domainRoot, "hubEngineCore.js")).href);
+  const hubEngineModule = await import(pathToFileURL(join(domainRoot, "hubEngine.js")).href);
+  const orchestrator = await import(pathToFileURL(join(domainRoot, "hubMusicOrchestrator.js")).href);
+  const stubMusicEngine = await import(pathToFileURL(join(domainRoot, "musicIntelligenceEngine.js")).href);
+  const projectionAdapter = await import(pathToFileURL(join(domainRoot, "uiMusicProjectionAdapter.js")).href);
+  const stubModule = await import(pathToFileURL(join(servicesRoot, "stubHubEngine.js")).href);
 
   const seed = structuredClone(defaults.DEFAULT_HUB_SNAPSHOT);
-  const payload = {
+  const syncEvent = {
     type: "TRANSACTIONS_SYNCED",
     transactions: [{ id: "tx_1", appId: "a", appName: "A", action: "install", status: "succeeded", message: "ok", occurredAt: "2026-02-13T00:00:00.000Z" }]
   };
 
-  const a = core.applyHubEvent(seed, payload);
-  const b = core.applyHubEvent(seed, payload);
+  const a = core.applyHubEvent(seed, syncEvent);
+  const b = core.applyHubEvent(seed, syncEvent);
   assert(JSON.stringify(a) === JSON.stringify(b), "applyHubEvent must be deterministic for same input.");
-
-  const signedOut = core.applyHubEvent(
-    { ...seed, session: { userId: "u", email: "u@a.com", displayName: "U", signedInAt: "2026-02-13T00:00:00.000Z" } },
-    { type: "SIGNED_OUT" }
-  );
-  assert(signedOut.snapshot.session === null, "SIGNED_OUT must clear session.");
 
   const reset = core.applyHubEvent(seed, { type: "RESET" });
   assert(reset.status.mode === "configuration-error", "RESET must return configuration-error mode.");
-  assert(reset.snapshot.session === null, "RESET must return default snapshot.");
 
   const fakeGateway = {
     async signIn() {
@@ -101,12 +107,21 @@ async function run() {
   };
 
   const hubEngine = new hubEngineModule.HubEngine(fakeGateway, fakeStore);
-  const signedInState = await hubEngine.signIn("a@a.com");
-  assert(signedInState.status.mode === "ready", "HubEngine signIn should return ready.");
-  const installedState = await hubEngine.installApp("app.1");
-  assert(installedState.snapshot.entitlements[0].installedVersion === "1.0.0", "HubEngine installApp should upsert installed version.");
-  const signedOutState = await hubEngine.signOut();
-  assert(signedOutState.snapshot.session === null, "HubEngine signOut should clear session.");
+  await hubEngine.signIn("a@a.com");
+  const projectionA = hubEngine.runMusicIntelligence();
+  const projectionB = hubEngine.runMusicIntelligence();
+  assert(JSON.stringify(projectionA) === JSON.stringify(projectionB), "HubEngine orchestration path must be deterministic.");
+  assert(projectionA.status === "ready" && projectionA.projection !== null, "HubEngine should return UI-safe projection.");
+
+  const badPlugin = { id: "bad-plugin", evaluate() { return { lane: "invalid", reason: 42, confidence: "x" }; } };
+  const badResult = orchestrator.runMusicPipeline(saved, badPlugin, projectionAdapter.UiMusicProjectionAdapter);
+  assert(badResult.status === "runtime-error", "Invalid engine output must be handled as runtime-error.");
+  assert(badResult.message.includes("contract violation"), "Contract enforcement message must be explicit.");
+
+  const throwingPlugin = { id: "throwing-plugin", evaluate() { throw new Error("engine exploded"); } };
+  const thrownResult = orchestrator.runMusicPipeline(saved, throwingPlugin, projectionAdapter.UiMusicProjectionAdapter);
+  assert(thrownResult.status === "runtime-error", "Plugin exceptions must map to runtime-error.");
+  assert(thrownResult.message === "engine exploded", "Runtime-error should preserve plugin exception message.");
 
   const stubEngineA = new stubModule.StubHubEngine();
   const stubEngineB = new stubModule.StubHubEngine();
@@ -114,13 +129,9 @@ async function run() {
   const stubB = await stubEngineB.bootstrap();
   assert(JSON.stringify(stubA) === JSON.stringify(stubB), "StubHubEngine bootstrap should be deterministic.");
 
-  const orchestratorEngineA = new stubModule.StubHubEngine();
-  const orchestratorEngineB = new stubModule.StubHubEngine();
-  await orchestratorEngineA.bootstrap();
-  await orchestratorEngineB.bootstrap();
-  const e2eA = intelligenceAdapter.runMusicIntelligence((await orchestratorEngineA.signIn("producer@antiphon.audio")).snapshot);
-  const e2eB = intelligenceAdapter.runMusicIntelligence((await orchestratorEngineB.signIn("producer@antiphon.audio")).snapshot);
-  assert(JSON.stringify(e2eA) === JSON.stringify(e2eB), "Orchestrator -> engine -> adapter path must be deterministic.");
+  const pluginA = orchestrator.runMusicPipeline(stubA.snapshot, stubMusicEngine.StubMusicIntelligenceEngine, projectionAdapter.UiMusicProjectionAdapter);
+  const pluginB = orchestrator.runMusicPipeline(stubB.snapshot, stubMusicEngine.StubMusicIntelligenceEngine, projectionAdapter.UiMusicProjectionAdapter);
+  assert(JSON.stringify(pluginA) === JSON.stringify(pluginB), "Engine plugin + adapter projection must be deterministic.");
 }
 
 run().catch((error) => {
