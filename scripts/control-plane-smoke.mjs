@@ -169,6 +169,9 @@ async function run() {
   const controlPlaneUiContract = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneUiContract.js")).href
   );
+  const controlPlaneTrustArtifact = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneTrustArtifact.js")).href
+  );
   const publicControlPlane = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/publicControlPlane.js")).href
   );
@@ -396,7 +399,12 @@ async function run() {
       fixture.opsVm
     );
     assertEqual(actual, fixture.expected, `Control-plane UI contract mismatch: ${fixture.name}`);
+    assertEqual(Object.keys(actual).sort(), fixture.expectedKeysSorted, `Control-plane UI key surface mismatch: ${fixture.name}`);
   }
+
+  const appSource = readFileSync(join(process.cwd(), "apps/layer0-hub/src/App.tsx"), "utf-8");
+  assert(!appSource.includes("SectionCard"), "App should remain minimal and not render rich control surfaces.");
+  assert(!appSource.includes("runAction("), "App should not contain policy/action orchestration logic.");
 
   const trustEnvelopeFixtures = JSON.parse(
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-trust-envelope-snapshots.json"), "utf-8")
@@ -414,6 +422,11 @@ async function run() {
     assertEqual(actual, fixture.expected, `Control-plane public surface mismatch: ${fixture.name}`);
   }
 
+  const consumerHarness = await import(
+    pathToFileURL(join(process.cwd(), "scripts/control-plane-consumer-harness.mjs")).href
+  );
+  await consumerHarness.runControlPlaneConsumerHarness();
+
   const reasonCoverageFixtures = JSON.parse(
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-reason-coverage-snapshots.json"), "utf-8")
   );
@@ -422,13 +435,25 @@ async function run() {
       ...controlPlaneContracts.CONTRACT_COMPAT_REASON_CODES,
       ...persistence.PERSISTENCE_REASON_CODES,
       ...installUpdateAuthorityModule.INSTALL_UPDATE_REASON_CODES,
-      ...launchTokenBoundaryModule.LAUNCH_TOKEN_REASON_CODES
+      ...launchTokenBoundaryModule.LAUNCH_TOKEN_REASON_CODES,
+      ...controlPlaneTrustArtifact.TRUST_ARTIFACT_REASON_CODES
     ].sort();
     assertEqual(actual, fixture.expectedReasonCodes, `Control-plane reason coverage mismatch: ${fixture.name}`);
     for (const code of actual) {
       const remediation = controlPlaneReasonTaxonomy.remediationForReason(code);
       assert(typeof remediation === "string" && remediation.length > 0, `Missing remediation mapping for reason code: ${code}`);
     }
+  }
+
+  const trustArtifactCompatFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-trust-artifact-compat-snapshots.json"), "utf-8")
+  );
+  for (const fixture of trustArtifactCompatFixtures) {
+    const actual = controlPlaneTrustArtifact.parseTrustArtifactWithReport(
+      fixture.raw,
+      fixture.nowIso ? { nowIso: fixture.nowIso, maxSkewSeconds: fixture.maxSkewSeconds } : undefined
+    );
+    assertEqual(actual, fixture.expected, `Control-plane trust artifact compat mismatch: ${fixture.name}`);
   }
 }
 

@@ -24,6 +24,12 @@ export const CONTROL_PLANE_REASON_TAXONOMY = {
   signature_invalid: "reissue_token",
   expired: "reissue_token",
   claims_invalid: "reissue_token"
+  ,
+  ok_trust_artifact_loaded: "none",
+  invalid_trust_artifact_json: "rebuild_trust_artifact",
+  invalid_trust_artifact_shape: "rebuild_trust_artifact",
+  unsupported_trust_artifact_version: "upgrade_or_downgrade_to_supported_version",
+  trust_artifact_clock_skew: "refresh_online_session"
 } as const;
 
 export type ControlPlaneReasonCode = keyof typeof CONTROL_PLANE_REASON_TAXONOMY;

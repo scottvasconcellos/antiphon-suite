@@ -18,15 +18,20 @@
       "invalid_json",
       "invalid_offline_cache",
       "invalid_root_shape",
+      "invalid_trust_artifact_json",
+      "invalid_trust_artifact_shape",
       "malformed",
       "ok_cache_loaded",
       "ok_install_completed",
+      "ok_trust_artifact_loaded",
       "ok_update_completed",
       "ok_version_supported",
       "signature_invalid",
       "stale_timestamp",
+      "trust_artifact_clock_skew",
       "unsupported_contract_version",
-      "unsupported_schema_or_version"
+      "unsupported_schema_or_version",
+      "unsupported_trust_artifact_version"
     ]
   }
 ]

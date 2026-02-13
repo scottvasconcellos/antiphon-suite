@@ -51,6 +51,15 @@
       "cacheLine": "Cache schema: antiphon.control-plane-cache@v1 restorable=true",
       "launchReadinessLine": "Launch readiness: antiphon.app:token_issued",
       "recentOpsLine": "Recent ops: tx-1:succeeded"
-    }
+    },
+    "expectedKeysSorted": [
+      "cacheLine",
+      "entitlementLine",
+      "installUpdateLine",
+      "launchReadinessLine",
+      "launchTokenLine",
+      "recentOpsLine",
+      "statusLine"
+    ]
   }
 ]
