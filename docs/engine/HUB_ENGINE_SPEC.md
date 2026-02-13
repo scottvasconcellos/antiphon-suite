@@ -1,4 +1,4 @@
-# HubEngine Specification (v1.1)
+# HubEngine Specification (v1.2)
 
 ## Deterministic Contract
 - Inputs: current `HubSnapshot` plus a typed `HubEvent`.
@@ -13,6 +13,7 @@
 - Preserve deterministic behavior for identical snapshot and plugin inputs.
 - Select engine deterministically via registry rules (requested engine id if valid; otherwise default rule by snapshot state).
 - Surface selected engine metadata in pipeline result (`engineId`, `selectionSource`, `selectionReason`).
+- Surface stable engine identity metadata in pipeline result (`engineId`, `engineName`, `engineVersion`, selection fields).
 
 ## State Model
 - Snapshot fields: `session`, `entitlements`, `offlineCache`, `transactions`.
@@ -55,3 +56,5 @@
 - `pnpm test:engine` validates registry selection defaults and requested-engine override behavior.
 - `pnpm test:engine` validates hub view-model projection snapshots from `apps/layer0-hub/fixtures/hub-view-model-snapshots.json`.
 - `pnpm test:engine` validates both explicit selection variants (stub + minimal real) with deterministic metadata.
+- `pnpm test:engine` validates invalid requested engine id fallback metadata (`selectionSource=default` with explicit reason).
+- Engine configuration and deterministic selection policy are documented in `docs/engine/ENGINE_CONFIGURATION.md`.

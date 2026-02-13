@@ -15,6 +15,8 @@ export type MusicIntelligenceOutput = {
 
 export type MusicEnginePlugin = {
   id: string;
+  name: string;
+  version: string;
   evaluate(input: MusicIntelligenceInput): MusicIntelligenceOutput;
 };
 
@@ -34,6 +36,8 @@ export type MusicPipelineResult = {
   status: "ready" | "runtime-error";
   message: string;
   engineId: string;
+  engineName: string;
+  engineVersion: string;
   selectionSource: "requested" | "default";
   selectionReason: string;
   projection: UiMusicProjection | null;

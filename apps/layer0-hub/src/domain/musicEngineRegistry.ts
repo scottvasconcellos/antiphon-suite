@@ -28,9 +28,14 @@ export function selectMusicEngine(snapshot: HubSnapshot, requestedEngineId?: str
   }
 
   const defaultEngine = snapshot.session ? MinimalRealMusicIntelligenceEngine : StubMusicIntelligenceEngine;
+  const fallbackReason = requestedEngineId
+    ? `Requested engine id '${requestedEngineId}' not found; applying deterministic default policy.`
+    : snapshot.session
+      ? "Session present: use minimal real engine."
+      : "No session: use stub engine.";
   return {
     engine: defaultEngine,
     source: "default",
-    reason: snapshot.session ? "Session present: use minimal real engine." : "No session: use stub engine."
+    reason: fallbackReason
   };
 }

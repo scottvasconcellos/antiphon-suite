@@ -64,7 +64,10 @@ export default function App() {
 
       <p className="status-line">{vm.statusLine}</p>
       <p className="status-line">{vm.intelligenceHeadline}: {vm.intelligenceDetail}</p>
-      <p className="status-line">Engine {vm.intelligenceEngineId} ({vm.intelligenceSelectionSource})</p>
+      <p className="status-line">
+        Engine {vm.intelligenceEngineId} [{vm.intelligenceEngineName} v{vm.intelligenceEngineVersion}] ({vm.intelligenceSelectionSource})
+      </p>
+      <p className="status-line">Selection: {vm.intelligenceSelectionReason}</p>
 
       <section className="grid-layout">
         <SectionCard

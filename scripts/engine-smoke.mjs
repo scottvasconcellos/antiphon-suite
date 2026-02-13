@@ -129,7 +129,7 @@ async function run() {
   assert(typeof projectionA.engineId === "string" && projectionA.engineId.length > 0, "Pipeline result must surface engine id.");
   assert(projectionA.selectionSource === "default", "Pipeline result must surface deterministic selection source.");
 
-  const badPlugin = { id: "bad-plugin", evaluate() { return { lane: "invalid", reason: 42, confidence: "x" }; } };
+  const badPlugin = { id: "bad-plugin", name: "Bad Plugin", version: "1.0.0", evaluate() { return { lane: "invalid", reason: 42, confidence: "x" }; } };
   const badResult = orchestrator.runMusicPipeline(
     saved,
     { engine: badPlugin, source: "requested", reason: "test bad plugin" },
@@ -138,7 +138,7 @@ async function run() {
   assert(badResult.status === "runtime-error", "Invalid engine output must be handled as runtime-error.");
   assert(badResult.message.includes("contract violation"), "Contract enforcement message must be explicit.");
 
-  const throwingPlugin = { id: "throwing-plugin", evaluate() { throw new Error("engine exploded"); } };
+  const throwingPlugin = { id: "throwing-plugin", name: "Throwing Plugin", version: "1.0.0", evaluate() { throw new Error("engine exploded"); } };
   const thrownResult = orchestrator.runMusicPipeline(
     saved,
     { engine: throwingPlugin, source: "requested", reason: "test throwing plugin" },
@@ -147,7 +147,7 @@ async function run() {
   assert(thrownResult.status === "runtime-error", "Plugin exceptions must map to runtime-error.");
   assert(thrownResult.message === "engine exploded", "Runtime-error should preserve plugin exception message.");
 
-  const nanPlugin = { id: "nan-plugin", evaluate() { return { lane: "create", reason: "x", confidence: Number.NaN }; } };
+  const nanPlugin = { id: "nan-plugin", name: "NaN Plugin", version: "1.0.0", evaluate() { return { lane: "create", reason: "x", confidence: Number.NaN }; } };
   const nanResult = orchestrator.runMusicPipeline(
     saved,
     { engine: nanPlugin, source: "requested", reason: "test nan plugin" },
@@ -193,6 +193,9 @@ async function run() {
   assert(defaultSignedIn === realMusicEngine.MinimalRealMusicIntelligenceEngine.id, "Signed-in default must select minimal real engine.");
   const requested = registry.selectMusicEngine(defaults.DEFAULT_HUB_SNAPSHOT, realMusicEngine.MinimalRealMusicIntelligenceEngine.id).engine.id;
   assert(requested === realMusicEngine.MinimalRealMusicIntelligenceEngine.id, "Requested engine ID must be honored deterministically.");
+  const unknownSelection = registry.selectMusicEngine(defaults.DEFAULT_HUB_SNAPSHOT, "unknown.engine.v1");
+  assert(unknownSelection.source === "default", "Unknown requested engine must fall back to deterministic default.");
+  assert(unknownSelection.reason.includes("not found"), "Unknown requested engine fallback reason must be explicit.");
 
   const explicitStubEngine = new hubEngineModule.HubEngine(fakeGateway, fakeStore, { musicEngineId: stubMusicEngine.StubMusicIntelligenceEngine.id });
   const explicitStubProjection = explicitStubEngine.runMusicIntelligence();
@@ -202,6 +205,10 @@ async function run() {
   const explicitRealProjection = explicitRealEngine.runMusicIntelligence();
   assert(explicitRealProjection.engineId === realMusicEngine.MinimalRealMusicIntelligenceEngine.id, "Explicit real engine selection must be surfaced.");
   assert(explicitRealProjection.selectionSource === "requested", "Explicit real selection source must be requested.");
+  const invalidRequestedEngine = new hubEngineModule.HubEngine(fakeGateway, fakeStore, { musicEngineId: "unknown.engine.v1" });
+  const invalidRequestedProjection = invalidRequestedEngine.runMusicIntelligence();
+  assert(invalidRequestedProjection.selectionSource === "default", "Invalid requested engine must resolve to default selection source.");
+  assert(invalidRequestedProjection.selectionReason.includes("not found"), "Invalid requested engine reason must describe deterministic fallback.");
 
   const staleInput = { hasSession: true, ownedCount: 2, installedCount: 2, offlineDaysRemaining: 0 };
   const staleDecision = stubMusicEngine.evaluateMusicIntelligence(staleInput);

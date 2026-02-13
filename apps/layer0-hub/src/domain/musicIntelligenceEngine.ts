@@ -24,6 +24,8 @@ export function evaluateMusicIntelligence(input: MusicIntelligenceInput): MusicI
 
 export const StubMusicIntelligenceEngine: MusicEnginePlugin = {
   id: "stub-music-intelligence-v1",
+  name: "Stub Music Intelligence",
+  version: "1.0.0",
   evaluate(input: MusicIntelligenceInput): MusicIntelligenceOutput {
     return evaluateMusicIntelligence(input);
   }

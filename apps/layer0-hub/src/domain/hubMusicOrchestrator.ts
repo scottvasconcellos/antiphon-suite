@@ -34,6 +34,8 @@ export function runMusicPipeline(
         status: "runtime-error",
         message: `Engine contract violation from ${engine.id}.`,
         engineId: engine.id,
+        engineName: engine.name,
+        engineVersion: engine.version,
         selectionSource: selection.source,
         selectionReason: selection.reason,
         projection: null
@@ -43,6 +45,8 @@ export function runMusicPipeline(
       status: "ready",
       message: `Engine ${engine.id} evaluated.`,
       engineId: engine.id,
+      engineName: engine.name,
+      engineVersion: engine.version,
       selectionSource: selection.source,
       selectionReason: selection.reason,
       projection: adapter.toProjection(output)
@@ -52,6 +56,8 @@ export function runMusicPipeline(
       status: "runtime-error",
       message: error instanceof Error ? error.message : "Unknown engine runtime failure.",
       engineId: engine.id,
+      engineName: engine.name,
+      engineVersion: engine.version,
       selectionSource: selection.source,
       selectionReason: selection.reason,
       projection: null

@@ -35,6 +35,8 @@ export function evaluateMinimalRealMusicIntelligence(input: MusicIntelligenceInp
 
 export const MinimalRealMusicIntelligenceEngine: MusicEnginePlugin = {
   id: "minimal-real-music-intelligence-v1",
+  name: "Minimal Real Music Intelligence",
+  version: "1.0.0",
   evaluate(input: MusicIntelligenceInput): MusicIntelligenceOutput {
     return evaluateMinimalRealMusicIntelligence(input);
   }

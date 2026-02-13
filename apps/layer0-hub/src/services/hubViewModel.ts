@@ -9,7 +9,10 @@ export type HubViewModel = {
   intelligenceHeadline: string;
   intelligenceDetail: string;
   intelligenceEngineId: string;
+  intelligenceEngineName: string;
+  intelligenceEngineVersion: string;
   intelligenceSelectionSource: "requested" | "default" | "unavailable";
+  intelligenceSelectionReason: string;
 };
 
 export function toHubViewModel(hubState: HubState, intelligence: MusicPipelineResult | null): HubViewModel {
@@ -22,7 +25,10 @@ export function toHubViewModel(hubState: HubState, intelligence: MusicPipelineRe
       intelligenceHeadline: "Music Intelligence offline",
       intelligenceDetail: intelligence?.message ?? "Unavailable while runtime is in error state.",
       intelligenceEngineId: intelligence?.engineId ?? "none",
-      intelligenceSelectionSource: intelligence?.selectionSource ?? "unavailable"
+      intelligenceEngineName: intelligence?.engineName ?? "none",
+      intelligenceEngineVersion: intelligence?.engineVersion ?? "0.0.0",
+      intelligenceSelectionSource: intelligence?.selectionSource ?? "unavailable",
+      intelligenceSelectionReason: intelligence?.selectionReason ?? "No selection."
     };
   }
 
@@ -37,7 +43,10 @@ export function toHubViewModel(hubState: HubState, intelligence: MusicPipelineRe
     intelligenceHeadline: intelligence?.projection?.headline ?? "Music Intelligence unavailable",
     intelligenceDetail: intelligence?.projection?.detail ?? intelligence?.message ?? "No recommendation available.",
     intelligenceEngineId: intelligence?.engineId ?? "none",
-    intelligenceSelectionSource: intelligence?.selectionSource ?? "unavailable"
+    intelligenceEngineName: intelligence?.engineName ?? "none",
+    intelligenceEngineVersion: intelligence?.engineVersion ?? "0.0.0",
+    intelligenceSelectionSource: intelligence?.selectionSource ?? "unavailable",
+    intelligenceSelectionReason: intelligence?.selectionReason ?? "No selection."
   };
 }
 
