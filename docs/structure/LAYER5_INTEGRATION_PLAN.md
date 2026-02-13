@@ -6,6 +6,10 @@
 3. Add UI view-model mappers from service DTOs to screen state.
 4. Add integration tests for happy path and ownership failure path.
 
+## Batch 2 Progress
+- Implemented authority response contract parsing in hub service layer.
+- Implemented UI view-model mapping to keep projection logic out of component render flow.
+
 ## Done Criteria For Structure Entry
 - Domain contracts documented and enforced at compile-time.
 - Service adapters cover all authority routes.

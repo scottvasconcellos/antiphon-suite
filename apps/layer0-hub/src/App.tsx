@@ -1,31 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { SectionCard } from "./components/SectionCard";
-import { type EntitledApp, type InstallTransaction, type HubState } from "./domain/types";
+import { type HubState } from "./domain/types";
 import { buildHubEngine } from "./services/buildHubEngine";
+import { toDisplayDate, toHubViewModel, toInstallActionLabel, toTransactionLabel } from "./services/hubViewModel";
 
 const INITIAL_EMAIL = "producer@antiphon.audio";
 const built = buildHubEngine();
-
-function formatDate(value: string | null): string {
-  if (!value) {
-    return "Never";
-  }
-  return new Date(value).toLocaleString();
-}
-
-function installActionLabel(app: EntitledApp): string {
-  if (app.installState === "installing") {
-    return "Installing...";
-  }
-  if (app.installedVersion) {
-    return app.updateAvailable ? "Apply update" : "Reinstall";
-  }
-  return "Install";
-}
-
-function transactionLabel(tx: InstallTransaction): string {
-  return `${tx.action.toUpperCase()} ${tx.status.toUpperCase()}`;
-}
 
 export default function App() {
   const [hubState, setHubState] = useState<HubState>(built.initialState);
@@ -39,15 +19,7 @@ export default function App() {
     void built.engine.bootstrap().then(setHubState);
   }, []);
 
-  const status = useMemo(() => {
-    if (hubState.status.mode !== "ready") {
-      return hubState.status.message;
-    }
-    if (!hubState.snapshot.session) {
-      return "Signed out: offline cache remains available for existing installs.";
-    }
-    return "Signed in: ownership state synced and ready for install authority actions.";
-  }, [hubState]);
+  const vm = toHubViewModel(hubState);
 
   async function runAction(actionId: string, task: () => Promise<HubState>) {
     setBusyState(actionId);
@@ -79,7 +51,6 @@ export default function App() {
   }
 
   const snapshot = hubState.snapshot;
-  const installedCount = snapshot.entitlements.filter((app) => app.installedVersion).length;
 
   return (
     <main className="page-shell">
@@ -99,16 +70,16 @@ export default function App() {
           </div>
           <div className="metric">
             <span>Owned apps</span>
-            <strong>{snapshot.entitlements.filter((app) => app.owned).length}</strong>
+            <strong>{vm.ownedCount}</strong>
           </div>
           <div className="metric">
             <span>Installed</span>
-            <strong>{installedCount}</strong>
+            <strong>{vm.installedCount}</strong>
           </div>
         </div>
       </header>
 
-      <p className="status-line">{status}</p>
+      <p className="status-line">{vm.statusLine}</p>
 
       <section className="grid-layout">
         <SectionCard
@@ -187,7 +158,7 @@ export default function App() {
                         )
                       }
                     >
-                      {busyState === actionId ? "Working..." : installActionLabel(app)}
+                      {busyState === actionId ? "Working..." : toInstallActionLabel(app)}
                     </button>
                   </div>
                 </article>
@@ -201,7 +172,7 @@ export default function App() {
           subtitle="Manual update flow keeps operational control explicit during MVP."
         >
           <p className="note-text">
-            Updates pending: {snapshot.entitlements.filter((app) => app.updateAvailable).length}
+            Updates pending: {vm.pendingUpdates}
           </p>
           <p className="note-text">
             Install channel policy: trusted packages only, no floating builds, Antiphon-only distribution.
@@ -237,7 +208,7 @@ export default function App() {
             </div>
             <div>
               <span>Last validated</span>
-              <strong>{formatDate(snapshot.offlineCache.lastValidatedAt)}</strong>
+              <strong>{toDisplayDate(snapshot.offlineCache.lastValidatedAt)}</strong>
             </div>
             <div>
               <span>Offline window</span>
@@ -263,12 +234,12 @@ export default function App() {
                   <div>
                     <h3>{tx.appName}</h3>
                     <p>
-                      {tx.message} | {formatDate(tx.occurredAt)}
+                      {tx.message} | {toDisplayDate(tx.occurredAt)}
                     </p>
                   </div>
                   <div className="item-actions">
                     <span className={`pill ${tx.status === "succeeded" ? "pill-owned" : "pill-unowned"}`}>
-                      {transactionLabel(tx)}
+                      {toTransactionLabel(tx)}
                     </span>
                   </div>
                 </article>
