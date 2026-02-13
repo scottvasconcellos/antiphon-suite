@@ -59,6 +59,32 @@
           "ready": true,
           "reason": "token_issued"
         }
+      ],
+      "trustEnvelope": [
+        {
+          "operation": "entitlementDecision",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 25,
+          "failureBudgetPct": 0.1
+        },
+        {
+          "operation": "installUpdateAuthority",
+          "latencyTier": "short",
+          "latencyBudgetMs": 300,
+          "failureBudgetPct": 1
+        },
+        {
+          "operation": "launchTokenBoundary",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 25,
+          "failureBudgetPct": 0.1
+        },
+        {
+          "operation": "offlineCache",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 15,
+          "failureBudgetPct": 0.1
+        }
       ]
     }
   },
@@ -101,7 +127,33 @@
         "version": 1,
         "restorable": true
       },
-      "launchReadiness": []
+      "launchReadiness": [],
+      "trustEnvelope": [
+        {
+          "operation": "entitlementDecision",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 25,
+          "failureBudgetPct": 0.1
+        },
+        {
+          "operation": "installUpdateAuthority",
+          "latencyTier": "short",
+          "latencyBudgetMs": 300,
+          "failureBudgetPct": 1
+        },
+        {
+          "operation": "launchTokenBoundary",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 25,
+          "failureBudgetPct": 0.1
+        },
+        {
+          "operation": "offlineCache",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 15,
+          "failureBudgetPct": 0.1
+        }
+      ]
     }
   },
   {
@@ -143,7 +195,33 @@
         "version": 1,
         "restorable": true
       },
-      "launchReadiness": []
+      "launchReadiness": [],
+      "trustEnvelope": [
+        {
+          "operation": "entitlementDecision",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 25,
+          "failureBudgetPct": 0.1
+        },
+        {
+          "operation": "installUpdateAuthority",
+          "latencyTier": "short",
+          "latencyBudgetMs": 300,
+          "failureBudgetPct": 1
+        },
+        {
+          "operation": "launchTokenBoundary",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 25,
+          "failureBudgetPct": 0.1
+        },
+        {
+          "operation": "offlineCache",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 15,
+          "failureBudgetPct": 0.1
+        }
+      ]
     }
   }
 ]

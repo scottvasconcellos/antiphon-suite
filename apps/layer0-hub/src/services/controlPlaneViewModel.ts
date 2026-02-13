@@ -3,6 +3,7 @@ import { issueLaunchToken, verifyLaunchToken } from "../domain/launchTokenBounda
 import { type HubSnapshot, type HubState } from "../domain/types";
 import { parsePersistedControlPlaneState, toPersistedControlPlaneState } from "./controlPlanePersistence";
 import { toLaunchReadinessMatrix, type LaunchReadinessEntry } from "./launchReadinessMatrix";
+import { toTrustEnvelopeView, type TrustEnvelopeView } from "./controlPlaneTrustEnvelope";
 
 const TOKEN_SECRET = "antiphon.layer1.launch";
 const TOKEN_LIFETIME_SECONDS = 3600;
@@ -27,6 +28,7 @@ export type ControlPlaneViewModel = {
     restorable: boolean;
   };
   launchReadiness: LaunchReadinessEntry[];
+  trustEnvelope: TrustEnvelopeView[];
 };
 
 function toDeterministicEpoch(snapshot: HubSnapshot): number {
@@ -108,6 +110,7 @@ export function toControlPlaneViewModel(hubState: HubState): ControlPlaneViewMod
       version: persistedState.version,
       restorable
     },
-    launchReadiness: toLaunchReadinessMatrix(snapshot)
+    launchReadiness: toLaunchReadinessMatrix(snapshot),
+    trustEnvelope: toTrustEnvelopeView()
   };
 }

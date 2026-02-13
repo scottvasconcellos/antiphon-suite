@@ -18,6 +18,7 @@
     "src/services/controlPlaneScenarioRunner.ts",
     "src/services/controlPlaneOperationsViewModel.ts",
     "src/services/controlPlaneContracts.ts",
-    "src/services/controlPlaneUiContract.ts"
+    "src/services/controlPlaneUiContract.ts",
+    "src/services/controlPlaneTrustEnvelope.ts"
   ]
 }

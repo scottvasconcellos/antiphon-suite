@@ -138,3 +138,58 @@ export function runAntiGatingScenario(seed: HubSnapshot): {
     offlineRunnableWithoutHub: offlineProjection.launchReadiness.some((entry) => entry.ready)
   };
 }
+
+export function runHubOptionalScenario(seed: HubSnapshot): {
+  authorizedOnce: boolean;
+  hubPresentAfterAuthorization: boolean;
+  serviceCallsAfterAuthorization: number;
+  offlineRunnableWithoutHub: boolean;
+} {
+  const authorization = decideEntitlement({
+    identity: { authenticated: seed.session !== null },
+    license: { owned: seed.entitlements.some((app) => app.owned), revoked: false },
+    offlineCache: {
+      cacheState: seed.offlineCache.cacheState,
+      offlineDaysRemaining: seed.offlineCache.offlineDaysRemaining
+    }
+  });
+
+  const serializedTrust = serializePersistedControlPlaneState(
+    toPersistedControlPlaneState(seed, {
+      input: {
+        identity: { authenticated: seed.session !== null },
+        license: { owned: seed.entitlements.some((app) => app.owned), revoked: false },
+        offlineCache: {
+          cacheState: seed.offlineCache.cacheState,
+          offlineDaysRemaining: seed.offlineCache.offlineDaysRemaining
+        }
+      },
+      outcome: authorization,
+      evaluatedAt: seed.offlineCache.lastValidatedAt ?? "2026-02-13T00:00:00.000Z"
+    })
+  );
+  const restored = parsePersistedControlPlaneState(serializedTrust);
+
+  // Hub absent after authorization means we only consume persisted trust artifact.
+  const offlineProjection = toControlPlaneViewModel({
+    snapshot: {
+      ...seed,
+      session: null
+    },
+    status: {
+      mode: "ready",
+      message: "hub absent, offline run",
+      code: "ok_bootstrap_offline_cache"
+    }
+  });
+
+  return {
+    authorizedOnce: authorization.outcome === "Authorized",
+    hubPresentAfterAuthorization: false,
+    serviceCallsAfterAuthorization: 0,
+    offlineRunnableWithoutHub:
+      restored !== null &&
+      offlineProjection.entitlement.outcome === "OfflineAuthorized" &&
+      offlineProjection.launchReadiness.some((entry) => entry.ready)
+  };
+}

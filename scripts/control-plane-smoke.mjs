@@ -68,6 +68,10 @@ async function run() {
     'from "./launchReadinessMatrix";',
     'from "./launchReadinessMatrix.js";'
   );
+  controlPlaneVmSource = controlPlaneVmSource.replace(
+    'from "./controlPlaneTrustEnvelope";',
+    'from "./controlPlaneTrustEnvelope.js";'
+  );
   writeFileSync(controlPlaneVmPath, controlPlaneVmSource, "utf-8");
   const launchReadinessPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/launchReadinessMatrix.js");
   let launchReadinessSource = readFileSync(launchReadinessPath, "utf-8");
@@ -124,6 +128,9 @@ async function run() {
   );
   const controlPlaneContracts = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneContracts.js")).href
+  );
+  const controlPlaneTrustEnvelope = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneTrustEnvelope.js")).href
   );
   const controlPlaneUiContract = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneUiContract.js")).href
@@ -280,6 +287,14 @@ async function run() {
     assertEqual(actual, fixture.expected, `Control-plane anti-gating snapshot mismatch: ${fixture.name}`);
   }
 
+  const hubOptionalFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-hub-optional-snapshots.json"), "utf-8")
+  );
+  for (const fixture of hubOptionalFixtures) {
+    const actual = controlPlaneScenarioRunner.runHubOptionalScenario(fixture.seed);
+    assertEqual(actual, fixture.expected, `Control-plane hub-optional snapshot mismatch: ${fixture.name}`);
+  }
+
   const launchReadinessFixtures = JSON.parse(
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-launch-readiness-snapshots.json"), "utf-8")
   );
@@ -319,6 +334,14 @@ async function run() {
       fixture.opsVm
     );
     assertEqual(actual, fixture.expected, `Control-plane UI contract mismatch: ${fixture.name}`);
+  }
+
+  const trustEnvelopeFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-trust-envelope-snapshots.json"), "utf-8")
+  );
+  for (const fixture of trustEnvelopeFixtures) {
+    const actual = controlPlaneTrustEnvelope.toTrustEnvelopeView();
+    assertEqual(actual, fixture.expected, `Control-plane trust envelope snapshot mismatch: ${fixture.name}`);
   }
 }
 
