@@ -78,6 +78,12 @@ export default function App() {
       <p className="status-line">Install/Update: {controlPlaneVm.installUpdate.state} ({controlPlaneVm.installUpdate.reasonCode})</p>
       <p className="status-line">Launch token: {controlPlaneVm.launchToken.status} ({controlPlaneVm.launchToken.reason})</p>
       <p className="status-line">Cache schema: {controlPlaneVm.persistedCache.schema}@v{controlPlaneVm.persistedCache.version} restorable={String(controlPlaneVm.persistedCache.restorable)}</p>
+      <p className="status-line">
+        Launch readiness:{" "}
+        {controlPlaneVm.launchReadiness.length === 0
+          ? "none"
+          : controlPlaneVm.launchReadiness.map((entry) => `${entry.appId}:${entry.reason}`).join(", ")}
+      </p>
 
       <section className="grid-layout">
         <SectionCard
