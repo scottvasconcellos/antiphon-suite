@@ -13,6 +13,9 @@
     "test:engine": "node scripts/engine-smoke.mjs",
     "test:structure": "node scripts/structure-smoke.mjs",
     "test": "node scripts/foundation-smoke.mjs",
-    "gate": "node scripts/gate.mjs"
+    "gate": "node scripts/gate.mjs",
+    "demo:hub": "node scripts/demo-hub.mjs",
+    "demo:layer": "node scripts/demo-layer.mjs",
+    "release:check": "node scripts/release-check.mjs"
   }
 }
