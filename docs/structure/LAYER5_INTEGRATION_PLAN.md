@@ -19,6 +19,9 @@
 - Covered gateway contract parsing and runtime task recovery paths.
 - Wired structure smoke into root `pnpm test` via `scripts/foundation-smoke.mjs`.
 
+## Batch 6 Progress
+- Added dedicated `pnpm test:structure` script for direct structure-level verification.
+
 ## Done Criteria For Structure Entry
 - Domain contracts documented and enforced at compile-time.
 - Service adapters cover all authority routes.
