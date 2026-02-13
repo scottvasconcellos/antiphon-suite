@@ -34,5 +34,6 @@
     "maxOfflineDays": 21,
     "offlineDaysRemaining": 0,
     "cacheState": "empty"
-  }
+  },
+  "transactions": []
 }

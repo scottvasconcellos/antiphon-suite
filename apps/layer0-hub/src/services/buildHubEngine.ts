@@ -13,7 +13,8 @@ function missingConfigState(message: string): HubState {
         maxOfflineDays: 21,
         offlineDaysRemaining: 0,
         cacheState: "empty"
-      }
+      },
+      transactions: []
     },
     status: {
       mode: "configuration-error",

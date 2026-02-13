@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { SectionCard } from "./components/SectionCard";
-import { type EntitledApp, type HubState } from "./domain/types";
+import { type EntitledApp, type InstallTransaction, type HubState } from "./domain/types";
 import { buildHubEngine } from "./services/buildHubEngine";
 
 const INITIAL_EMAIL = "producer@antiphon.audio";
@@ -21,6 +21,10 @@ function installActionLabel(app: EntitledApp): string {
     return app.updateAvailable ? "Apply update" : "Reinstall";
   }
   return "Install";
+}
+
+function transactionLabel(tx: InstallTransaction): string {
+  return `${tx.action.toUpperCase()} ${tx.status.toUpperCase()}`;
 }
 
 export default function App() {
@@ -51,20 +55,30 @@ export default function App() {
       const next = await task();
       setHubState(next);
     } catch (error) {
-      setHubState((current) => ({
-        ...current,
-        status: {
-          mode: "runtime-error",
-          message: error instanceof Error ? error.message : "Unexpected failure."
-        }
-      }));
+      if (built.engine) {
+        const withTransactions = await built.engine.syncTransactions();
+        setHubState({
+          ...withTransactions,
+          status: {
+            mode: "runtime-error",
+            message: error instanceof Error ? error.message : "Unexpected failure."
+          }
+        });
+      } else {
+        setHubState((current) => ({
+          ...current,
+          status: {
+            mode: "runtime-error",
+            message: error instanceof Error ? error.message : "Unexpected failure."
+          }
+        }));
+      }
     } finally {
       setBusyState(null);
     }
   }
 
   const snapshot = hubState.snapshot;
-
   const installedCount = snapshot.entitlements.filter((app) => app.installedVersion).length;
 
   return (
@@ -192,14 +206,24 @@ export default function App() {
           <p className="note-text">
             Install channel policy: trusted packages only, no floating builds, Antiphon-only distribution.
           </p>
-          <button
-            type="button"
-            className="btn"
-            onClick={() => built.engine && runAction("refresh", () => built.engine!.refreshEntitlements())}
-            disabled={busyState !== null || !snapshot.session || !built.engine}
-          >
-            {busyState === "refresh" ? "Refreshing..." : "Refresh entitlements"}
-          </button>
+          <div className="button-row">
+            <button
+              type="button"
+              className="btn"
+              onClick={() => built.engine && runAction("refresh", () => built.engine!.refreshEntitlements())}
+              disabled={busyState !== null || !snapshot.session || !built.engine}
+            >
+              {busyState === "refresh" ? "Refreshing..." : "Refresh entitlements"}
+            </button>
+            <button
+              type="button"
+              className="btn"
+              onClick={() => built.engine && runAction("sync-transactions", () => built.engine!.syncTransactions())}
+              disabled={busyState !== null || !snapshot.session || !built.engine}
+            >
+              {busyState === "sync-transactions" ? "Syncing..." : "Sync transaction log"}
+            </button>
+          </div>
         </SectionCard>
 
         <SectionCard
@@ -223,6 +247,33 @@ export default function App() {
               <span>Remaining</span>
               <strong>{snapshot.offlineCache.offlineDaysRemaining} days</strong>
             </div>
+          </div>
+        </SectionCard>
+
+        <SectionCard
+          title="Install Transaction Log"
+          subtitle="Every install/update attempt is recorded with result + recoverable failure context."
+        >
+          <div className="entitlement-list">
+            {snapshot.transactions.length === 0 ? (
+              <p className="note-text">No transactions recorded yet.</p>
+            ) : (
+              snapshot.transactions.slice(0, 6).map((tx) => (
+                <article key={tx.id} className="entitlement-item">
+                  <div>
+                    <h3>{tx.appName}</h3>
+                    <p>
+                      {tx.message} | {formatDate(tx.occurredAt)}
+                    </p>
+                  </div>
+                  <div className="item-actions">
+                    <span className={`pill ${tx.status === "succeeded" ? "pill-owned" : "pill-unowned"}`}>
+                      {transactionLabel(tx)}
+                    </span>
+                  </div>
+                </article>
+              ))
+            )}
           </div>
         </SectionCard>
       </section>

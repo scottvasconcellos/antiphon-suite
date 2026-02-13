@@ -8,5 +8,6 @@ export const DEFAULT_HUB_SNAPSHOT: HubSnapshot = {
     maxOfflineDays: 21,
     offlineDaysRemaining: 0,
     cacheState: "empty"
-  }
+  },
+  transactions: []
 };

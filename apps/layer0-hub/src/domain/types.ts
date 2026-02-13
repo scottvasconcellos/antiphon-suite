@@ -24,10 +24,21 @@ export type OfflineCacheState = {
   cacheState: "empty" | "valid" | "stale";
 };
 
+export type InstallTransaction = {
+  id: string;
+  appId: string;
+  appName: string;
+  action: "install" | "update";
+  status: "succeeded" | "failed";
+  message: string;
+  occurredAt: string;
+};
+
 export type HubSnapshot = {
   session: HubSession | null;
   entitlements: EntitledApp[];
   offlineCache: OfflineCacheState;
+  transactions: InstallTransaction[];
 };
 
 export type HubConfig = {

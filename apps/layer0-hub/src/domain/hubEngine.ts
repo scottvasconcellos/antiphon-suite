@@ -22,15 +22,17 @@ export class HubEngine {
     const base = this.store.load();
 
     try {
-      const [entitlements, offlineCache] = await Promise.all([
+      const [entitlements, offlineCache, transactions] = await Promise.all([
         this.gateway.fetchEntitlements(),
-        this.gateway.getOfflineCacheState()
+        this.gateway.getOfflineCacheState(),
+        this.gateway.fetchTransactions()
       ]);
 
       const snapshot = this.store.save({
         ...base,
         entitlements,
-        offlineCache
+        offlineCache,
+        transactions
       });
 
       return {
@@ -54,14 +56,18 @@ export class HubEngine {
   async signIn(email: string): Promise<HubState> {
     const current = this.store.load();
     const session = await this.gateway.signIn(email);
-    const entitlements = await this.gateway.fetchEntitlements();
-    const offlineCache = await this.gateway.refreshEntitlements();
+    const [entitlements, offlineCache, transactions] = await Promise.all([
+      this.gateway.fetchEntitlements(),
+      this.gateway.refreshEntitlements(),
+      this.gateway.fetchTransactions()
+    ]);
 
     const snapshot = this.store.save({
       ...current,
       session,
       entitlements,
-      offlineCache
+      offlineCache,
+      transactions
     });
 
     return {
@@ -93,15 +99,17 @@ export class HubEngine {
 
   async refreshEntitlements(): Promise<HubState> {
     const current = this.store.load();
-    const [entitlements, offlineCache] = await Promise.all([
+    const [entitlements, offlineCache, transactions] = await Promise.all([
       this.gateway.fetchEntitlements(),
-      this.gateway.refreshEntitlements()
+      this.gateway.refreshEntitlements(),
+      this.gateway.fetchTransactions()
     ]);
 
     const snapshot = this.store.save({
       ...current,
       entitlements,
-      offlineCache
+      offlineCache,
+      transactions
     });
 
     return {
@@ -116,10 +124,12 @@ export class HubEngine {
   async installApp(appId: string): Promise<HubState> {
     const current = this.store.load();
     const nextApp = await this.gateway.installApp(appId);
+    const transactions = await this.gateway.fetchTransactions();
 
     const snapshot = this.store.save({
       ...current,
-      entitlements: upsertApp(current.entitlements, nextApp)
+      entitlements: upsertApp(current.entitlements, nextApp),
+      transactions
     });
 
     return {
@@ -134,10 +144,12 @@ export class HubEngine {
   async applyUpdate(appId: string): Promise<HubState> {
     const current = this.store.load();
     const nextApp = await this.gateway.applyUpdate(appId);
+    const transactions = await this.gateway.fetchTransactions();
 
     const snapshot = this.store.save({
       ...current,
-      entitlements: upsertApp(current.entitlements, nextApp)
+      entitlements: upsertApp(current.entitlements, nextApp),
+      transactions
     });
 
     return {
@@ -145,6 +157,23 @@ export class HubEngine {
       status: {
         mode: "ready",
         message: `Update transaction completed for ${nextApp.name}.`
+      }
+    };
+  }
+
+  async syncTransactions(): Promise<HubState> {
+    const current = this.store.load();
+    const transactions = await this.gateway.fetchTransactions();
+    const snapshot = this.store.save({
+      ...current,
+      transactions
+    });
+
+    return {
+      snapshot,
+      status: {
+        mode: "ready",
+        message: "Transaction log synchronized."
       }
     };
   }

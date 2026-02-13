@@ -1,5 +1,5 @@
 import { type HubGateway } from "../domain/ports";
-import { type EntitledApp, type HubConfig, type HubSession, type OfflineCacheState } from "../domain/types";
+import { type EntitledApp, type HubConfig, type HubSession, type OfflineCacheState, type InstallTransaction } from "../domain/types";
 
 type ApiError = {
   message?: string;
@@ -100,6 +100,14 @@ export class HttpHubGateway implements HubGateway {
       return await requestJson<OfflineCacheState>(`${this.apiBaseUrl}/offline-cache/status`);
     } catch (error) {
       throw new Error(`Offline cache lookup failed: ${normalizeApiError(error)}`);
+    }
+  }
+
+  async fetchTransactions(): Promise<InstallTransaction[]> {
+    try {
+      return await requestJson<InstallTransaction[]>(`${this.apiBaseUrl}/transactions`);
+    } catch (error) {
+      throw new Error(`Transaction fetch failed: ${normalizeApiError(error)}`);
     }
   }
 }

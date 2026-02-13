@@ -30,13 +30,25 @@ type OfflineCacheState = {
   cacheState: "empty" | "valid" | "stale";
 };
 
+type InstallTransaction = {
+  id: string;
+  appId: string;
+  appName: string;
+  action: "install" | "update";
+  status: "succeeded" | "failed";
+  message: string;
+  occurredAt: string;
+};
+
 type AuthorityState = {
   session: HubSession | null;
   entitlements: EntitledApp[];
   offlineCache: OfflineCacheState;
+  transactions: InstallTransaction[];
 };
 
 const OFFLINE_MAX_DAYS = 21;
+const MAX_TRANSACTIONS = 50;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const statePath = join(__dirname, "../data/state.json");
 
@@ -77,6 +89,7 @@ function readState(): AuthorityState {
   const parsed = JSON.parse(readFileSync(statePath, "utf-8")) as AuthorityState;
   return {
     ...parsed,
+    transactions: parsed.transactions ?? [],
     offlineCache: hydrateOfflineCache(parsed.offlineCache)
   };
 }
@@ -84,10 +97,34 @@ function readState(): AuthorityState {
 function writeState(state: AuthorityState): AuthorityState {
   const hydrated = {
     ...state,
+    transactions: state.transactions.slice(-MAX_TRANSACTIONS),
     offlineCache: hydrateOfflineCache(state.offlineCache)
   };
   writeFileSync(statePath, `${JSON.stringify(hydrated, null, 2)}\n`, "utf-8");
   return hydrated;
+}
+
+function appendTransaction(
+  state: AuthorityState,
+  action: InstallTransaction["action"],
+  status: InstallTransaction["status"],
+  app: EntitledApp,
+  message: string
+): AuthorityState {
+  const entry: InstallTransaction = {
+    id: `tx_${Math.random().toString(36).slice(2, 10)}`,
+    appId: app.id,
+    appName: app.name,
+    action,
+    status,
+    message,
+    occurredAt: nowIso()
+  };
+
+  return {
+    ...state,
+    transactions: [entry, ...(state.transactions ?? [])].slice(0, MAX_TRANSACTIONS)
+  };
 }
 
 function requireSession(state: AuthorityState, response: Response): HubSession | null {
@@ -193,8 +230,16 @@ app.get("/offline-cache/status", (_req: Request, res: Response) => {
   res.json(state.offlineCache);
 });
 
-app.post("/installs/:appId", (req: Request, res: Response) => {
+app.get("/transactions", (_req: Request, res: Response) => {
   const state = readState();
+  if (!requireSession(state, res)) {
+    return;
+  }
+  res.json(state.transactions);
+});
+
+app.post("/installs/:appId", (req: Request, res: Response) => {
+  let state = readState();
   if (!requireSession(state, res)) {
     return;
   }
@@ -206,6 +251,8 @@ app.post("/installs/:appId", (req: Request, res: Response) => {
     return;
   }
   if (!target.owned) {
+    state = appendTransaction(state, "install", "failed", target, "Install blocked: app not owned.");
+    writeState(state);
     res.status(403).json({ message: `App ${appId} is not owned by this identity.` });
     return;
   }
@@ -217,17 +264,19 @@ app.post("/installs/:appId", (req: Request, res: Response) => {
     updateAvailable: false
   };
 
-  const next = writeState({
+  state = {
     ...state,
     entitlements: state.entitlements.map((candidate) => (candidate.id === appId ? installed : candidate))
-  });
+  };
+  state = appendTransaction(state, "install", "succeeded", installed, `Installed ${installed.version}.`);
 
+  const next = writeState(state);
   const saved = findApp(next, appId);
   res.json(saved);
 });
 
 app.post("/updates/:appId", (req: Request, res: Response) => {
-  const state = readState();
+  let state = readState();
   if (!requireSession(state, res)) {
     return;
   }
@@ -239,7 +288,15 @@ app.post("/updates/:appId", (req: Request, res: Response) => {
     return;
   }
   if (!target.owned) {
+    state = appendTransaction(state, "update", "failed", target, "Update blocked: app not owned.");
+    writeState(state);
     res.status(403).json({ message: `App ${appId} is not owned by this identity.` });
+    return;
+  }
+  if (!target.installedVersion) {
+    state = appendTransaction(state, "update", "failed", target, "Update blocked: app not installed yet.");
+    writeState(state);
+    res.status(409).json({ message: `App ${appId} must be installed before updating.` });
     return;
   }
 
@@ -250,11 +307,13 @@ app.post("/updates/:appId", (req: Request, res: Response) => {
     updateAvailable: false
   };
 
-  const next = writeState({
+  state = {
     ...state,
     entitlements: state.entitlements.map((candidate) => (candidate.id === appId ? updated : candidate))
-  });
+  };
+  state = appendTransaction(state, "update", "succeeded", updated, `Updated to ${updated.version}.`);
 
+  const next = writeState(state);
   const saved = findApp(next, appId);
   res.json(saved);
 });
