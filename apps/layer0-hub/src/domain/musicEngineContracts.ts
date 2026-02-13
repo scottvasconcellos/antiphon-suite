@@ -33,6 +33,9 @@ export type MusicProjectionAdapter = {
 export type MusicPipelineResult = {
   status: "ready" | "runtime-error";
   message: string;
+  engineId: string;
+  selectionSource: "requested" | "default";
+  selectionReason: string;
   projection: UiMusicProjection | null;
 };
 

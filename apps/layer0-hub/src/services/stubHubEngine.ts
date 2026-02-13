@@ -106,7 +106,7 @@ export class StubHubEngine implements HubEngineContract {
 
   runMusicIntelligence() {
     const selected = selectMusicEngine(this.snapshot, this.options.musicEngineId);
-    return runMusicPipeline(this.snapshot, selected.engine, UiMusicProjectionAdapter);
+    return runMusicPipeline(this.snapshot, selected, UiMusicProjectionAdapter);
   }
 
   reset(): HubState {

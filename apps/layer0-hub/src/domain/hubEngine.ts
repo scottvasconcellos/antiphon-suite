@@ -114,7 +114,7 @@ export class HubEngine implements HubEngineContract {
   runMusicIntelligence() {
     const snapshot = this.store.load();
     const selected = selectMusicEngine(snapshot, this.options.musicEngineId);
-    return runMusicPipeline(snapshot, selected.engine, UiMusicProjectionAdapter);
+    return runMusicPipeline(snapshot, selected, UiMusicProjectionAdapter);
   }
 
   reset(): HubState {

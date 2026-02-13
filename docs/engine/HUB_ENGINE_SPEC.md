@@ -12,6 +12,7 @@
 - Return taxonomy-safe result (`ready` or `runtime-error`) without throwing.
 - Preserve deterministic behavior for identical snapshot and plugin inputs.
 - Select engine deterministically via registry rules (requested engine id if valid; otherwise default rule by snapshot state).
+- Surface selected engine metadata in pipeline result (`engineId`, `selectionSource`, `selectionReason`).
 
 ## State Model
 - Snapshot fields: `session`, `entitlements`, `offlineCache`, `transactions`.
@@ -53,3 +54,4 @@
 - `pnpm test:engine` validates edge cases: expired offline trust, zero-owned install routing, adapter exception mapping, and confidence clamping.
 - `pnpm test:engine` validates registry selection defaults and requested-engine override behavior.
 - `pnpm test:engine` validates hub view-model projection snapshots from `apps/layer0-hub/fixtures/hub-view-model-snapshots.json`.
+- `pnpm test:engine` validates both explicit selection variants (stub + minimal real) with deterministic metadata.

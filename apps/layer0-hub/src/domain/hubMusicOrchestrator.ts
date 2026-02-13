@@ -1,11 +1,11 @@
 import { type HubSnapshot } from "./types";
 import {
-  type MusicEnginePlugin,
   type MusicIntelligenceOutput,
   type MusicPipelineResult,
   type MusicProjectionAdapter,
   toMusicIntelligenceInput
 } from "./musicEngineContracts";
+import { type MusicEngineSelection } from "./musicEngineRegistry";
 
 function isValidOutput(output: unknown): output is MusicIntelligenceOutput {
   if (!output || typeof output !== "object" || Array.isArray(output)) {
@@ -22,9 +22,10 @@ function isValidOutput(output: unknown): output is MusicIntelligenceOutput {
 
 export function runMusicPipeline(
   snapshot: HubSnapshot,
-  engine: MusicEnginePlugin,
+  selection: MusicEngineSelection,
   adapter: MusicProjectionAdapter
 ): MusicPipelineResult {
+  const engine = selection.engine;
   try {
     const input = toMusicIntelligenceInput(snapshot);
     const output = engine.evaluate(input);
@@ -32,18 +33,27 @@ export function runMusicPipeline(
       return {
         status: "runtime-error",
         message: `Engine contract violation from ${engine.id}.`,
+        engineId: engine.id,
+        selectionSource: selection.source,
+        selectionReason: selection.reason,
         projection: null
       };
     }
     return {
       status: "ready",
       message: `Engine ${engine.id} evaluated.`,
+      engineId: engine.id,
+      selectionSource: selection.source,
+      selectionReason: selection.reason,
       projection: adapter.toProjection(output)
     };
   } catch (error) {
     return {
       status: "runtime-error",
       message: error instanceof Error ? error.message : "Unknown engine runtime failure.",
+      engineId: engine.id,
+      selectionSource: selection.source,
+      selectionReason: selection.reason,
       projection: null
     };
   }

@@ -1,6 +1,49 @@
 [
   {
-    "name": "ready_signed_in_install_lane",
+    "name": "ready_stub_selected_default",
+    "hubState": {
+      "snapshot": {
+        "session": null,
+        "entitlements": [],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 21,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "ready",
+        "message": "ok"
+      }
+    },
+    "intelligence": {
+      "status": "ready",
+      "message": "Engine stub-music-intelligence-v1 evaluated.",
+      "engineId": "stub-music-intelligence-v1",
+      "selectionSource": "default",
+      "selectionReason": "No session: use stub engine.",
+      "projection": {
+        "lane": "authenticate",
+        "headline": "Authenticate to continue",
+        "detail": "Session required to unlock ownership-aware tools.",
+        "confidencePct": 92
+      }
+    },
+    "expected": {
+      "statusLine": "Signed out: offline cache remains available for existing installs.",
+      "installedCount": 0,
+      "ownedCount": 0,
+      "pendingUpdates": 0,
+      "intelligenceHeadline": "Authenticate to continue",
+      "intelligenceDetail": "Session required to unlock ownership-aware tools.",
+      "intelligenceEngineId": "stub-music-intelligence-v1",
+      "intelligenceSelectionSource": "default"
+    }
+  },
+  {
+    "name": "ready_real_selected_default",
     "hubState": {
       "snapshot": {
         "session": {
@@ -36,6 +79,9 @@
     "intelligence": {
       "status": "ready",
       "message": "Engine minimal-real-music-intelligence-v1 evaluated.",
+      "engineId": "minimal-real-music-intelligence-v1",
+      "selectionSource": "default",
+      "selectionReason": "Session present: use minimal real engine.",
       "projection": {
         "lane": "install",
         "headline": "Install recommended tools",
@@ -49,7 +95,9 @@
       "ownedCount": 1,
       "pendingUpdates": 0,
       "intelligenceHeadline": "Install recommended tools",
-      "intelligenceDetail": "Install owned tools to unlock full production flow."
+      "intelligenceDetail": "Install owned tools to unlock full production flow.",
+      "intelligenceEngineId": "minimal-real-music-intelligence-v1",
+      "intelligenceSelectionSource": "default"
     }
   },
   {
@@ -78,7 +126,9 @@
       "ownedCount": 0,
       "pendingUpdates": 0,
       "intelligenceHeadline": "Music Intelligence offline",
-      "intelligenceDetail": "Unavailable while runtime is in error state."
+      "intelligenceDetail": "Unavailable while runtime is in error state.",
+      "intelligenceEngineId": "none",
+      "intelligenceSelectionSource": "unavailable"
     }
   }
 ]

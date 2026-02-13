@@ -126,24 +126,38 @@ async function run() {
   const projectionB = hubEngine.runMusicIntelligence();
   assert(JSON.stringify(projectionA) === JSON.stringify(projectionB), "HubEngine orchestration path must be deterministic.");
   assert(projectionA.status === "ready" && projectionA.projection !== null, "HubEngine should return UI-safe projection.");
+  assert(typeof projectionA.engineId === "string" && projectionA.engineId.length > 0, "Pipeline result must surface engine id.");
+  assert(projectionA.selectionSource === "default", "Pipeline result must surface deterministic selection source.");
 
   const badPlugin = { id: "bad-plugin", evaluate() { return { lane: "invalid", reason: 42, confidence: "x" }; } };
-  const badResult = orchestrator.runMusicPipeline(saved, badPlugin, projectionAdapter.UiMusicProjectionAdapter);
+  const badResult = orchestrator.runMusicPipeline(
+    saved,
+    { engine: badPlugin, source: "requested", reason: "test bad plugin" },
+    projectionAdapter.UiMusicProjectionAdapter
+  );
   assert(badResult.status === "runtime-error", "Invalid engine output must be handled as runtime-error.");
   assert(badResult.message.includes("contract violation"), "Contract enforcement message must be explicit.");
 
   const throwingPlugin = { id: "throwing-plugin", evaluate() { throw new Error("engine exploded"); } };
-  const thrownResult = orchestrator.runMusicPipeline(saved, throwingPlugin, projectionAdapter.UiMusicProjectionAdapter);
+  const thrownResult = orchestrator.runMusicPipeline(
+    saved,
+    { engine: throwingPlugin, source: "requested", reason: "test throwing plugin" },
+    projectionAdapter.UiMusicProjectionAdapter
+  );
   assert(thrownResult.status === "runtime-error", "Plugin exceptions must map to runtime-error.");
   assert(thrownResult.message === "engine exploded", "Runtime-error should preserve plugin exception message.");
 
   const nanPlugin = { id: "nan-plugin", evaluate() { return { lane: "create", reason: "x", confidence: Number.NaN }; } };
-  const nanResult = orchestrator.runMusicPipeline(saved, nanPlugin, projectionAdapter.UiMusicProjectionAdapter);
+  const nanResult = orchestrator.runMusicPipeline(
+    saved,
+    { engine: nanPlugin, source: "requested", reason: "test nan plugin" },
+    projectionAdapter.UiMusicProjectionAdapter
+  );
   assert(nanResult.status === "runtime-error", "Non-finite confidence must fail contract enforcement.");
 
   const adapterThrowResult = orchestrator.runMusicPipeline(
     saved,
-    stubMusicEngine.StubMusicIntelligenceEngine,
+    { engine: stubMusicEngine.StubMusicIntelligenceEngine, source: "requested", reason: "test adapter throw" },
     { id: "throwing-adapter", toProjection() { throw new Error("adapter exploded"); } }
   );
   assert(adapterThrowResult.status === "runtime-error", "Adapter exceptions must map to runtime-error.");
@@ -155,8 +169,16 @@ async function run() {
   const stubB = await stubEngineB.bootstrap();
   assert(JSON.stringify(stubA) === JSON.stringify(stubB), "StubHubEngine bootstrap should be deterministic.");
 
-  const pluginA = orchestrator.runMusicPipeline(stubA.snapshot, stubMusicEngine.StubMusicIntelligenceEngine, projectionAdapter.UiMusicProjectionAdapter);
-  const pluginB = orchestrator.runMusicPipeline(stubB.snapshot, stubMusicEngine.StubMusicIntelligenceEngine, projectionAdapter.UiMusicProjectionAdapter);
+  const pluginA = orchestrator.runMusicPipeline(
+    stubA.snapshot,
+    { engine: stubMusicEngine.StubMusicIntelligenceEngine, source: "default", reason: "test deterministic A" },
+    projectionAdapter.UiMusicProjectionAdapter
+  );
+  const pluginB = orchestrator.runMusicPipeline(
+    stubB.snapshot,
+    { engine: stubMusicEngine.StubMusicIntelligenceEngine, source: "default", reason: "test deterministic A" },
+    projectionAdapter.UiMusicProjectionAdapter
+  );
   assert(JSON.stringify(pluginA) === JSON.stringify(pluginB), "Engine plugin + adapter projection must be deterministic.");
 
   const registryIds = registry.getRegisteredMusicEngineIds();
@@ -171,6 +193,15 @@ async function run() {
   assert(defaultSignedIn === realMusicEngine.MinimalRealMusicIntelligenceEngine.id, "Signed-in default must select minimal real engine.");
   const requested = registry.selectMusicEngine(defaults.DEFAULT_HUB_SNAPSHOT, realMusicEngine.MinimalRealMusicIntelligenceEngine.id).engine.id;
   assert(requested === realMusicEngine.MinimalRealMusicIntelligenceEngine.id, "Requested engine ID must be honored deterministically.");
+
+  const explicitStubEngine = new hubEngineModule.HubEngine(fakeGateway, fakeStore, { musicEngineId: stubMusicEngine.StubMusicIntelligenceEngine.id });
+  const explicitStubProjection = explicitStubEngine.runMusicIntelligence();
+  assert(explicitStubProjection.engineId === stubMusicEngine.StubMusicIntelligenceEngine.id, "Explicit stub engine selection must be surfaced.");
+  assert(explicitStubProjection.selectionSource === "requested", "Explicit stub selection source must be requested.");
+  const explicitRealEngine = new hubEngineModule.HubEngine(fakeGateway, fakeStore, { musicEngineId: realMusicEngine.MinimalRealMusicIntelligenceEngine.id });
+  const explicitRealProjection = explicitRealEngine.runMusicIntelligence();
+  assert(explicitRealProjection.engineId === realMusicEngine.MinimalRealMusicIntelligenceEngine.id, "Explicit real engine selection must be surfaced.");
+  assert(explicitRealProjection.selectionSource === "requested", "Explicit real selection source must be requested.");
 
   const staleInput = { hasSession: true, ownedCount: 2, installedCount: 2, offlineDaysRemaining: 0 };
   const staleDecision = stubMusicEngine.evaluateMusicIntelligence(staleInput);

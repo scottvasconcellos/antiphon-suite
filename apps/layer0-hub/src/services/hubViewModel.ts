@@ -8,6 +8,8 @@ export type HubViewModel = {
   pendingUpdates: number;
   intelligenceHeadline: string;
   intelligenceDetail: string;
+  intelligenceEngineId: string;
+  intelligenceSelectionSource: "requested" | "default" | "unavailable";
 };
 
 export function toHubViewModel(hubState: HubState, intelligence: MusicPipelineResult | null): HubViewModel {
@@ -18,7 +20,9 @@ export function toHubViewModel(hubState: HubState, intelligence: MusicPipelineRe
       ownedCount: 0,
       pendingUpdates: 0,
       intelligenceHeadline: "Music Intelligence offline",
-      intelligenceDetail: intelligence?.message ?? "Unavailable while runtime is in error state."
+      intelligenceDetail: intelligence?.message ?? "Unavailable while runtime is in error state.",
+      intelligenceEngineId: intelligence?.engineId ?? "none",
+      intelligenceSelectionSource: intelligence?.selectionSource ?? "unavailable"
     };
   }
 
@@ -31,7 +35,9 @@ export function toHubViewModel(hubState: HubState, intelligence: MusicPipelineRe
     ownedCount: snapshot.entitlements.filter((app) => app.owned).length,
     pendingUpdates: snapshot.entitlements.filter((app) => app.updateAvailable).length,
     intelligenceHeadline: intelligence?.projection?.headline ?? "Music Intelligence unavailable",
-    intelligenceDetail: intelligence?.projection?.detail ?? intelligence?.message ?? "No recommendation available."
+    intelligenceDetail: intelligence?.projection?.detail ?? intelligence?.message ?? "No recommendation available.",
+    intelligenceEngineId: intelligence?.engineId ?? "none",
+    intelligenceSelectionSource: intelligence?.selectionSource ?? "unavailable"
   };
 }
 
