@@ -606,6 +606,14 @@ async function run() {
     pathToFileURL(join(process.cwd(), "scripts/control-plane-consumer-harness.mjs")).href
   );
   await consumerHarness.runControlPlaneConsumerHarness();
+  const demoLayer = await import(
+    pathToFileURL(join(process.cwd(), "scripts/demo-layer.mjs")).href
+  );
+  const demoSnapshot = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-demo-output-snapshots.json"), "utf-8")
+  )[0];
+  const demoActual = await demoLayer.buildDemoOutput();
+  assertEqual(demoActual, demoSnapshot.expected, `Control-plane demo output snapshot mismatch: ${demoSnapshot.name}`);
   const layerAppHarness = await import(
     pathToFileURL(join(process.cwd(), "scripts/layer-app-example-harness.mjs")).href
   );

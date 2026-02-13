@@ -1,0 +1,57 @@
+[
+  {
+    "name": "operator-60-second-demo-proof",
+    "expected": {
+      "catalogApps": [
+        {
+          "appId": "antiphon.layer.alpha",
+          "channel": "stable",
+          "installedVersion": "1.9.0",
+          "availableVersion": "2.0.0"
+        },
+        {
+          "appId": "antiphon.layer.zeta",
+          "channel": "beta",
+          "installedVersion": null,
+          "availableVersion": "1.0.0"
+        }
+      ],
+      "entitlementOutcomes": [
+        {
+          "appId": "antiphon.layer.alpha",
+          "outcome": "Authorized",
+          "reasonCode": "ok_version_supported"
+        },
+        {
+          "appId": "antiphon.layer.zeta",
+          "outcome": "Denied",
+          "reasonCode": "blocked_not_owned"
+        }
+      ],
+      "transitions": [
+        {
+          "flow": "install",
+          "from": "NotInstalled",
+          "to": "Installing",
+          "reasonCode": "ok_install_completed"
+        },
+        {
+          "flow": "update",
+          "from": "Installed",
+          "to": "Updating",
+          "reasonCode": "ok_update_candidate_selected"
+        }
+      ],
+      "updateSelection": {
+        "appId": "antiphon.layer.alpha",
+        "selectedVersion": "2.0.0",
+        "reasonCode": "ok_update_candidate_selected"
+      },
+      "trustProof": {
+        "authorizedOnce": true,
+        "hubRemoved": true,
+        "offlineRunnableWithoutHub": true
+      }
+    }
+  }
+]

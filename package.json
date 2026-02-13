@@ -16,6 +16,7 @@
     "gate": "node scripts/gate.mjs",
     "demo:hub": "node scripts/demo-hub.mjs",
     "demo:layer": "node scripts/demo-layer.mjs",
-    "release:check": "node scripts/release-check.mjs"
+    "release:check": "node scripts/release-check.mjs",
+    "verify": "node scripts/integration-check.mjs"
   }
 }

@@ -19,4 +19,7 @@ run("node", ["scripts/verify-public-surface.mjs"]);
 console.log("[gate] verifying reason coverage snapshot");
 run("node", ["scripts/verify-reason-coverage.mjs"]);
 
+console.log("[gate] running integration checks");
+run("node", ["scripts/integration-check.mjs"]);
+
 console.log("[gate] PASS");
