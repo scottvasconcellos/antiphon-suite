@@ -57,4 +57,5 @@
 - `pnpm test:engine` validates hub view-model projection snapshots from `apps/layer0-hub/fixtures/hub-view-model-snapshots.json`.
 - `pnpm test:engine` validates both explicit selection variants (stub + minimal real) with deterministic metadata.
 - `pnpm test:engine` validates invalid requested engine id fallback metadata (`selectionSource=default` with explicit reason).
+- `pnpm test:engine` validates pipeline snapshots from `apps/layer0-hub/fixtures/music-pipeline-snapshots.json`.
 - Engine configuration and deterministic selection policy are documented in `docs/engine/ENGINE_CONFIGURATION.md`.

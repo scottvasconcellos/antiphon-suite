@@ -1,0 +1,104 @@
+[
+  {
+    "name": "default_stub_selection",
+    "snapshot": {
+      "session": null,
+      "entitlements": [],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 21,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "requestedEngineId": null,
+    "expected": {
+      "status": "ready",
+      "engineId": "stub-music-intelligence-v1",
+      "engineName": "Stub Music Intelligence",
+      "engineVersion": "1.0.0",
+      "selectionSource": "default",
+      "selectionReason": "No session: use stub engine.",
+      "projection": {
+        "lane": "authenticate",
+        "headline": "Authenticate to continue",
+        "detail": "Session required to unlock ownership-aware tools.",
+        "confidencePct": 92
+      }
+    }
+  },
+  {
+    "name": "default_real_selection",
+    "snapshot": {
+      "session": {
+        "userId": "usr_sel",
+        "email": "sel@antiphon.audio",
+        "displayName": "Sel",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [
+        {
+          "id": "app.1",
+          "name": "App One",
+          "version": "1.0.0",
+          "installedVersion": null,
+          "owned": true,
+          "installState": "not-installed",
+          "updateAvailable": false
+        }
+      ],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 21,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "requestedEngineId": null,
+    "expected": {
+      "status": "ready",
+      "engineId": "minimal-real-music-intelligence-v1",
+      "engineName": "Minimal Real Music Intelligence",
+      "engineVersion": "1.0.0",
+      "selectionSource": "default",
+      "selectionReason": "Session present: use minimal real engine.",
+      "projection": {
+        "lane": "install",
+        "headline": "Install recommended tools",
+        "detail": "Install owned tools to unlock full production flow.",
+        "confidencePct": 82
+      }
+    }
+  },
+  {
+    "name": "invalid_requested_fallback",
+    "snapshot": {
+      "session": null,
+      "entitlements": [],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 21,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "requestedEngineId": "unknown.engine.v1",
+    "expected": {
+      "status": "ready",
+      "engineId": "stub-music-intelligence-v1",
+      "engineName": "Stub Music Intelligence",
+      "engineVersion": "1.0.0",
+      "selectionSource": "default",
+      "selectionReason": "Requested engine id 'unknown.engine.v1' not found; applying deterministic default policy.",
+      "projection": {
+        "lane": "authenticate",
+        "headline": "Authenticate to continue",
+        "detail": "Session required to unlock ownership-aware tools.",
+        "confidencePct": 92
+      }
+    }
+  }
+]

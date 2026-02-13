@@ -234,6 +234,26 @@ async function run() {
       `Hub view-model snapshot mismatch: ${fixture.name}`
     );
   }
+
+  const pipelineFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/music-pipeline-snapshots.json"), "utf-8")
+  );
+  for (const fixture of pipelineFixtures) {
+    const selection = registry.selectMusicEngine(fixture.snapshot, fixture.requestedEngineId ?? undefined);
+    const actual = orchestrator.runMusicPipeline(fixture.snapshot, selection, projectionAdapter.UiMusicProjectionAdapter);
+    assert(
+      JSON.stringify({
+        status: actual.status,
+        engineId: actual.engineId,
+        engineName: actual.engineName,
+        engineVersion: actual.engineVersion,
+        selectionSource: actual.selectionSource,
+        selectionReason: actual.selectionReason,
+        projection: actual.projection
+      }) === JSON.stringify(fixture.expected),
+      `Music pipeline snapshot mismatch: ${fixture.name}`
+    );
+  }
 }
 
 run().catch((error) => {
