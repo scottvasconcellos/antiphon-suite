@@ -15,6 +15,7 @@
     "src/services/controlPlaneViewModel.ts",
     "src/services/controlPlaneBootstrap.ts",
     "src/services/launchReadinessMatrix.ts",
-    "src/services/controlPlaneScenarioRunner.ts"
+    "src/services/controlPlaneScenarioRunner.ts",
+    "src/services/controlPlaneOperationsViewModel.ts"
   ]
 }

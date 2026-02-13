@@ -11,6 +11,7 @@ import {
   toTransactionLabel
 } from "./services/hubViewModel";
 import { toControlPlaneViewModel } from "./services/controlPlaneViewModel";
+import { toControlPlaneOperations } from "./services/controlPlaneOperationsViewModel";
 
 const INITIAL_EMAIL = "producer@antiphon.audio";
 const built = buildHubEngine();
@@ -30,6 +31,7 @@ export default function App() {
   const intelligence = built.engine ? built.engine.runMusicIntelligence() : null;
   const vm = toHubViewModel(hubState, intelligence);
   const controlPlaneVm = toControlPlaneViewModel(hubState);
+  const opsVm = toControlPlaneOperations(hubState.snapshot);
 
   async function runAction(actionId: string, task: () => Promise<HubState>) {
     setBusyState(actionId);
@@ -84,6 +86,7 @@ export default function App() {
           ? "none"
           : controlPlaneVm.launchReadiness.map((entry) => `${entry.appId}:${entry.reason}`).join(", ")}
       </p>
+      <p className="status-line">Recent ops: {opsVm.length === 0 ? "none" : opsVm.map((op) => `${op.id}:${op.status}`).join(", ")}</p>
 
       <section className="grid-layout">
         <SectionCard

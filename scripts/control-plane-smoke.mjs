@@ -115,6 +115,9 @@ async function run() {
   const launchReadinessMatrix = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/launchReadinessMatrix.js")).href
   );
+  const controlPlaneOperations = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneOperationsViewModel.js")).href
+  );
 
   const entitlementFixtures = JSON.parse(readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/entitlement-decision-snapshots.json"), "utf-8"));
   for (const fixture of entitlementFixtures) {
@@ -250,6 +253,14 @@ async function run() {
     assertEqual(actual, fixture.expected, `Control-plane launch readiness snapshot mismatch: ${fixture.name}`);
     const repeat = launchReadinessMatrix.toLaunchReadinessMatrix(fixture.snapshot);
     assertEqual(repeat, actual, `Control-plane launch readiness determinism mismatch: ${fixture.name}`);
+  }
+
+  const operationsFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-operations-snapshots.json"), "utf-8")
+  );
+  for (const fixture of operationsFixtures) {
+    const actual = controlPlaneOperations.toControlPlaneOperations(fixture.snapshot, 5);
+    assertEqual(actual, fixture.expected, `Control-plane operations snapshot mismatch: ${fixture.name}`);
   }
 }
 
