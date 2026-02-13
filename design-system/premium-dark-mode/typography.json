@@ -1,0 +1,66 @@
+{
+  "fontFamilies": {
+    "font-sans": "ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+    "font-mono": "ui-monospace, \"SF Mono\", Monaco, \"Cascadia Code\", monospace",
+    "default-font-family": "var(--font-sans)",
+    "default-font-feature-settings": "var(--font-sans--font-feature-settings)",
+    "default-font-variation-settings": "var(--font-sans--font-variation-settings)",
+    "default-mono-font-family": "var(--font-mono)",
+    "default-mono-font-feature-settings": "var(--font-mono--font-feature-settings)",
+    "default-mono-font-variation-settings": "var(--font-mono--font-variation-settings)",
+    "font-display": "ui-sans-serif, system-ui, sans-serif",
+    "font-ui": "ui-sans-serif, system-ui, sans-serif"
+  },
+  "fontSizes": {
+    "font-size-display-lg": "3.5rem",
+    "font-size-display-md": "2.5rem",
+    "font-size-display-sm": "2rem",
+    "font-size-heading-lg": "1.5rem",
+    "font-size-heading-md": "1.25rem",
+    "font-size-heading-sm": "1rem",
+    "font-size-body-lg": "1rem",
+    "font-size-body-md": ".875rem",
+    "font-size-micro": ".6875rem",
+    "font-size-code": ".8125rem"
+  },
+  "fontWeights": {
+    "font-weight-medium": "500",
+    "font-weight-semibold": "600"
+  },
+  "textSizes": {
+    "text-xs": ".75rem",
+    "text-xs--line-height": "calc(1 / .75)",
+    "text-sm": ".875rem",
+    "text-sm--line-height": "calc(1.25 / .875)",
+    "text-base": "1rem",
+    "text-base--line-height": "calc(1.5 / 1)",
+    "text-lg": "1.125rem",
+    "text-lg--line-height": "calc(1.75 / 1.125)",
+    "text-xl": "1.25rem",
+    "text-xl--line-height": "calc(1.75 / 1.25)",
+    "text-2xl": "1.5rem",
+    "text-2xl--line-height": "calc(2 / 1.5)",
+    "text-3xl": "1.875rem",
+    "text-3xl--line-height": "calc(2.25 / 1.875)",
+    "text-5xl": "3rem",
+    "text-5xl--line-height": "1"
+  },
+  "lineHeights": {
+    "line-height-tight": "1.2",
+    "line-height-normal": "1.5"
+  },
+  "tracking": {
+    "tracking-tight": "-.02em",
+    "tracking-wide": ".02em",
+    "tracking-wider": ".05em",
+    "tracking-widest": ".1em"
+  },
+  "easing": {
+    "ease-in": "cubic-bezier(.4, 0, 1, 1)",
+    "ease-out": "cubic-bezier(0, 0, .2, 1)",
+    "ease-in-out": "cubic-bezier(.4, 0, .2, 1)"
+  },
+  "transitions": {
+    "transition-fast": ".1s cubic-bezier(.4, 0, .2, 1)"
+  }
+}

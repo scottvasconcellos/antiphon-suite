@@ -1,0 +1,297 @@
+[
+  {
+    "name": "Fretboard",
+    "category": "audio",
+    "path": "premium-dark-source/src/components/audio/Fretboard.tsx"
+  },
+  {
+    "name": "GrooveGrid",
+    "category": "audio",
+    "path": "premium-dark-source/src/components/audio/GrooveGrid.tsx"
+  },
+  {
+    "name": "Knob",
+    "category": "audio",
+    "path": "premium-dark-source/src/components/audio/Knob.tsx"
+  },
+  {
+    "name": "PianoKeyboard",
+    "category": "audio",
+    "path": "premium-dark-source/src/components/audio/PianoKeyboard.tsx"
+  },
+  {
+    "name": "PianoRoll",
+    "category": "audio",
+    "path": "premium-dark-source/src/components/audio/PianoRoll.tsx"
+  },
+  {
+    "name": "Synthesizer",
+    "category": "audio",
+    "path": "premium-dark-source/src/components/audio/Synthesizer.tsx"
+  },
+  {
+    "name": "Transport",
+    "category": "audio",
+    "path": "premium-dark-source/src/components/audio/Transport.tsx"
+  },
+  {
+    "name": "Waveform",
+    "category": "audio",
+    "path": "premium-dark-source/src/components/audio/Waveform.tsx"
+  },
+  {
+    "name": "ImageWithFallback",
+    "category": "figma",
+    "path": "premium-dark-source/src/components/figma/ImageWithFallback.tsx"
+  },
+  {
+    "name": "IconLibrary",
+    "category": "icons",
+    "path": "premium-dark-source/src/components/icons/IconLibrary.tsx"
+  },
+  {
+    "name": "Badge",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/Badge.tsx"
+  },
+  {
+    "name": "Button",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/Button.tsx"
+  },
+  {
+    "name": "Card",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/Card.tsx"
+  },
+  {
+    "name": "Input",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/Input.tsx"
+  },
+  {
+    "name": "Modal",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/Modal.tsx"
+  },
+  {
+    "name": "ProgressBar",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/ProgressBar.tsx"
+  },
+  {
+    "name": "Select",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/Select.tsx"
+  },
+  {
+    "name": "Slider",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/Slider.tsx"
+  },
+  {
+    "name": "Tabs",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/Tabs.tsx"
+  },
+  {
+    "name": "Toast",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/Toast.tsx"
+  },
+  {
+    "name": "Toggle",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/Toggle.tsx"
+  },
+  {
+    "name": "accordion",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/accordion.tsx"
+  },
+  {
+    "name": "alert-dialog",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/alert-dialog.tsx"
+  },
+  {
+    "name": "alert",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/alert.tsx"
+  },
+  {
+    "name": "aspect-ratio",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/aspect-ratio.tsx"
+  },
+  {
+    "name": "avatar",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/avatar.tsx"
+  },
+  {
+    "name": "breadcrumb",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/breadcrumb.tsx"
+  },
+  {
+    "name": "calendar",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/calendar.tsx"
+  },
+  {
+    "name": "carousel",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/carousel.tsx"
+  },
+  {
+    "name": "chart",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/chart.tsx"
+  },
+  {
+    "name": "checkbox",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/checkbox.tsx"
+  },
+  {
+    "name": "collapsible",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/collapsible.tsx"
+  },
+  {
+    "name": "command",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/command.tsx"
+  },
+  {
+    "name": "context-menu",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/context-menu.tsx"
+  },
+  {
+    "name": "dialog",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/dialog.tsx"
+  },
+  {
+    "name": "drawer",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/drawer.tsx"
+  },
+  {
+    "name": "dropdown-menu",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/dropdown-menu.tsx"
+  },
+  {
+    "name": "form",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/form.tsx"
+  },
+  {
+    "name": "hover-card",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/hover-card.tsx"
+  },
+  {
+    "name": "input-otp",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/input-otp.tsx"
+  },
+  {
+    "name": "label",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/label.tsx"
+  },
+  {
+    "name": "menubar",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/menubar.tsx"
+  },
+  {
+    "name": "navigation-menu",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/navigation-menu.tsx"
+  },
+  {
+    "name": "pagination",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/pagination.tsx"
+  },
+  {
+    "name": "popover",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/popover.tsx"
+  },
+  {
+    "name": "progress",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/progress.tsx"
+  },
+  {
+    "name": "radio-group",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/radio-group.tsx"
+  },
+  {
+    "name": "resizable",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/resizable.tsx"
+  },
+  {
+    "name": "scroll-area",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/scroll-area.tsx"
+  },
+  {
+    "name": "separator",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/separator.tsx"
+  },
+  {
+    "name": "sheet",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/sheet.tsx"
+  },
+  {
+    "name": "sidebar",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/sidebar.tsx"
+  },
+  {
+    "name": "skeleton",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/skeleton.tsx"
+  },
+  {
+    "name": "sonner",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/sonner.tsx"
+  },
+  {
+    "name": "switch",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/switch.tsx"
+  },
+  {
+    "name": "table",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/table.tsx"
+  },
+  {
+    "name": "textarea",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/textarea.tsx"
+  },
+  {
+    "name": "toggle-group",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/toggle-group.tsx"
+  },
+  {
+    "name": "tooltip",
+    "category": "ui",
+    "path": "premium-dark-source/src/components/ui/tooltip.tsx"
+  }
+]
