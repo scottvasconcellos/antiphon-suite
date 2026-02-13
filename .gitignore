@@ -1,6 +1,7 @@
 node_modules
 dist
 coverage
+apps/layer0-hub/.tmp-structure-smoke
 .DS_Store
 **/.DS_Store
 .env*

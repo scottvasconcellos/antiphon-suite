@@ -92,6 +92,7 @@ async function run() {
 
   runStep("pnpm", ["build"]);
   runStep("pnpm", ["typecheck"]);
+  runStep("node", ["scripts/structure-smoke.mjs"]);
   verifyHubBuildOutput();
 
   const port = 8799;

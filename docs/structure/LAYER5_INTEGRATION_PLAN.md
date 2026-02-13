@@ -14,11 +14,17 @@
 - Isolated UI projection helpers in `hubViewModel.ts`.
 - Isolated hub runtime action error handling in `hubRuntime.ts`.
 
+## Batch 5 Progress
+- Added executable structure smoke verification in `scripts/structure-smoke.mjs`.
+- Covered gateway contract parsing and runtime task recovery paths.
+- Wired structure smoke into root `pnpm test` via `scripts/foundation-smoke.mjs`.
+
 ## Done Criteria For Structure Entry
 - Domain contracts documented and enforced at compile-time.
 - Service adapters cover all authority routes.
 - UI modules consume mapped view models only.
 - Integration tests run under `pnpm test` or `pnpm test:structure`.
+- Gateway contract parsing and runtime failure-recovery paths are executable in local smoke verification.
 
 ## Non-Goals In Batch 1
 - No visual polish.
