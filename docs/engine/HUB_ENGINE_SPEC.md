@@ -32,3 +32,7 @@
 ## Minimal Deterministic Path
 - `applyHubEvent(snapshot, event)` is the single headless transition function.
 - Runtime/service layers perform IO first, then call `applyHubEvent`.
+
+## Verification
+- `pnpm test:engine` validates deterministic transition behavior and invariants.
+- `pnpm test:engine` also validates minimal `HubEngine` class paths with a headless fake gateway/store.

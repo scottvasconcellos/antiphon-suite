@@ -23,8 +23,14 @@ async function run() {
   const corePath = join(basePath, "hubEngineCore.js");
   const coreSource = readFileSync(corePath, "utf-8").replace('from "./defaults";', 'from "./defaults.js";');
   writeFileSync(corePath, coreSource, "utf-8");
+  const enginePath = join(basePath, "hubEngine.js");
+  const engineSource = readFileSync(enginePath, "utf-8")
+    .replace('from "./defaults";', 'from "./defaults.js";')
+    .replace('from "./hubEngineCore";', 'from "./hubEngineCore.js";');
+  writeFileSync(enginePath, engineSource, "utf-8");
   const core = await import(pathToFileURL(join(basePath, "hubEngineCore.js")).href);
   const defaults = await import(pathToFileURL(join(basePath, "defaults.js")).href);
+  const hubEngineModule = await import(pathToFileURL(enginePath).href);
 
   const seed = structuredClone(defaults.DEFAULT_HUB_SNAPSHOT);
   const payload = {
@@ -45,6 +51,49 @@ async function run() {
   const reset = core.applyHubEvent(seed, { type: "RESET" });
   assert(reset.status.mode === "configuration-error", "RESET must return configuration-error mode.");
   assert(reset.snapshot.session === null, "RESET must return default snapshot.");
+
+  const fakeGateway = {
+    async signIn() {
+      return { userId: "usr_1", email: "a@a.com", displayName: "A", signedInAt: "2026-02-13T00:00:00.000Z" };
+    },
+    async signOut() {},
+    async fetchEntitlements() {
+      return [{ id: "app.1", name: "App One", version: "1.0.0", installedVersion: null, owned: true, installState: "not-installed", updateAvailable: false }];
+    },
+    async refreshEntitlements() {
+      return { lastValidatedAt: "2026-02-13T00:00:00.000Z", maxOfflineDays: 21, offlineDaysRemaining: 21, cacheState: "valid" };
+    },
+    async installApp() {
+      return { id: "app.1", name: "App One", version: "1.0.0", installedVersion: "1.0.0", owned: true, installState: "installed", updateAvailable: false };
+    },
+    async applyUpdate() {
+      return { id: "app.1", name: "App One", version: "1.0.1", installedVersion: "1.0.1", owned: true, installState: "installed", updateAvailable: false };
+    },
+    async getOfflineCacheState() {
+      return { lastValidatedAt: "2026-02-13T00:00:00.000Z", maxOfflineDays: 21, offlineDaysRemaining: 21, cacheState: "valid" };
+    },
+    async fetchTransactions() {
+      return [{ id: "tx_1", appId: "app.1", appName: "App One", action: "install", status: "succeeded", message: "ok", occurredAt: "2026-02-13T00:00:00.000Z" }];
+    }
+  };
+  let saved = structuredClone(defaults.DEFAULT_HUB_SNAPSHOT);
+  const fakeStore = {
+    load() {
+      return saved;
+    },
+    save(snapshot) {
+      saved = snapshot;
+      return snapshot;
+    }
+  };
+
+  const hubEngine = new hubEngineModule.HubEngine(fakeGateway, fakeStore);
+  const signedInState = await hubEngine.signIn("a@a.com");
+  assert(signedInState.status.mode === "ready", "HubEngine signIn should return ready.");
+  const installedState = await hubEngine.installApp("app.1");
+  assert(installedState.snapshot.entitlements[0].installedVersion === "1.0.0", "HubEngine installApp should upsert installed version.");
+  const signedOutState = await hubEngine.signOut();
+  assert(signedOutState.snapshot.session === null, "HubEngine signOut should clear session.");
 }
 
 run().catch((error) => {

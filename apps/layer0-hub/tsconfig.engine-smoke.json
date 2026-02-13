@@ -5,5 +5,11 @@
     "outDir": "./.tmp-engine-smoke",
     "rootDir": "./src"
   },
-  "include": ["src/domain/types.ts", "src/domain/defaults.ts", "src/domain/hubEngineCore.ts"]
+  "include": [
+    "src/domain/types.ts",
+    "src/domain/defaults.ts",
+    "src/domain/ports.ts",
+    "src/domain/hubEngineCore.ts",
+    "src/domain/hubEngine.ts"
+  ]
 }
