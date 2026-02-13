@@ -118,6 +118,10 @@
     - Final pre-release audit
     - Missing intent that blocks execution
 
+    Missing/Deleted legacy governing docs are NOT a stop condition:
+    - If older manuals/constitutions are unavailable, proceed using this XML + current Layer0 docs.
+    - Record the absence in /docs/FOUNDATION_STATUS.md and continue.
+
     Everything else proceeds autonomously.
   </mandatory_stops>
 
