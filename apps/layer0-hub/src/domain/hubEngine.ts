@@ -1,20 +1,15 @@
 import { DEFAULT_HUB_SNAPSHOT } from "./defaults";
 import { type HubEngineContract } from "./engineContract";
-import { runMusicPipeline } from "./hubMusicOrchestrator";
-import { selectMusicEngine } from "./musicEngineRegistry";
 import { type HubGateway, type HubStore } from "./ports";
-import { UiMusicProjectionAdapter } from "./uiMusicProjectionAdapter";
 import { applyHubEvent } from "./hubEngineCore";
 import { type HubState } from "./types";
-import { toAuthorityMusicTelemetryDto } from "../services/musicTelemetryDto";
 import { runInstallUpdateAuthority } from "../services/installUpdateAuthority";
 import { resolveBootstrapFailure } from "../services/controlPlaneBootstrap";
 
 export class HubEngine implements HubEngineContract {
   constructor(
     private readonly gateway: HubGateway,
-    private readonly store: HubStore,
-    private readonly options: { musicEngineId?: string } = {}
+    private readonly store: HubStore
   ) {}
 
   async bootstrap(): Promise<HubState> {
@@ -138,18 +133,6 @@ export class HubEngine implements HubEngineContract {
     const transactions = await this.gateway.fetchTransactions();
     const next = applyHubEvent(current, { type: "TRANSACTIONS_SYNCED", transactions });
     return { ...next, snapshot: this.store.save(next.snapshot) };
-  }
-
-  runMusicIntelligence() {
-    const snapshot = this.store.load();
-    const selected = selectMusicEngine(snapshot, this.options.musicEngineId);
-    return runMusicPipeline(snapshot, selected, UiMusicProjectionAdapter);
-  }
-
-  buildMusicTelemetry() {
-    const snapshot = this.store.load();
-    const intelligence = this.runMusicIntelligence();
-    return toAuthorityMusicTelemetryDto(snapshot, intelligence);
   }
 
   reset(): HubState {

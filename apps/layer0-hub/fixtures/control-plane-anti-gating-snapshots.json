@@ -1,0 +1,37 @@
+[
+  {
+    "name": "authorized_then_offline_still_runnable_without_hub",
+    "seed": {
+      "session": {
+        "userId": "usr_trust",
+        "email": "trust@antiphon.audio",
+        "displayName": "Trust",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [
+        {
+          "id": "antiphon.trust.app",
+          "name": "Trust App",
+          "version": "1.0.0",
+          "installedVersion": "1.0.0",
+          "owned": true,
+          "installState": "installed",
+          "updateAvailable": false
+        }
+      ],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 10,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "expected": {
+      "onlineOutcome": "Authorized",
+      "offlineOutcome": "OfflineAuthorized",
+      "durableTrustArtifact": true,
+      "offlineRunnableWithoutHub": true
+    }
+  }
+]

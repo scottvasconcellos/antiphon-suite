@@ -3,6 +3,7 @@ import { transitionLifecycleState } from "../domain/installUpdateStateMachine";
 import { type HubSnapshot, type HubState } from "../domain/types";
 import { runInstallUpdateAuthority, type InstallUpdateAction, type InstallUpdateReasonCode } from "./installUpdateAuthority";
 import { toControlPlaneViewModel } from "./controlPlaneViewModel";
+import { parsePersistedControlPlaneState, serializePersistedControlPlaneState, toPersistedControlPlaneState } from "./controlPlanePersistence";
 
 export type HappyPathScenarioResult = {
   entitlement: ReturnType<typeof decideEntitlement>;
@@ -85,5 +86,55 @@ export async function runFailureScenario(
     reasonCode: failed.result.reasonCode,
     lifecycleTo: failed.result.lifecycle.to,
     recoveryTo: recovery.to
+  };
+}
+
+export function runAntiGatingScenario(seed: HubSnapshot): {
+  onlineOutcome: string;
+  offlineOutcome: string;
+  durableTrustArtifact: boolean;
+  offlineRunnableWithoutHub: boolean;
+} {
+  const online = decideEntitlement({
+    identity: { authenticated: seed.session !== null },
+    license: { owned: seed.entitlements.some((app) => app.owned), revoked: false },
+    offlineCache: {
+      cacheState: seed.offlineCache.cacheState,
+      offlineDaysRemaining: seed.offlineCache.offlineDaysRemaining
+    }
+  });
+
+  const persisted = toPersistedControlPlaneState(seed, {
+    input: {
+      identity: { authenticated: seed.session !== null },
+      license: { owned: seed.entitlements.some((app) => app.owned), revoked: false },
+      offlineCache: {
+        cacheState: seed.offlineCache.cacheState,
+        offlineDaysRemaining: seed.offlineCache.offlineDaysRemaining
+      }
+    },
+    outcome: online,
+    evaluatedAt: seed.offlineCache.lastValidatedAt ?? "2026-02-13T00:00:00.000Z"
+  });
+  const durableTrustArtifact = parsePersistedControlPlaneState(serializePersistedControlPlaneState(persisted)) !== null;
+
+  const offlineSnapshot: HubSnapshot = {
+    ...seed,
+    session: null
+  };
+  const offlineProjection = toControlPlaneViewModel({
+    snapshot: offlineSnapshot,
+    status: {
+      mode: "ready",
+      message: "offline mode",
+      code: "ok_bootstrap_offline_cache"
+    }
+  });
+
+  return {
+    onlineOutcome: online.outcome,
+    offlineOutcome: offlineProjection.entitlement.outcome,
+    durableTrustArtifact,
+    offlineRunnableWithoutHub: offlineProjection.launchReadiness.some((entry) => entry.ready)
   };
 }

@@ -1,11 +1,7 @@
 import { type HubEngineContract } from "../domain/engineContract";
 import { DEFAULT_HUB_SNAPSHOT } from "../domain/defaults";
 import { applyHubEvent } from "../domain/hubEngineCore";
-import { runMusicPipeline } from "../domain/hubMusicOrchestrator";
-import { selectMusicEngine } from "../domain/musicEngineRegistry";
 import { type EntitledApp, type HubSnapshot, type HubState } from "../domain/types";
-import { UiMusicProjectionAdapter } from "../domain/uiMusicProjectionAdapter";
-import { toAuthorityMusicTelemetryDto } from "./musicTelemetryDto";
 
 const STUB_APPS: EntitledApp[] = [
   {
@@ -27,8 +23,6 @@ const STUB_OFFLINE_CACHE: HubSnapshot["offlineCache"] = {
 };
 
 export class StubHubEngine implements HubEngineContract {
-  constructor(private readonly options: { musicEngineId?: string } = {}) {}
-
   private snapshot: HubSnapshot = structuredClone(DEFAULT_HUB_SNAPSHOT);
 
   async bootstrap(): Promise<HubState> {
@@ -103,15 +97,6 @@ export class StubHubEngine implements HubEngineContract {
     const next = applyHubEvent(this.snapshot, { type: "TRANSACTIONS_SYNCED", transactions: [] });
     this.snapshot = next.snapshot;
     return next;
-  }
-
-  runMusicIntelligence() {
-    const selected = selectMusicEngine(this.snapshot, this.options.musicEngineId);
-    return runMusicPipeline(this.snapshot, selected, UiMusicProjectionAdapter);
-  }
-
-  buildMusicTelemetry() {
-    return toAuthorityMusicTelemetryDto(this.snapshot, this.runMusicIntelligence());
   }
 
   reset(): HubState {

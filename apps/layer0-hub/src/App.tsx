@@ -5,7 +5,6 @@ import { buildHubEngine } from "./services/buildHubEngine";
 import { runHubTask } from "./services/hubRuntime";
 import {
   toDisplayDate,
-  toEngineSummaryLine,
   toHubViewModel,
   toInstallActionLabel,
   toTransactionLabel
@@ -28,8 +27,7 @@ export default function App() {
     void built.engine.bootstrap().then(setHubState);
   }, []);
 
-  const intelligence = built.engine ? built.engine.runMusicIntelligence() : null;
-  const vm = toHubViewModel(hubState, intelligence);
+  const vm = toHubViewModel(hubState);
   const controlPlaneVm = toControlPlaneViewModel(hubState);
   const opsVm = toControlPlaneOperations(hubState.snapshot);
 
@@ -73,9 +71,6 @@ export default function App() {
       </header>
 
       <p className="status-line">{vm.statusLine}</p>
-      <p className="status-line">{vm.intelligenceHeadline}: {vm.intelligenceDetail}</p>
-      <p className="status-line">{toEngineSummaryLine(vm)}</p>
-      <p className="status-line">Selection: {vm.intelligenceSelectionReason}</p>
       <p className="status-line">Entitlement: {controlPlaneVm.entitlement.outcome} ({controlPlaneVm.entitlement.reason})</p>
       <p className="status-line">Install/Update: {controlPlaneVm.installUpdate.state} ({controlPlaneVm.installUpdate.reasonCode})</p>
       <p className="status-line">Launch token: {controlPlaneVm.launchToken.status} ({controlPlaneVm.launchToken.reason})</p>

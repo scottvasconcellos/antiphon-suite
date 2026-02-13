@@ -94,6 +94,10 @@ async function run() {
     'from "./controlPlaneViewModel";',
     'from "./controlPlaneViewModel.js";'
   );
+  scenarioRunnerSource = scenarioRunnerSource.replace(
+    'from "./controlPlanePersistence";',
+    'from "./controlPlanePersistence.js";'
+  );
   writeFileSync(scenarioRunnerPath, scenarioRunnerSource, "utf-8");
 
   const entitlement = await import(pathToFileURL(join(domainRoot, "entitlementDecision.js")).href);
@@ -243,6 +247,14 @@ async function run() {
   for (const fixture of failureMatrix) {
     const actual = await controlPlaneScenarioRunner.runFailureScenario(fixture.seed, fixture.action, fixture.reasonCode);
     assertEqual(actual, fixture.expected, `Control-plane failure matrix mismatch: ${fixture.name}`);
+  }
+
+  const antiGatingFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-anti-gating-snapshots.json"), "utf-8")
+  );
+  for (const fixture of antiGatingFixtures) {
+    const actual = controlPlaneScenarioRunner.runAntiGatingScenario(fixture.seed);
+    assertEqual(actual, fixture.expected, `Control-plane anti-gating snapshot mismatch: ${fixture.name}`);
   }
 
   const launchReadinessFixtures = JSON.parse(
