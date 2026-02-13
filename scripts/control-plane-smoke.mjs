@@ -45,9 +45,14 @@ async function run() {
   const launchTokenSource = readFileSync(launchTokenPath, "utf-8").replace('from "node:crypto";', 'from "node:crypto";');
   writeFileSync(launchTokenPath, launchTokenSource, "utf-8");
   const authorityPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/installUpdateAuthority.js");
-  const authoritySource = readFileSync(authorityPath, "utf-8").replace(
+  let authoritySource = readFileSync(authorityPath, "utf-8");
+  authoritySource = authoritySource.replace(
     'from "../domain/installUpdateStateMachine";',
     'from "../domain/installUpdateStateMachine.js";'
+  );
+  authoritySource = authoritySource.replace(
+    'from "./downloadInstallerBoundary";',
+    'from "./downloadInstallerBoundary.js";'
   );
   writeFileSync(authorityPath, authoritySource, "utf-8");
   const controlPlaneVmPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneViewModel.js");
@@ -122,6 +127,13 @@ async function run() {
     'from "./controlPlaneReasonTaxonomy.js";'
   );
   writeFileSync(updateChannelPath, updateChannelSource, "utf-8");
+  const updateRecoveryPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/updateRecoveryPolicy.js");
+  let updateRecoverySource = readFileSync(updateRecoveryPath, "utf-8");
+  updateRecoverySource = updateRecoverySource.replace(
+    'from "./controlPlaneReasonTaxonomy";',
+    'from "./controlPlaneReasonTaxonomy.js";'
+  );
+  writeFileSync(updateRecoveryPath, updateRecoverySource, "utf-8");
   const scenarioRunnerPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneScenarioRunner.js");
   let scenarioRunnerSource = readFileSync(scenarioRunnerPath, "utf-8");
   scenarioRunnerSource = scenarioRunnerSource.replace(
@@ -206,6 +218,12 @@ async function run() {
   const updateChannelPolicy = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/updateChannelPolicy.js")).href
   );
+  const updateRecoveryPolicy = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/updateRecoveryPolicy.js")).href
+  );
+  const downloadInstallerBoundary = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/downloadInstallerBoundary.js")).href
+  );
   const publicControlPlane = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/publicControlPlane.js")).href
   );
@@ -281,6 +299,35 @@ async function run() {
     assertEqual(actual, fixture.expected, `Update channel policy snapshot mismatch: ${fixture.name}`);
   }
 
+  const updateRollbackFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-update-rollback-snapshots.json"), "utf-8")
+  );
+  for (const fixture of updateRollbackFixtures) {
+    const actual = updateRecoveryPolicy.applyUpdateRollback(fixture.app, fixture.options);
+    assertEqual(actual, fixture.expected, `Update rollback snapshot mismatch: ${fixture.name}`);
+  }
+
+  const downloadInstallerFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-download-installer-snapshots.json"), "utf-8")
+  );
+  for (const fixture of downloadInstallerFixtures) {
+    const boundary = downloadInstallerBoundary.createDeterministicStubBoundary(fixture.outputs);
+    const first = await installUpdateAuthority.runInstallUpdateAuthorityWithBoundary(
+      fixture.snapshot,
+      "install",
+      fixture.snapshot.entitlements[0].id,
+      boundary
+    );
+    const second = await installUpdateAuthority.runInstallUpdateAuthorityWithBoundary(
+      fixture.snapshot,
+      "install",
+      fixture.snapshot.entitlements[0].id,
+      boundary
+    );
+    assertEqual(first.result.reasonCode, fixture.expectedReasonCode, `Download/installer reason mismatch: ${fixture.name}`);
+    assertEqual(first, second, `Download/installer determinism mismatch: ${fixture.name}`);
+  }
+
   const persistenceTortureFixtures = JSON.parse(
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-persistence-torture-snapshots.json"), "utf-8")
   );
@@ -296,6 +343,14 @@ async function run() {
     } else {
       assert(report.state !== null, `Persistence torture should produce valid state: ${fixture.name}`);
     }
+  }
+
+  const atomicPersistenceFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-atomic-persistence-snapshots.json"), "utf-8")
+  );
+  for (const fixture of atomicPersistenceFixtures) {
+    const actual = persistence.simulateAtomicPersist(fixture.input.state, fixture.input.mode);
+    assertEqual(actual, fixture.expected, `Atomic persistence snapshot mismatch: ${fixture.name}`);
   }
 
   const tempDir = mkdtempSync(join(os.tmpdir(), "antiphon-control-plane-smoke-"));
@@ -495,7 +550,8 @@ async function run() {
       ...installUpdateAuthorityModule.INSTALL_UPDATE_REASON_CODES,
       ...launchTokenBoundaryModule.LAUNCH_TOKEN_REASON_CODES,
       ...controlPlaneTrustArtifact.TRUST_ARTIFACT_REASON_CODES,
-      ...updateChannelPolicy.UPDATE_CHANNEL_REASON_CODES
+      ...updateChannelPolicy.UPDATE_CHANNEL_REASON_CODES,
+      ...updateRecoveryPolicy.UPDATE_ROLLBACK_REASON_CODES
     ])].sort();
     assertEqual(actual, fixture.expectedReasonCodes, `Control-plane reason coverage mismatch: ${fixture.name}`);
     for (const code of actual) {

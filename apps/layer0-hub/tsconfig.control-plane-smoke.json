@@ -25,6 +25,8 @@
     "src/services/controlPlaneTrustArtifact.ts",
     "src/services/appCatalog.ts",
     "src/services/multiAppEntitlement.ts",
-    "src/services/updateChannelPolicy.ts"
+    "src/services/updateChannelPolicy.ts",
+    "src/services/downloadInstallerBoundary.ts",
+    "src/services/updateRecoveryPolicy.ts"
   ]
 }

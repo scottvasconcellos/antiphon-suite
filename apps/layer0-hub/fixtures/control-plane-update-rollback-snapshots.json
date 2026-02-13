@@ -1,0 +1,40 @@
+[
+  {
+    "name": "rollback-preserves-last-known-good",
+    "app": {
+      "id": "antiphon.rollback.app",
+      "name": "Rollback App",
+      "version": "2.0.0",
+      "installedVersion": "1.9.0",
+      "owned": true,
+      "installState": "installed",
+      "updateAvailable": true
+    },
+    "options": {},
+    "expected": {
+      "appId": "antiphon.rollback.app",
+      "preservedInstalledVersion": "1.9.0",
+      "reasonCode": "ok_update_rollback_applied",
+      "remediation": "none"
+    }
+  },
+  {
+    "name": "rollback-blocked-no-last-known-good",
+    "app": {
+      "id": "antiphon.rollback.app",
+      "name": "Rollback App",
+      "version": "2.0.0",
+      "installedVersion": null,
+      "owned": true,
+      "installState": "not-installed",
+      "updateAvailable": true
+    },
+    "options": {},
+    "expected": {
+      "appId": "antiphon.rollback.app",
+      "preservedInstalledVersion": null,
+      "reasonCode": "blocked_no_last_known_good",
+      "remediation": "none"
+    }
+  }
+]

@@ -1,5 +1,6 @@
 import { transitionLifecycleState, type AppLifecycleState } from "../domain/installUpdateStateMachine";
 import { type EntitledApp, type HubSnapshot } from "../domain/types";
+import { createInstallUpdateExecutor, type DownloadProvider, type Installer } from "./downloadInstallerBoundary";
 
 export type InstallUpdateAction = "install" | "update";
 
@@ -145,4 +146,25 @@ export async function runInstallUpdateAuthority(
       lifecycle: { from, to: completeTransition.to }
     }
   };
+}
+
+export async function runInstallUpdateAuthorityWithBoundary(
+  snapshot: HubSnapshot,
+  action: InstallUpdateAction,
+  appId: string,
+  boundary: {
+    provider: DownloadProvider;
+    installer: Installer;
+  }
+): Promise<{ snapshot: HubSnapshot; result: InstallUpdateAuthorityResult }> {
+  return runInstallUpdateAuthority(
+    snapshot,
+    action,
+    appId,
+    createInstallUpdateExecutor({
+      provider: boundary.provider,
+      installer: boundary.installer,
+      getApp: (id) => snapshot.entitlements.find((entry) => entry.id === id) ?? null
+    })
+  );
 }

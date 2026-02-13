@@ -240,3 +240,59 @@ export function parsePersistedControlPlaneStateWithReport(
     remediation: "none"
   };
 }
+
+export type AtomicPersistSimulation = {
+  current: string | null;
+  next: string;
+  temp: string | null;
+};
+
+export type AtomicPersistMode =
+  | "success"
+  | "power_loss_before_rename"
+  | "concurrent_write_detected"
+  | "corrupted_temp_file";
+
+export type AtomicPersistReport = {
+  stored: string | null;
+  temp: string | null;
+  reasonCode:
+    | "ok_atomic_write"
+    | "atomic_write_power_loss"
+    | "atomic_write_conflict"
+    | "atomic_write_corrupt_temp";
+  remediation: "none" | "retry_atomic_write" | "rebuild_cache";
+};
+
+export function simulateAtomicPersist(state: AtomicPersistSimulation, mode: AtomicPersistMode): AtomicPersistReport {
+  if (mode === "success") {
+    return {
+      stored: state.next,
+      temp: null,
+      reasonCode: "ok_atomic_write",
+      remediation: "none"
+    };
+  }
+  if (mode === "power_loss_before_rename") {
+    return {
+      stored: state.current,
+      temp: state.next,
+      reasonCode: "atomic_write_power_loss",
+      remediation: "retry_atomic_write"
+    };
+  }
+  if (mode === "concurrent_write_detected") {
+    return {
+      stored: state.current,
+      temp: state.temp,
+      reasonCode: "atomic_write_conflict",
+      remediation: "retry_atomic_write"
+    };
+  }
+  return {
+    stored: state.current,
+    temp: "{corrupt",
+    reasonCode: "atomic_write_corrupt_temp",
+    remediation: "rebuild_cache"
+  };
+}
