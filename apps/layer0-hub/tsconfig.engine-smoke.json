@@ -19,6 +19,7 @@
     "src/domain/minimalRealMusicIntelligenceEngine.ts",
     "src/services/stubHubEngine.ts",
     "src/services/musicIntelligenceAdapter.ts",
-    "src/services/hubViewModel.ts"
+    "src/services/hubViewModel.ts",
+    "src/services/musicTelemetryDto.ts"
   ]
 }

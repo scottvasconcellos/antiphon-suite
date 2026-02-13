@@ -59,6 +59,9 @@ async function run() {
   patchImports(join(servicesRoot, "hubViewModel.js"), [
     ["from \"../domain/musicEngineContracts\";", "from \"../domain/musicEngineContracts.js\";"]
   ]);
+  patchImports(join(servicesRoot, "musicTelemetryDto.js"), [
+    ["from \"../domain/musicEngineContracts\";", "from \"../domain/musicEngineContracts.js\";"]
+  ]);
 
   const defaults = await import(pathToFileURL(join(domainRoot, "defaults.js")).href);
   const core = await import(pathToFileURL(join(domainRoot, "hubEngineCore.js")).href);
@@ -71,6 +74,7 @@ async function run() {
   const contracts = await import(pathToFileURL(join(domainRoot, "musicEngineContracts.js")).href);
   const stubModule = await import(pathToFileURL(join(servicesRoot, "stubHubEngine.js")).href);
   const hubViewModel = await import(pathToFileURL(join(servicesRoot, "hubViewModel.js")).href);
+  const telemetry = await import(pathToFileURL(join(servicesRoot, "musicTelemetryDto.js")).href);
 
   const seed = structuredClone(defaults.DEFAULT_HUB_SNAPSHOT);
   const syncEvent = {
@@ -190,19 +194,22 @@ async function run() {
     JSON.stringify(registry.getMusicEngineManifest()) === JSON.stringify(manifestFixture),
     "Engine registry manifest snapshot mismatch."
   );
-  const defaultSignedOut = registry.selectMusicEngine(defaults.DEFAULT_HUB_SNAPSHOT).engine.id;
-  assert(defaultSignedOut === stubMusicEngine.StubMusicIntelligenceEngine.id, "Signed-out default must select stub engine.");
-  const signedInSnapshot = {
-    ...defaults.DEFAULT_HUB_SNAPSHOT,
-    session: { userId: "usr_sel", email: "sel@antiphon.audio", displayName: "Sel", signedInAt: "2026-02-13T00:00:00.000Z" }
-  };
-  const defaultSignedIn = registry.selectMusicEngine(signedInSnapshot).engine.id;
-  assert(defaultSignedIn === realMusicEngine.MinimalRealMusicIntelligenceEngine.id, "Signed-in default must select minimal real engine.");
+  const selectionFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/music-selection-snapshots.json"), "utf-8")
+  );
+  for (const fixture of selectionFixtures) {
+    const selection = registry.selectMusicEngine(fixture.snapshot, fixture.requestedEngineId ?? undefined);
+    assert(
+      JSON.stringify({
+        engineId: selection.engine.id,
+        source: selection.source,
+        reason: selection.reason
+      }) === JSON.stringify(fixture.expected),
+      `Music selection snapshot mismatch: ${fixture.name}`
+    );
+  }
   const requested = registry.selectMusicEngine(defaults.DEFAULT_HUB_SNAPSHOT, realMusicEngine.MinimalRealMusicIntelligenceEngine.id).engine.id;
   assert(requested === realMusicEngine.MinimalRealMusicIntelligenceEngine.id, "Requested engine ID must be honored deterministically.");
-  const unknownSelection = registry.selectMusicEngine(defaults.DEFAULT_HUB_SNAPSHOT, "unknown.engine.v1");
-  assert(unknownSelection.source === "default", "Unknown requested engine must fall back to deterministic default.");
-  assert(unknownSelection.reason.includes("not found"), "Unknown requested engine fallback reason must be explicit.");
 
   const explicitStubEngine = new hubEngineModule.HubEngine(fakeGateway, fakeStore, { musicEngineId: stubMusicEngine.StubMusicIntelligenceEngine.id });
   const explicitStubProjection = explicitStubEngine.runMusicIntelligence();
@@ -259,6 +266,19 @@ async function run() {
         projection: actual.projection
       }) === JSON.stringify(fixture.expected),
       `Music pipeline snapshot mismatch: ${fixture.name}`
+    );
+  }
+
+  const telemetryFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/music-telemetry-snapshots.json"), "utf-8")
+  );
+  for (const fixture of telemetryFixtures) {
+    const selection = registry.selectMusicEngine(fixture.snapshot, fixture.requestedEngineId ?? undefined);
+    const pipeline = orchestrator.runMusicPipeline(fixture.snapshot, selection, projectionAdapter.UiMusicProjectionAdapter);
+    const dto = telemetry.toAuthorityMusicTelemetryDto(fixture.snapshot, pipeline);
+    assert(
+      JSON.stringify(dto) === JSON.stringify(fixture.expected),
+      `Music telemetry snapshot mismatch: ${fixture.name}`
     );
   }
 }
