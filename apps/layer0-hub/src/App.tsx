@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { SectionCard } from "./components/SectionCard";
 import { type HubState } from "./domain/types";
 import { buildHubEngine } from "./services/buildHubEngine";
+import { runHubTask } from "./services/hubRuntime";
 import { toDisplayDate, toHubViewModel, toInstallActionLabel, toTransactionLabel } from "./services/hubViewModel";
 
 const INITIAL_EMAIL = "producer@antiphon.audio";
@@ -24,27 +25,8 @@ export default function App() {
   async function runAction(actionId: string, task: () => Promise<HubState>) {
     setBusyState(actionId);
     try {
-      const next = await task();
+      const next = await runHubTask(built.engine, task, () => hubState);
       setHubState(next);
-    } catch (error) {
-      if (built.engine) {
-        const withTransactions = await built.engine.syncTransactions();
-        setHubState({
-          ...withTransactions,
-          status: {
-            mode: "runtime-error",
-            message: error instanceof Error ? error.message : "Unexpected failure."
-          }
-        });
-      } else {
-        setHubState((current) => ({
-          ...current,
-          status: {
-            mode: "runtime-error",
-            message: error instanceof Error ? error.message : "Unexpected failure."
-          }
-        }));
-      }
     } finally {
       setBusyState(null);
     }

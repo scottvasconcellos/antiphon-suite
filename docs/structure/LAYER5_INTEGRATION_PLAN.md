@@ -10,6 +10,10 @@
 - Implemented authority response contract parsing in hub service layer.
 - Implemented UI view-model mapping to keep projection logic out of component render flow.
 
+## Batch 3 Progress
+- Isolated UI projection helpers in `hubViewModel.ts`.
+- Isolated hub runtime action error handling in `hubRuntime.ts`.
+
 ## Done Criteria For Structure Entry
 - Domain contracts documented and enforced at compile-time.
 - Service adapters cover all authority routes.
