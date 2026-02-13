@@ -45,16 +45,18 @@
     ],
     "expected": {
       "statusLine": "Signed in",
-      "entitlementLine": "Entitlement: Authorized (owned_active_identity)",
-      "installUpdateLine": "Install/Update: ready (ok_install_completed)",
+      "identityLine": "Identity: Present",
+      "entitlementLine": "Entitlement: antiphon.app=Allowed:owned_active_identity",
+      "installUpdateLine": "Install/Update: antiphon.app=Installed:ok_install_completed",
       "launchTokenLine": "Launch token: issued_verified (verified)",
       "cacheLine": "Cache schema: antiphon.control-plane-cache@v1 restorable=true",
-      "launchReadinessLine": "Launch readiness: antiphon.app:token_issued",
+      "launchReadinessLine": "Launch readiness: antiphon.app=Runnable:token_issued",
       "recentOpsLine": "Recent ops: tx-1:succeeded"
     },
     "expectedKeysSorted": [
       "cacheLine",
       "entitlementLine",
+      "identityLine",
       "installUpdateLine",
       "launchReadinessLine",
       "launchTokenLine",

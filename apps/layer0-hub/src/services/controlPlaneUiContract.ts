@@ -4,6 +4,7 @@ import { type ControlPlaneOperationEntry } from "./controlPlaneOperationsViewMod
 
 export type ControlPlaneUiContract = {
   statusLine: string;
+  identityLine: string;
   entitlementLine: string;
   installUpdateLine: string;
   launchTokenLine: string;
@@ -17,16 +18,38 @@ export function toControlPlaneUiContract(
   controlPlaneVm: ControlPlaneViewModel,
   opsVm: ControlPlaneOperationEntry[]
 ): ControlPlaneUiContract {
+  const entitlementLabel =
+    controlPlaneVm.entitlement.outcome === "Authorized"
+      ? "Allowed"
+      : controlPlaneVm.entitlement.outcome === "OfflineAuthorized"
+        ? "OfflineAllowed"
+        : "Denied";
+  const installLabel =
+    controlPlaneVm.installUpdate.reasonCode.startsWith("ok_")
+      ? "Installed"
+      : controlPlaneVm.installUpdate.reasonCode.includes("update")
+        ? "Updating"
+        : "Failed";
+  const launchLabel = (ready: boolean) => (ready ? "Runnable" : "NotRunnable");
+  const appEntries = [...controlPlaneVm.launchReadiness].sort((a, b) => a.appId.localeCompare(b.appId));
+
   return {
     statusLine: hubVm.statusLine,
-    entitlementLine: `Entitlement: ${controlPlaneVm.entitlement.outcome} (${controlPlaneVm.entitlement.reason})`,
-    installUpdateLine: `Install/Update: ${controlPlaneVm.installUpdate.state} (${controlPlaneVm.installUpdate.reasonCode})`,
+    identityLine: hubVm.statusLine.startsWith("Signed in") ? "Identity: Present" : "Identity: Absent",
+    entitlementLine:
+      appEntries.length === 0
+        ? `Entitlement: ${entitlementLabel} (${controlPlaneVm.entitlement.reason})`
+        : `Entitlement: ${appEntries.map((entry) => `${entry.appId}=${entitlementLabel}:${controlPlaneVm.entitlement.reason}`).join(", ")}`,
     launchTokenLine: `Launch token: ${controlPlaneVm.launchToken.status} (${controlPlaneVm.launchToken.reason})`,
     cacheLine: `Cache schema: ${controlPlaneVm.persistedCache.schema}@v${controlPlaneVm.persistedCache.version} restorable=${String(controlPlaneVm.persistedCache.restorable)}`,
     launchReadinessLine:
-      controlPlaneVm.launchReadiness.length === 0
+      appEntries.length === 0
         ? "Launch readiness: none"
-        : `Launch readiness: ${controlPlaneVm.launchReadiness.map((entry) => `${entry.appId}:${entry.reason}`).join(", ")}`,
+        : `Launch readiness: ${appEntries.map((entry) => `${entry.appId}=${launchLabel(entry.ready)}:${entry.reason}`).join(", ")}`,
+    installUpdateLine:
+      appEntries.length === 0
+        ? `Install/Update: ${installLabel} (${controlPlaneVm.installUpdate.reasonCode})`
+        : `Install/Update: ${appEntries.map((entry) => `${entry.appId}=${installLabel}:${controlPlaneVm.installUpdate.reasonCode}`).join(", ")}`,
     recentOpsLine:
       opsVm.length === 0
         ? "Recent ops: none"

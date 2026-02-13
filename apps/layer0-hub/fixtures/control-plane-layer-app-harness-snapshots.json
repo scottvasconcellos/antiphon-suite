@@ -1,0 +1,118 @@
+[
+  {
+    "name": "layer-app-authorize-persist-run-offline",
+    "input": {
+      "entitlementInput": {
+        "identity": {
+          "authenticated": true
+        },
+        "license": {
+          "owned": true,
+          "revoked": false
+        },
+        "offlineCache": {
+          "cacheState": "valid",
+          "offlineDaysRemaining": 7
+        }
+      },
+      "requestedVersion": "1.0.0",
+      "persistenceSeed": {
+        "session": {
+          "userId": "usr_layer_app",
+          "email": "layer@app.antiphon",
+          "displayName": "Layer App",
+          "signedInAt": "2026-02-13T00:00:00.000Z"
+        },
+        "entitlements": [
+          {
+            "id": "antiphon.layer.example",
+            "name": "Layer Example",
+            "version": "1.0.0",
+            "installedVersion": "1.0.0",
+            "owned": true,
+            "installState": "installed",
+            "updateAvailable": false
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 7,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "persistenceDecision": {
+        "input": {
+          "identity": {
+            "authenticated": true
+          },
+          "license": {
+            "owned": true,
+            "revoked": false
+          },
+          "offlineCache": {
+            "cacheState": "valid",
+            "offlineDaysRemaining": 7
+          }
+        },
+        "outcome": {
+          "outcome": "Authorized",
+          "reason": "owned_active_identity"
+        },
+        "evaluatedAt": "2026-02-13T00:00:00.000Z"
+      },
+      "trustSeed": {
+        "session": {
+          "userId": "usr_layer_app",
+          "email": "layer@app.antiphon",
+          "displayName": "Layer App",
+          "signedInAt": "2026-02-13T00:00:00.000Z"
+        },
+        "entitlements": [
+          {
+            "id": "antiphon.layer.example",
+            "name": "Layer Example",
+            "version": "1.0.0",
+            "installedVersion": "1.0.0",
+            "owned": true,
+            "installState": "installed",
+            "updateAvailable": false
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 7,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "contractName": "launchTokenBoundary"
+    },
+    "expected": {
+      "entitlement": {
+        "outcome": "Authorized",
+        "reasonCode": "owned_active_identity",
+        "remediation": "none"
+      },
+      "contract": {
+        "contract": "launchTokenBoundary",
+        "requestedVersion": "1.0.0",
+        "supportedVersion": "1.0.0",
+        "compatible": true,
+        "reasonCode": "ok_version_supported",
+        "remediation": "none"
+      },
+      "persistence": {
+        "reasonCode": "ok_cache_loaded",
+        "remediation": "none"
+      },
+      "trustArtifact": {
+        "artifactRestoredAfterRestart": true,
+        "runnableWithoutHub": true,
+        "deterministic": true
+      }
+    }
+  }
+]

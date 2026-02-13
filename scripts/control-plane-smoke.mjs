@@ -570,6 +570,10 @@ async function run() {
     pathToFileURL(join(process.cwd(), "scripts/control-plane-consumer-harness.mjs")).href
   );
   await consumerHarness.runControlPlaneConsumerHarness();
+  const layerAppHarness = await import(
+    pathToFileURL(join(process.cwd(), "scripts/layer-app-example-harness.mjs")).href
+  );
+  await layerAppHarness.runLayerAppExampleHarness();
 
   const reasonCoverageFixtures = JSON.parse(
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-reason-coverage-snapshots.json"), "utf-8")

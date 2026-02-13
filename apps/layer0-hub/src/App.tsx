@@ -26,6 +26,7 @@ export default function App() {
 
   const orderedLines = [
     uiContract.cacheLine,
+    uiContract.identityLine,
     uiContract.entitlementLine,
     uiContract.installUpdateLine,
     uiContract.launchReadinessLine,
