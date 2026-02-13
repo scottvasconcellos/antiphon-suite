@@ -1,5 +1,12 @@
 import { type HubGateway } from "../domain/ports";
 import { type EntitledApp, type HubConfig, type HubSession, type OfflineCacheState, type InstallTransaction } from "../domain/types";
+import {
+  parseEntitledApp,
+  parseEntitlements,
+  parseOfflineCache,
+  parseSession,
+  parseTransactions
+} from "./authorityContracts";
 
 type ApiError = {
   message?: string;
@@ -46,10 +53,11 @@ export class HttpHubGateway implements HubGateway {
 
   async signIn(email: string): Promise<HubSession> {
     try {
-      return await requestJson<HubSession>(`${this.apiBaseUrl}/auth/session`, {
+      const payload = await requestJson<unknown>(`${this.apiBaseUrl}/auth/session`, {
         method: "POST",
         body: JSON.stringify({ email })
       });
+      return parseSession(payload);
     } catch (error) {
       throw new Error(`Sign-in failed: ${normalizeApiError(error)}`);
     }
@@ -65,7 +73,8 @@ export class HttpHubGateway implements HubGateway {
 
   async fetchEntitlements(): Promise<EntitledApp[]> {
     try {
-      return await requestJson<EntitledApp[]>(`${this.apiBaseUrl}/entitlements`);
+      const payload = await requestJson<unknown>(`${this.apiBaseUrl}/entitlements`);
+      return parseEntitlements(payload);
     } catch (error) {
       throw new Error(`Entitlement fetch failed: ${normalizeApiError(error)}`);
     }
@@ -73,7 +82,8 @@ export class HttpHubGateway implements HubGateway {
 
   async refreshEntitlements(): Promise<OfflineCacheState> {
     try {
-      return await requestJson<OfflineCacheState>(`${this.apiBaseUrl}/entitlements/refresh`, { method: "POST" });
+      const payload = await requestJson<unknown>(`${this.apiBaseUrl}/entitlements/refresh`, { method: "POST" });
+      return parseOfflineCache(payload);
     } catch (error) {
       throw new Error(`Entitlement refresh failed: ${normalizeApiError(error)}`);
     }
@@ -81,7 +91,8 @@ export class HttpHubGateway implements HubGateway {
 
   async installApp(appId: string): Promise<EntitledApp> {
     try {
-      return await requestJson<EntitledApp>(`${this.apiBaseUrl}/installs/${appId}`, { method: "POST" });
+      const payload = await requestJson<unknown>(`${this.apiBaseUrl}/installs/${appId}`, { method: "POST" });
+      return parseEntitledApp(payload);
     } catch (error) {
       throw new Error(`Install failed: ${normalizeApiError(error)}`);
     }
@@ -89,7 +100,8 @@ export class HttpHubGateway implements HubGateway {
 
   async applyUpdate(appId: string): Promise<EntitledApp> {
     try {
-      return await requestJson<EntitledApp>(`${this.apiBaseUrl}/updates/${appId}`, { method: "POST" });
+      const payload = await requestJson<unknown>(`${this.apiBaseUrl}/updates/${appId}`, { method: "POST" });
+      return parseEntitledApp(payload);
     } catch (error) {
       throw new Error(`Update failed: ${normalizeApiError(error)}`);
     }
@@ -97,7 +109,8 @@ export class HttpHubGateway implements HubGateway {
 
   async getOfflineCacheState(): Promise<OfflineCacheState> {
     try {
-      return await requestJson<OfflineCacheState>(`${this.apiBaseUrl}/offline-cache/status`);
+      const payload = await requestJson<unknown>(`${this.apiBaseUrl}/offline-cache/status`);
+      return parseOfflineCache(payload);
     } catch (error) {
       throw new Error(`Offline cache lookup failed: ${normalizeApiError(error)}`);
     }
@@ -105,7 +118,8 @@ export class HttpHubGateway implements HubGateway {
 
   async fetchTransactions(): Promise<InstallTransaction[]> {
     try {
-      return await requestJson<InstallTransaction[]>(`${this.apiBaseUrl}/transactions`);
+      const payload = await requestJson<unknown>(`${this.apiBaseUrl}/transactions`);
+      return parseTransactions(payload);
     } catch (error) {
       throw new Error(`Transaction fetch failed: ${normalizeApiError(error)}`);
     }
