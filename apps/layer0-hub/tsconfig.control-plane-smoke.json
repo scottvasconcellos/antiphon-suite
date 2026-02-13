@@ -22,6 +22,9 @@
     "src/services/controlPlaneTrustEnvelope.ts",
     "src/services/publicControlPlane.ts",
     "src/services/controlPlaneReasonTaxonomy.ts",
-    "src/services/controlPlaneTrustArtifact.ts"
+    "src/services/controlPlaneTrustArtifact.ts",
+    "src/services/appCatalog.ts",
+    "src/services/multiAppEntitlement.ts",
+    "src/services/updateChannelPolicy.ts"
   ]
 }

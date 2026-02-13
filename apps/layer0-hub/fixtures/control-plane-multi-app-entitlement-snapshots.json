@@ -1,0 +1,80 @@
+[
+  {
+    "name": "one-user-multi-app-mixed-entitlements",
+    "input": [
+      {
+        "appId": "antiphon.alpha",
+        "requiredEntitlements": ["pro"],
+        "grantedEntitlements": ["pro", "core"],
+        "decisionInput": {
+          "identity": { "authenticated": true },
+          "license": { "owned": true, "revoked": false },
+          "offlineCache": { "cacheState": "valid", "offlineDaysRemaining": 10 }
+        }
+      },
+      {
+        "appId": "antiphon.beta",
+        "requiredEntitlements": ["beta"],
+        "grantedEntitlements": ["core"],
+        "decisionInput": {
+          "identity": { "authenticated": true },
+          "license": { "owned": true, "revoked": false },
+          "offlineCache": { "cacheState": "valid", "offlineDaysRemaining": 10 }
+        }
+      }
+    ],
+    "expected": [
+      {
+        "appId": "antiphon.alpha",
+        "outcome": "Authorized",
+        "reasonCode": "ok_version_supported",
+        "remediation": "none"
+      },
+      {
+        "appId": "antiphon.beta",
+        "outcome": "Denied",
+        "reasonCode": "blocked_not_owned",
+        "remediation": "refresh_online_session"
+      }
+    ]
+  },
+  {
+    "name": "offline-cache-multi-app",
+    "input": [
+      {
+        "appId": "antiphon.gamma",
+        "requiredEntitlements": ["core"],
+        "grantedEntitlements": ["core"],
+        "decisionInput": {
+          "identity": { "authenticated": false },
+          "license": { "owned": false, "revoked": false },
+          "offlineCache": { "cacheState": "valid", "offlineDaysRemaining": 5 }
+        }
+      },
+      {
+        "appId": "antiphon.delta",
+        "requiredEntitlements": ["core", "pro"],
+        "grantedEntitlements": ["core"],
+        "decisionInput": {
+          "identity": { "authenticated": false },
+          "license": { "owned": false, "revoked": false },
+          "offlineCache": { "cacheState": "valid", "offlineDaysRemaining": 5 }
+        }
+      }
+    ],
+    "expected": [
+      {
+        "appId": "antiphon.delta",
+        "outcome": "Denied",
+        "reasonCode": "blocked_not_owned",
+        "remediation": "refresh_online_session"
+      },
+      {
+        "appId": "antiphon.gamma",
+        "outcome": "Authorized",
+        "reasonCode": "ok_version_supported",
+        "remediation": "none"
+      }
+    ]
+  }
+]

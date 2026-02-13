@@ -1,5 +1,6 @@
 import { type EntitlementDecision, type EntitlementDecisionInput } from "../domain/entitlementDecision";
 import { type HubSnapshot, type OfflineCacheState, type InstallState } from "../domain/types";
+import { normalizeAppCatalog, type AppCatalogEntry } from "./appCatalog";
 
 export const CONTROL_PLANE_CACHE_SCHEMA = "antiphon.control-plane-cache";
 export const CONTROL_PLANE_CACHE_VERSION = 1;
@@ -22,6 +23,7 @@ export type PersistedControlPlaneState = {
   version: typeof CONTROL_PLANE_CACHE_VERSION;
   offlineCache: OfflineCacheState;
   installState: PersistedInstallState[];
+  appCatalog?: AppCatalogEntry[];
   entitlementDecision: PersistedEntitlementDecision | null;
 };
 
@@ -31,7 +33,8 @@ function stableSortInstallState(state: PersistedInstallState[]): PersistedInstal
 
 export function toPersistedControlPlaneState(
   snapshot: HubSnapshot,
-  entitlementDecision: PersistedEntitlementDecision | null
+  entitlementDecision: PersistedEntitlementDecision | null,
+  appCatalog: AppCatalogEntry[] = []
 ): PersistedControlPlaneState {
   return {
     schema: CONTROL_PLANE_CACHE_SCHEMA,
@@ -45,15 +48,18 @@ export function toPersistedControlPlaneState(
         updateAvailable: app.updateAvailable
       }))
     ),
+    ...(appCatalog.length > 0 ? { appCatalog: normalizeAppCatalog(appCatalog) } : {}),
     entitlementDecision
   };
 }
 
 export function serializePersistedControlPlaneState(state: PersistedControlPlaneState): string {
+  const normalizedCatalog = state.appCatalog ? normalizeAppCatalog(state.appCatalog) : undefined;
   return JSON.stringify(
     {
       ...state,
-      installState: stableSortInstallState(state.installState)
+      installState: stableSortInstallState(state.installState),
+      ...(normalizedCatalog && normalizedCatalog.length > 0 ? { appCatalog: normalizedCatalog } : {})
     },
     null,
     2
@@ -111,6 +117,30 @@ function isValidEntitlementDecision(value: unknown): value is PersistedEntitleme
   }
 
   return true;
+}
+
+function isValidAppCatalog(value: unknown): value is AppCatalogEntry[] | undefined {
+  if (value === undefined) {
+    return true;
+  }
+  if (!Array.isArray(value)) {
+    return false;
+  }
+  return value.every((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      return false;
+    }
+    const candidate = entry as Record<string, unknown>;
+    return (
+      typeof candidate.appId === "string" &&
+      typeof candidate.version === "string" &&
+      (candidate.channel === "stable" || candidate.channel === "beta") &&
+      (candidate.installedVersion === null || typeof candidate.installedVersion === "string") &&
+      typeof candidate.availableVersion === "string" &&
+      Array.isArray(candidate.requiredEntitlements) &&
+      candidate.requiredEntitlements.every((flag) => typeof flag === "string")
+    );
+  });
 }
 
 export function parsePersistedControlPlaneState(raw: string): PersistedControlPlaneState | null {
@@ -174,6 +204,9 @@ export function parsePersistedControlPlaneStateWithReport(
   if (!isValidEntitlementDecision(candidate.entitlementDecision)) {
     return { state: null, reasonCode: "invalid_entitlement_decision", remediation: "rebuild_cache" };
   }
+  if (!isValidAppCatalog(candidate.appCatalog)) {
+    return { state: null, reasonCode: "invalid_root_shape", remediation: "rebuild_cache" };
+  }
 
   if (
     options?.nowIso &&
@@ -198,6 +231,7 @@ export function parsePersistedControlPlaneStateWithReport(
     version: CONTROL_PLANE_CACHE_VERSION,
     offlineCache: candidate.offlineCache,
     installState: stableSortInstallState(candidate.installState),
+    ...(candidate.appCatalog ? { appCatalog: normalizeAppCatalog(candidate.appCatalog) } : {}),
     entitlementDecision: candidate.entitlementDecision
   };
   return {

@@ -97,6 +97,31 @@ async function run() {
   authorityIndexSource = authorityIndexSource.replaceAll('from "./controlPlaneBootstrap";', 'from "./controlPlaneBootstrap.js";');
   authorityIndexSource = authorityIndexSource.replaceAll('from "./controlPlanePersistence";', 'from "./controlPlanePersistence.js";');
   writeFileSync(authorityIndexPath, authorityIndexSource, "utf-8");
+  const persistencePath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlanePersistence.js");
+  let persistenceSource = readFileSync(persistencePath, "utf-8");
+  persistenceSource = persistenceSource.replace(
+    'from "./appCatalog";',
+    'from "./appCatalog.js";'
+  );
+  writeFileSync(persistencePath, persistenceSource, "utf-8");
+  const multiAppPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/multiAppEntitlement.js");
+  let multiAppSource = readFileSync(multiAppPath, "utf-8");
+  multiAppSource = multiAppSource.replace(
+    'from "../domain/entitlementDecision";',
+    'from "../domain/entitlementDecision.js";'
+  );
+  multiAppSource = multiAppSource.replace(
+    'from "./controlPlaneReasonTaxonomy";',
+    'from "./controlPlaneReasonTaxonomy.js";'
+  );
+  writeFileSync(multiAppPath, multiAppSource, "utf-8");
+  const updateChannelPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/updateChannelPolicy.js");
+  let updateChannelSource = readFileSync(updateChannelPath, "utf-8");
+  updateChannelSource = updateChannelSource.replace(
+    'from "./controlPlaneReasonTaxonomy";',
+    'from "./controlPlaneReasonTaxonomy.js";'
+  );
+  writeFileSync(updateChannelPath, updateChannelSource, "utf-8");
   const scenarioRunnerPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneScenarioRunner.js");
   let scenarioRunnerSource = readFileSync(scenarioRunnerPath, "utf-8");
   scenarioRunnerSource = scenarioRunnerSource.replace(
@@ -172,6 +197,15 @@ async function run() {
   const controlPlaneTrustArtifact = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneTrustArtifact.js")).href
   );
+  const appCatalog = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/appCatalog.js")).href
+  );
+  const multiAppEntitlement = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/multiAppEntitlement.js")).href
+  );
+  const updateChannelPolicy = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/updateChannelPolicy.js")).href
+  );
   const publicControlPlane = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/publicControlPlane.js")).href
   );
@@ -221,6 +255,30 @@ async function run() {
     const parsed = persistence.parsePersistedControlPlaneState(serialized);
     assert(parsed !== null, `Persistence parser should accept serialized state: ${fixture.name}`);
     assertEqual(parsed, JSON.parse(fixture.expectedSerialized), `Persistence parse result mismatch: ${fixture.name}`);
+  }
+
+  const appCatalogFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-app-catalog-snapshots.json"), "utf-8")
+  );
+  for (const fixture of appCatalogFixtures) {
+    const normalized = appCatalog.normalizeAppCatalog(fixture.catalog);
+    assertEqual(normalized, fixture.expected, `App catalog normalization mismatch: ${fixture.name}`);
+  }
+
+  const multiAppFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-multi-app-entitlement-snapshots.json"), "utf-8")
+  );
+  for (const fixture of multiAppFixtures) {
+    const actual = multiAppEntitlement.decideMultiAppEntitlements(fixture.input);
+    assertEqual(actual, fixture.expected, `Multi-app entitlement snapshot mismatch: ${fixture.name}`);
+  }
+
+  const updateChannelFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-update-channel-snapshots.json"), "utf-8")
+  );
+  for (const fixture of updateChannelFixtures) {
+    const actual = updateChannelPolicy.selectUpdateByChannelPolicy(fixture.input);
+    assertEqual(actual, fixture.expected, `Update channel policy snapshot mismatch: ${fixture.name}`);
   }
 
   const persistenceTortureFixtures = JSON.parse(
@@ -431,13 +489,14 @@ async function run() {
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-reason-coverage-snapshots.json"), "utf-8")
   );
   for (const fixture of reasonCoverageFixtures) {
-    const actual = [
+    const actual = [...new Set([
       ...controlPlaneContracts.CONTRACT_COMPAT_REASON_CODES,
       ...persistence.PERSISTENCE_REASON_CODES,
       ...installUpdateAuthorityModule.INSTALL_UPDATE_REASON_CODES,
       ...launchTokenBoundaryModule.LAUNCH_TOKEN_REASON_CODES,
-      ...controlPlaneTrustArtifact.TRUST_ARTIFACT_REASON_CODES
-    ].sort();
+      ...controlPlaneTrustArtifact.TRUST_ARTIFACT_REASON_CODES,
+      ...updateChannelPolicy.UPDATE_CHANNEL_REASON_CODES
+    ])].sort();
     assertEqual(actual, fixture.expectedReasonCodes, `Control-plane reason coverage mismatch: ${fixture.name}`);
     for (const code of actual) {
       const remediation = controlPlaneReasonTaxonomy.remediationForReason(code);

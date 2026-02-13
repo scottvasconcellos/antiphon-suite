@@ -20,6 +20,8 @@ export const CONTROL_PLANE_REASON_TAXONOMY = {
   failed_install_step: "retry_install",
   failed_update_step: "retry_update",
   failed_gateway: "retry_or_offline_cache",
+  ok_update_candidate_selected: "none",
+  blocked_channel_policy: "none",
   malformed: "reissue_token",
   signature_invalid: "reissue_token",
   expired: "reissue_token",
