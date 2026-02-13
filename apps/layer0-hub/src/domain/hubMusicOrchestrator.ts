@@ -15,7 +15,8 @@ function isValidOutput(output: unknown): output is MusicIntelligenceOutput {
   return (
     (record.lane === "authenticate" || record.lane === "install" || record.lane === "create") &&
     typeof record.reason === "string" &&
-    typeof record.confidence === "number"
+    typeof record.confidence === "number" &&
+    Number.isFinite(record.confidence)
   );
 }
 

@@ -49,3 +49,4 @@
 - `pnpm test:engine` also validates minimal `HubEngine` class paths with a headless fake gateway/store.
 - `pnpm test:engine` validates orchestrator -> `StubHubEngine` -> `MusicIntelligence` adapter determinism.
 - `pnpm test:engine` validates contract enforcement on invalid plugin output and runtime-error taxonomy mapping.
+- `pnpm test:engine` validates edge cases: expired offline trust, zero-owned install routing, adapter exception mapping, and confidence clamping.

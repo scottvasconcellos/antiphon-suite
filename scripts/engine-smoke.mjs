@@ -56,6 +56,7 @@ async function run() {
   const orchestrator = await import(pathToFileURL(join(domainRoot, "hubMusicOrchestrator.js")).href);
   const stubMusicEngine = await import(pathToFileURL(join(domainRoot, "musicIntelligenceEngine.js")).href);
   const projectionAdapter = await import(pathToFileURL(join(domainRoot, "uiMusicProjectionAdapter.js")).href);
+  const contracts = await import(pathToFileURL(join(domainRoot, "musicEngineContracts.js")).href);
   const stubModule = await import(pathToFileURL(join(servicesRoot, "stubHubEngine.js")).href);
 
   const seed = structuredClone(defaults.DEFAULT_HUB_SNAPSHOT);
@@ -123,6 +124,18 @@ async function run() {
   assert(thrownResult.status === "runtime-error", "Plugin exceptions must map to runtime-error.");
   assert(thrownResult.message === "engine exploded", "Runtime-error should preserve plugin exception message.");
 
+  const nanPlugin = { id: "nan-plugin", evaluate() { return { lane: "create", reason: "x", confidence: Number.NaN }; } };
+  const nanResult = orchestrator.runMusicPipeline(saved, nanPlugin, projectionAdapter.UiMusicProjectionAdapter);
+  assert(nanResult.status === "runtime-error", "Non-finite confidence must fail contract enforcement.");
+
+  const adapterThrowResult = orchestrator.runMusicPipeline(
+    saved,
+    stubMusicEngine.StubMusicIntelligenceEngine,
+    { id: "throwing-adapter", toProjection() { throw new Error("adapter exploded"); } }
+  );
+  assert(adapterThrowResult.status === "runtime-error", "Adapter exceptions must map to runtime-error.");
+  assert(adapterThrowResult.message === "adapter exploded", "Runtime-error should preserve adapter exception message.");
+
   const stubEngineA = new stubModule.StubHubEngine();
   const stubEngineB = new stubModule.StubHubEngine();
   const stubA = await stubEngineA.bootstrap();
@@ -132,6 +145,20 @@ async function run() {
   const pluginA = orchestrator.runMusicPipeline(stubA.snapshot, stubMusicEngine.StubMusicIntelligenceEngine, projectionAdapter.UiMusicProjectionAdapter);
   const pluginB = orchestrator.runMusicPipeline(stubB.snapshot, stubMusicEngine.StubMusicIntelligenceEngine, projectionAdapter.UiMusicProjectionAdapter);
   assert(JSON.stringify(pluginA) === JSON.stringify(pluginB), "Engine plugin + adapter projection must be deterministic.");
+
+  const staleInput = { hasSession: true, ownedCount: 2, installedCount: 2, offlineDaysRemaining: 0 };
+  const staleDecision = stubMusicEngine.evaluateMusicIntelligence(staleInput);
+  assert(staleDecision.lane === "authenticate", "Expired offline trust should route to authenticate lane.");
+  const coldInput = { hasSession: true, ownedCount: 0, installedCount: 0, offlineDaysRemaining: 21 };
+  const coldDecision = stubMusicEngine.evaluateMusicIntelligence(coldInput);
+  assert(coldDecision.lane === "install", "Zero-owned state should route to install lane.");
+
+  const clampedProjection = projectionAdapter.UiMusicProjectionAdapter.toProjection({ lane: "create", reason: "ok", confidence: 2.8 });
+  assert(clampedProjection.confidencePct === 100, "UI projection confidence must clamp to safe percentage.");
+
+  const inputA = contracts.toMusicIntelligenceInput(stubA.snapshot);
+  const inputB = contracts.toMusicIntelligenceInput(stubA.snapshot);
+  assert(JSON.stringify(inputA) === JSON.stringify(inputB), "Input mapping must remain deterministic.");
 }
 
 run().catch((error) => {
