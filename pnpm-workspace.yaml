@@ -1,5 +1,0 @@
-packages:
-  - "packages/*"
-  - "antiphon-hub-v2"
-  - "shared/*"
-  - "docs"
