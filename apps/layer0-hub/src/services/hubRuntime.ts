@@ -8,7 +8,8 @@ function runtimeErrorState(base: HubState, message: string): HubState {
     ...base,
     status: {
       mode: "runtime-error",
-      message
+      message,
+      code: "runtime_task_failed"
     }
   };
 }

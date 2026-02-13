@@ -8,6 +8,7 @@ import { applyHubEvent } from "./hubEngineCore";
 import { type HubState } from "./types";
 import { toAuthorityMusicTelemetryDto } from "../services/musicTelemetryDto";
 import { runInstallUpdateAuthority } from "../services/installUpdateAuthority";
+import { resolveBootstrapFailure } from "../services/controlPlaneBootstrap";
 
 export class HubEngine implements HubEngineContract {
   constructor(
@@ -34,13 +35,7 @@ export class HubEngine implements HubEngineContract {
       });
       return { ...next, snapshot: this.store.save(next.snapshot) };
     } catch (error) {
-      return {
-        snapshot: base,
-        status: {
-          mode: "runtime-error",
-          message: error instanceof Error ? error.message : "Unable to reach entitlement authority."
-        }
-      };
+      return resolveBootstrapFailure(base, error instanceof Error ? error.message : "Unable to reach entitlement authority.");
     }
   }
 
@@ -103,7 +98,8 @@ export class HubEngine implements HubEngineContract {
         snapshot: current,
         status: {
           mode: "runtime-error",
-          message: `Install authority blocked (${authority.result.reasonCode}).`
+          message: `Install authority blocked (${authority.result.reasonCode}).`,
+          code: authority.result.reasonCode
         }
       };
     }
@@ -127,7 +123,8 @@ export class HubEngine implements HubEngineContract {
         snapshot: current,
         status: {
           mode: "runtime-error",
-          message: `Update authority blocked (${authority.result.reasonCode}).`
+          message: `Update authority blocked (${authority.result.reasonCode}).`,
+          code: authority.result.reasonCode
         }
       };
     }

@@ -48,6 +48,7 @@ export type HubConfig = {
 export type HubRuntimeStatus = {
   mode: "ready" | "configuration-error" | "runtime-error";
   message: string;
+  code: string;
 };
 
 export type HubState = {

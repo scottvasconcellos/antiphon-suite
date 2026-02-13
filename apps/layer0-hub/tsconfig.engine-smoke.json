@@ -24,6 +24,7 @@
     "src/services/hubViewModel.ts",
     "src/services/musicTelemetryDto.ts",
     "src/services/installUpdateAuthority.ts",
-    "src/domain/installUpdateStateMachine.ts"
+    "src/domain/installUpdateStateMachine.ts",
+    "src/services/controlPlaneBootstrap.ts"
   ]
 }

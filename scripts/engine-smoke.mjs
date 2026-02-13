@@ -54,7 +54,8 @@ async function run() {
     ["from \"./musicIntelligenceEngine\";", "from \"./musicIntelligenceEngine.js\";"],
     ["from \"./uiMusicProjectionAdapter\";", "from \"./uiMusicProjectionAdapter.js\";"],
     ["from \"../services/musicTelemetryDto\";", "from \"../services/musicTelemetryDto.js\";"],
-    ["from \"../services/installUpdateAuthority\";", "from \"../services/installUpdateAuthority.js\";"]
+    ["from \"../services/installUpdateAuthority\";", "from \"../services/installUpdateAuthority.js\";"],
+    ["from \"../services/controlPlaneBootstrap\";", "from \"../services/controlPlaneBootstrap.js\";"]
   ]);
   patchImports(join(domainRoot, "hubMusicOrchestrator.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);
   patchImports(join(domainRoot, "musicIntelligenceEngine.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);

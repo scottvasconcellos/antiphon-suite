@@ -33,11 +33,9 @@ function toDeterministicEpoch(snapshot: HubSnapshot): number {
 }
 
 function toInstallUpdateProjection(status: HubState["status"]): ControlPlaneViewModel["installUpdate"] {
-  const match = status.message.match(/\(([^)]+)\)\.?$/);
-  const reasonCode = match?.[1] ?? "ok_ready";
   return {
     state: status.mode === "runtime-error" ? "blocked" : "ready",
-    reasonCode
+    reasonCode: status.code
   };
 }
 

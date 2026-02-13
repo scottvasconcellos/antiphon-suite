@@ -1,0 +1,46 @@
+[
+  {
+    "name": "offline-cache-valid-restores-ready-mode",
+    "snapshot": {
+      "session": null,
+      "entitlements": [],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 5,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "errorMessage": "authority down",
+    "expected": {
+      "status": {
+        "mode": "ready",
+        "message": "Authority unreachable. Running from offline cache.",
+        "code": "ok_bootstrap_offline_cache"
+      }
+    }
+  },
+  {
+    "name": "offline-cache-missing-fails-bootstrap",
+    "snapshot": {
+      "session": null,
+      "entitlements": [],
+      "offlineCache": {
+        "lastValidatedAt": null,
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 0,
+        "cacheState": "empty"
+      },
+      "transactions": []
+    },
+    "errorMessage": "authority down",
+    "expected": {
+      "status": {
+        "mode": "runtime-error",
+        "message": "authority down",
+        "code": "runtime_bootstrap_failed"
+      }
+    }
+  }
+]

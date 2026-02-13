@@ -20,7 +20,8 @@ function missingConfigState(message: string): HubState {
     },
     status: {
       mode: "configuration-error",
-      message
+      message,
+      code: "config_missing"
     }
   };
 }

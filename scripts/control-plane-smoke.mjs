@@ -76,6 +76,9 @@ async function run() {
   const controlPlaneViewModel = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneViewModel.js")).href
   );
+  const controlPlaneBootstrap = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneBootstrap.js")).href
+  );
 
   const entitlementFixtures = JSON.parse(readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/entitlement-decision-snapshots.json"), "utf-8"));
   for (const fixture of entitlementFixtures) {
@@ -165,6 +168,16 @@ async function run() {
     assertEqual(actual, fixture.expected, `Control-plane view-model snapshot mismatch: ${fixture.name}`);
     const repeat = controlPlaneViewModel.toControlPlaneViewModel(fixture.hubState);
     assertEqual(repeat, actual, `Control-plane view-model determinism mismatch: ${fixture.name}`);
+  }
+
+  const bootstrapFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-bootstrap-snapshots.json"), "utf-8")
+  );
+  for (const fixture of bootstrapFixtures) {
+    const actual = controlPlaneBootstrap.resolveBootstrapFailure(fixture.snapshot, fixture.errorMessage);
+    assertEqual(actual.status, fixture.expected.status, `Control-plane bootstrap snapshot mismatch: ${fixture.name}`);
+    const repeat = controlPlaneBootstrap.resolveBootstrapFailure(fixture.snapshot, fixture.errorMessage);
+    assertEqual(repeat.status, actual.status, `Control-plane bootstrap determinism mismatch: ${fixture.name}`);
   }
 }
 

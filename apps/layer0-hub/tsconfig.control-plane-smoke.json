@@ -12,6 +12,7 @@
     "src/domain/launchTokenBoundary.ts",
     "src/services/controlPlanePersistence.ts",
     "src/services/installUpdateAuthority.ts",
-    "src/services/controlPlaneViewModel.ts"
+    "src/services/controlPlaneViewModel.ts",
+    "src/services/controlPlaneBootstrap.ts"
   ]
 }

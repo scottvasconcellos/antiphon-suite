@@ -20,11 +20,24 @@ export type HubEvent =
 function upsertApp(entitlements: EntitledApp[], app: EntitledApp): EntitledApp[] {
   const index = entitlements.findIndex((candidate) => candidate.id === app.id);
   if (index === -1) {
-    return [...entitlements, app];
+    return sortEntitlements([...entitlements, app]);
   }
   const copy = [...entitlements];
   copy[index] = app;
-  return copy;
+  return sortEntitlements(copy);
+}
+
+function sortEntitlements(entitlements: EntitledApp[]): EntitledApp[] {
+  return [...entitlements].sort((a, b) => a.id.localeCompare(b.id));
+}
+
+function sortTransactions(transactions: HubSnapshot["transactions"]): HubSnapshot["transactions"] {
+  return [...transactions].sort((a, b) => {
+    if (a.occurredAt === b.occurredAt) {
+      return a.id.localeCompare(b.id);
+    }
+    return a.occurredAt.localeCompare(b.occurredAt);
+  });
 }
 
 export function applyHubEvent(snapshot: HubSnapshot, event: HubEvent): HubState {
@@ -33,22 +46,22 @@ export function applyHubEvent(snapshot: HubSnapshot, event: HubEvent): HubState 
       return {
         snapshot: {
           ...snapshot,
-          entitlements: event.entitlements,
+          entitlements: sortEntitlements(event.entitlements),
           offlineCache: event.offlineCache,
-          transactions: event.transactions
+          transactions: sortTransactions(event.transactions)
         },
-        status: { mode: "ready", message: "Hub connected to entitlement authority." }
+        status: { mode: "ready", message: "Hub connected to entitlement authority.", code: "ok_bootstrap_synced" }
       };
     case "SIGNED_IN":
       return {
         snapshot: {
           ...snapshot,
           session: event.session,
-          entitlements: event.entitlements,
+          entitlements: sortEntitlements(event.entitlements),
           offlineCache: event.offlineCache,
-          transactions: event.transactions
+          transactions: sortTransactions(event.transactions)
         },
-        status: { mode: "ready", message: "Identity authenticated and ownership refreshed." }
+        status: { mode: "ready", message: "Identity authenticated and ownership refreshed.", code: "ok_signed_in" }
       };
     case "SIGNED_OUT":
       return {
@@ -56,50 +69,51 @@ export function applyHubEvent(snapshot: HubSnapshot, event: HubEvent): HubState 
           ...snapshot,
           session: null
         },
-        status: { mode: "ready", message: "Signed out. Existing offline cache remains available." }
+        status: { mode: "ready", message: "Signed out. Existing offline cache remains available.", code: "ok_signed_out" }
       };
     case "ENTITLEMENTS_REFRESHED":
       return {
         snapshot: {
           ...snapshot,
-          entitlements: event.entitlements,
+          entitlements: sortEntitlements(event.entitlements),
           offlineCache: event.offlineCache,
-          transactions: event.transactions
+          transactions: sortTransactions(event.transactions)
         },
-        status: { mode: "ready", message: "Entitlements refreshed." }
+        status: { mode: "ready", message: "Entitlements refreshed.", code: "ok_entitlements_refreshed" }
       };
     case "APP_INSTALLED":
       return {
         snapshot: {
           ...snapshot,
           entitlements: upsertApp(snapshot.entitlements, event.app),
-          transactions: event.transactions
+          transactions: sortTransactions(event.transactions)
         },
-        status: { mode: "ready", message: `Install transaction completed for ${event.app.name}.` }
+        status: { mode: "ready", message: `Install transaction completed for ${event.app.name}.`, code: "ok_install_completed" }
       };
     case "APP_UPDATED":
       return {
         snapshot: {
           ...snapshot,
           entitlements: upsertApp(snapshot.entitlements, event.app),
-          transactions: event.transactions
+          transactions: sortTransactions(event.transactions)
         },
-        status: { mode: "ready", message: `Update transaction completed for ${event.app.name}.` }
+        status: { mode: "ready", message: `Update transaction completed for ${event.app.name}.`, code: "ok_update_completed" }
       };
     case "TRANSACTIONS_SYNCED":
       return {
         snapshot: {
           ...snapshot,
-          transactions: event.transactions
+          transactions: sortTransactions(event.transactions)
         },
-        status: { mode: "ready", message: "Transaction log synchronized." }
+        status: { mode: "ready", message: "Transaction log synchronized.", code: "ok_transactions_synced" }
       };
     case "RESET":
       return {
         snapshot: DEFAULT_HUB_SNAPSHOT,
         status: {
           mode: "configuration-error",
-          message: "Hub reset. Configure VITE_ANTIPHON_API_URL to continue."
+          message: "Hub reset. Configure VITE_ANTIPHON_API_URL to continue.",
+          code: "config_reset"
         }
       };
     default: {

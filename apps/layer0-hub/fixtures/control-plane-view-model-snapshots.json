@@ -30,7 +30,8 @@
       },
       "status": {
         "mode": "ready",
-        "message": "Hub connected to entitlement authority."
+        "message": "Hub connected to entitlement authority.",
+        "code": "ok_bootstrap_synced"
       }
     },
     "expected": {
@@ -40,7 +41,7 @@
       },
       "installUpdate": {
         "state": "ready",
-        "reasonCode": "ok_ready"
+        "reasonCode": "ok_bootstrap_synced"
       },
       "launchToken": {
         "ready": true,
@@ -70,7 +71,8 @@
       },
       "status": {
         "mode": "runtime-error",
-        "message": "Update authority blocked (failed_gateway)."
+        "message": "Update authority blocked (failed_gateway).",
+        "code": "failed_gateway"
       }
     },
     "expected": {
@@ -110,7 +112,8 @@
       },
       "status": {
         "mode": "ready",
-        "message": "Signed out"
+        "message": "Signed out",
+        "code": "ok_signed_out"
       }
     },
     "expected": {
@@ -120,7 +123,7 @@
       },
       "installUpdate": {
         "state": "ready",
-        "reasonCode": "ok_ready"
+        "reasonCode": "ok_signed_out"
       },
       "launchToken": {
         "ready": false,
