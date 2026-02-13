@@ -164,6 +164,10 @@ async function run() {
     'from "./controlPlaneTrustArtifact";',
     'from "./controlPlaneTrustArtifact.js";'
   );
+  scenarioRunnerSource = scenarioRunnerSource.replace(
+    'from "./clockDriftPolicy";',
+    'from "./clockDriftPolicy.js";'
+  );
   writeFileSync(scenarioRunnerPath, scenarioRunnerSource, "utf-8");
 
   const entitlement = await import(pathToFileURL(join(domainRoot, "entitlementDecision.js")).href);
@@ -220,6 +224,9 @@ async function run() {
   );
   const updateRecoveryPolicy = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/updateRecoveryPolicy.js")).href
+  );
+  const clockDriftPolicy = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/clockDriftPolicy.js")).href
   );
   const downloadInstallerBoundary = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/downloadInstallerBoundary.js")).href
@@ -457,6 +464,14 @@ async function run() {
     assertEqual(actual.firstBoot, actual.secondBoot, `Control-plane cold-boot projections diverged: ${fixture.name}`);
   }
 
+  const longRunFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-long-run-determinism-snapshots.json"), "utf-8")
+  );
+  for (const fixture of longRunFixtures) {
+    const actual = await controlPlaneScenarioRunner.runLongRunDeterminismScenario(fixture.seed, fixture.cycles);
+    assertEqual(actual, fixture.expected, `Control-plane long-run determinism mismatch: ${fixture.name}`);
+  }
+
   const concurrencyFixtures = JSON.parse(
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-concurrency-snapshots.json"), "utf-8")
   );
@@ -471,6 +486,22 @@ async function run() {
   for (const fixture of trustArtifactFixtures) {
     const actual = controlPlaneScenarioRunner.runTrustArtifactScenario(fixture.seed);
     assertEqual(actual, fixture.expected, `Control-plane trust artifact snapshot mismatch: ${fixture.name}`);
+  }
+
+  const clockDriftFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-clock-drift-snapshots.json"), "utf-8")
+  );
+  for (const fixture of clockDriftFixtures) {
+    const actual = controlPlaneScenarioRunner.runClockDriftScenario(fixture.input);
+    assertEqual(actual, fixture.expected, `Control-plane clock drift snapshot mismatch: ${fixture.name}`);
+  }
+
+  const antiGateValidationFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-trust-envelope-validation-snapshots.json"), "utf-8")
+  );
+  for (const fixture of antiGateValidationFixtures) {
+    const actual = controlPlaneScenarioRunner.runTrustEnvelopeValidationScenario(fixture.seed);
+    assertEqual(actual, fixture.expected, `Control-plane anti-gating trust envelope mismatch: ${fixture.name}`);
   }
 
   const launchReadinessFixtures = JSON.parse(
@@ -551,7 +582,8 @@ async function run() {
       ...launchTokenBoundaryModule.LAUNCH_TOKEN_REASON_CODES,
       ...controlPlaneTrustArtifact.TRUST_ARTIFACT_REASON_CODES,
       ...updateChannelPolicy.UPDATE_CHANNEL_REASON_CODES,
-      ...updateRecoveryPolicy.UPDATE_ROLLBACK_REASON_CODES
+      ...updateRecoveryPolicy.UPDATE_ROLLBACK_REASON_CODES,
+      ...clockDriftPolicy.CLOCK_DRIFT_POLICY_REASON_CODES
     ])].sort();
     assertEqual(actual, fixture.expectedReasonCodes, `Control-plane reason coverage mismatch: ${fixture.name}`);
     for (const code of actual) {

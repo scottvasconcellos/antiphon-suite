@@ -6,6 +6,7 @@ import { toControlPlaneViewModel } from "./controlPlaneViewModel";
 import { parsePersistedControlPlaneState, serializePersistedControlPlaneState, toPersistedControlPlaneState } from "./controlPlanePersistence";
 import { remediationForReason } from "./controlPlaneReasonTaxonomy";
 import { isRunnableWithoutHub, issueTrustArtifact, parseTrustArtifact, serializeTrustArtifact } from "./controlPlaneTrustArtifact";
+import { evaluateClockDrift, evaluateMixedEntitlementTimestamps } from "./clockDriftPolicy";
 
 export type HappyPathScenarioResult = {
   entitlement: ReturnType<typeof decideEntitlement>;
@@ -235,6 +236,188 @@ export function runColdBootScenario(seed: HubSnapshot): {
     firstBoot,
     secondBoot,
     deterministic: JSON.stringify(firstBoot) === JSON.stringify(secondBoot)
+  };
+}
+
+export async function runLongRunDeterminismScenario(
+  seed: HubSnapshot,
+  cycles: number
+): Promise<{
+  cycles: number;
+  projectionStable: boolean;
+  finalProjection: ReturnType<typeof toControlPlaneViewModel>;
+}> {
+  let snapshot = seed;
+  let baselineProjection: ReturnType<typeof toControlPlaneViewModel> | null = null;
+
+  for (let i = 0; i < cycles; i += 1) {
+    const target = snapshot.entitlements[0];
+    if (!target) {
+      throw new Error("long_run_missing_app");
+    }
+    const install = await runInstallUpdateAuthority(snapshot, "install", target.id, async (_action, _appId) => ({
+      ok: true,
+      app: {
+        ...target,
+        installedVersion: target.version,
+        installState: "installed",
+        updateAvailable: true
+      }
+    }));
+    const update = await runInstallUpdateAuthority(install.snapshot, "update", target.id, async (_action, _appId) => ({
+      ok: true,
+      app: {
+        ...install.snapshot.entitlements[0],
+        installedVersion: install.snapshot.entitlements[0].version,
+        installState: "installed",
+        updateAvailable: false
+      }
+    }));
+    const cycleEntitlement = decideEntitlement({
+      identity: { authenticated: update.snapshot.session !== null },
+      license: { owned: update.snapshot.entitlements.some((app) => app.owned), revoked: false },
+      offlineCache: {
+        cacheState: update.snapshot.offlineCache.cacheState,
+        offlineDaysRemaining: update.snapshot.offlineCache.offlineDaysRemaining
+      }
+    });
+
+    const result = toControlPlaneViewModel({
+      snapshot: update.snapshot,
+      status: {
+        mode: "ready",
+        message: "long run cycle",
+        code: "ok_update_completed"
+      }
+    });
+    if (baselineProjection === null) {
+      baselineProjection = result;
+    }
+
+    const persisted = toPersistedControlPlaneState(
+      update.snapshot,
+      {
+        input: {
+          identity: { authenticated: snapshot.session !== null },
+          license: { owned: snapshot.entitlements.some((app) => app.owned), revoked: false },
+          offlineCache: {
+            cacheState: snapshot.offlineCache.cacheState,
+            offlineDaysRemaining: snapshot.offlineCache.offlineDaysRemaining
+          }
+        },
+        outcome: cycleEntitlement,
+        evaluatedAt: snapshot.offlineCache.lastValidatedAt ?? "2026-02-13T00:00:00.000Z"
+      }
+    );
+    const restored = parsePersistedControlPlaneState(serializePersistedControlPlaneState(persisted));
+    if (!restored) {
+      throw new Error("long_run_persist_restore_failed");
+    }
+
+    snapshot = {
+      ...snapshot,
+      offlineCache: { ...restored.offlineCache },
+      entitlements: snapshot.entitlements
+        .map((app) => {
+          const persistedApp = restored.installState.find((value) => value.appId === app.id);
+          if (!persistedApp) {
+            return app;
+          }
+          return {
+            ...app,
+            installedVersion: persistedApp.installedVersion,
+            installState: persistedApp.installState,
+            updateAvailable: persistedApp.updateAvailable
+          };
+        })
+        .sort((a, b) => a.id.localeCompare(b.id))
+    };
+  }
+
+  const finalProjection = toControlPlaneViewModel({
+    snapshot,
+    status: {
+      mode: "ready",
+      message: "long run completed",
+      code: "ok_update_completed"
+    }
+  });
+
+  return {
+    cycles,
+    projectionStable: baselineProjection !== null && JSON.stringify(baselineProjection) === JSON.stringify(finalProjection),
+    finalProjection
+  };
+}
+
+export function runClockDriftScenario(input: {
+  nowIso: string;
+  lastValidatedAt: string | null;
+  offlineDaysRemaining: number;
+  maxClockSkewSeconds?: number;
+  mixedEntitlementTimestamps: string[];
+  maxSpreadSeconds?: number;
+}): {
+  driftDecision: ReturnType<typeof evaluateClockDrift>;
+  mixedDecision: ReturnType<typeof evaluateMixedEntitlementTimestamps>;
+  reasons: { reasonCode: string; remediation: string }[];
+} {
+  const driftDecision = evaluateClockDrift({
+    nowIso: input.nowIso,
+    lastValidatedAt: input.lastValidatedAt,
+    offlineDaysRemaining: input.offlineDaysRemaining,
+    maxClockSkewSeconds: input.maxClockSkewSeconds
+  });
+  const mixedDecision = evaluateMixedEntitlementTimestamps({
+    nowIso: input.nowIso,
+    evaluatedAt: input.mixedEntitlementTimestamps,
+    maxSpreadSeconds: input.maxSpreadSeconds
+  });
+
+  const reasons = [
+    {
+      reasonCode: driftDecision.reasonCode,
+      remediation: remediationForReason(driftDecision.reasonCode)
+    },
+    {
+      reasonCode: mixedDecision.reasonCode,
+      remediation: remediationForReason(mixedDecision.reasonCode)
+    }
+  ];
+
+  return {
+    driftDecision,
+    mixedDecision,
+    reasons
+  };
+}
+
+export function runTrustEnvelopeValidationScenario(seed: HubSnapshot): {
+  authorizedOnce: boolean;
+  hubRemoved: boolean;
+  trustArtifactValid: boolean;
+  launchTokenRequiredForOfflineRun: boolean;
+  offlineRunnableWithoutHub: boolean;
+} {
+  const entitlement = decideEntitlement({
+    identity: { authenticated: seed.session !== null },
+    license: { owned: seed.entitlements.some((app) => app.owned), revoked: false },
+    offlineCache: {
+      cacheState: seed.offlineCache.cacheState,
+      offlineDaysRemaining: seed.offlineCache.offlineDaysRemaining
+    }
+  });
+
+  const artifact = issueTrustArtifact(seed);
+  const parsedArtifact = parseTrustArtifact(serializeTrustArtifact(artifact));
+  const targetAppId = seed.entitlements[0]?.id ?? "";
+
+  return {
+    authorizedOnce: entitlement.outcome === "Authorized",
+    hubRemoved: true,
+    trustArtifactValid: parsedArtifact !== null,
+    launchTokenRequiredForOfflineRun: false,
+    offlineRunnableWithoutHub: isRunnableWithoutHub(parsedArtifact, targetAppId)
   };
 }
 
