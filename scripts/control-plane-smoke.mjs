@@ -1,7 +1,8 @@
 import { spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
+import os from "node:os";
 
 function runStep(command, args) {
   const result = spawnSync(command, args, { stdio: "inherit", shell: false });
@@ -43,10 +44,38 @@ async function run() {
   const launchTokenPath = join(domainRoot, "launchTokenBoundary.js");
   const launchTokenSource = readFileSync(launchTokenPath, "utf-8").replace('from "node:crypto";', 'from "node:crypto";');
   writeFileSync(launchTokenPath, launchTokenSource, "utf-8");
+  const authorityPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/installUpdateAuthority.js");
+  const authoritySource = readFileSync(authorityPath, "utf-8").replace(
+    'from "../domain/installUpdateStateMachine";',
+    'from "../domain/installUpdateStateMachine.js";'
+  );
+  writeFileSync(authorityPath, authoritySource, "utf-8");
+  const controlPlaneVmPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneViewModel.js");
+  let controlPlaneVmSource = readFileSync(controlPlaneVmPath, "utf-8");
+  controlPlaneVmSource = controlPlaneVmSource.replace(
+    'from "../domain/entitlementDecision";',
+    'from "../domain/entitlementDecision.js";'
+  );
+  controlPlaneVmSource = controlPlaneVmSource.replace(
+    'from "../domain/launchTokenBoundary";',
+    'from "../domain/launchTokenBoundary.js";'
+  );
+  controlPlaneVmSource = controlPlaneVmSource.replace(
+    'from "./controlPlanePersistence";',
+    'from "./controlPlanePersistence.js";'
+  );
+  writeFileSync(controlPlaneVmPath, controlPlaneVmSource, "utf-8");
 
   const entitlement = await import(pathToFileURL(join(domainRoot, "entitlementDecision.js")).href);
   const lifecycle = await import(pathToFileURL(join(domainRoot, "installUpdateStateMachine.js")).href);
   const tokenBoundary = await import(pathToFileURL(join(domainRoot, "launchTokenBoundary.js")).href);
+  const persistence = await import(pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlanePersistence.js")).href);
+  const installUpdateAuthority = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/installUpdateAuthority.js")).href
+  );
+  const controlPlaneViewModel = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneViewModel.js")).href
+  );
 
   const entitlementFixtures = JSON.parse(readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/entitlement-decision-snapshots.json"), "utf-8"));
   for (const fixture of entitlementFixtures) {
@@ -83,6 +112,60 @@ async function run() {
   const tampered = `${token.slice(0, -1)}x`;
   const tamperedVerify = tokenBoundary.verifyLaunchToken(tampered, tamperFixture.secret, tamperFixture.verifyAt);
   assert(tamperedVerify.valid === false && tamperedVerify.reason === "signature_invalid", "Tampered token must fail signature verification.");
+
+  const persistenceFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-persistence-snapshots.json"), "utf-8")
+  );
+  for (const fixture of persistenceFixtures) {
+    const serialized = persistence.serializePersistedControlPlaneState(fixture.state);
+    assertEqual(serialized, fixture.expectedSerialized, `Persistence serialization mismatch: ${fixture.name}`);
+    const parsed = persistence.parsePersistedControlPlaneState(serialized);
+    assert(parsed !== null, `Persistence parser should accept serialized state: ${fixture.name}`);
+    assertEqual(parsed, JSON.parse(fixture.expectedSerialized), `Persistence parse result mismatch: ${fixture.name}`);
+  }
+
+  const tempDir = mkdtempSync(join(os.tmpdir(), "antiphon-control-plane-smoke-"));
+  try {
+    const restartFile = join(tempDir, "offline-cache.json");
+    const restartState = persistenceFixtures[0].state;
+    const serialized = persistence.serializePersistedControlPlaneState(restartState);
+    writeFileSync(restartFile, serialized, "utf-8");
+    const loaded = persistence.parsePersistedControlPlaneState(readFileSync(restartFile, "utf-8"));
+    assert(loaded !== null, "Persistence should restore non-corrupt cache across restart.");
+    assertEqual(loaded.offlineCache, restartState.offlineCache, "Offline cache restore mismatch across restart.");
+    assertEqual(loaded.installState, JSON.parse(persistenceFixtures[0].expectedSerialized).installState, "Install state restore mismatch across restart.");
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+
+  const authorityFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/install-update-authority-snapshots.json"), "utf-8")
+  );
+  for (const fixture of authorityFixtures) {
+    const result = await installUpdateAuthority.runInstallUpdateAuthority(
+      fixture.input.snapshot,
+      fixture.input.action,
+      fixture.input.appId,
+      async () => fixture.input.stepResult
+    );
+    assert(result.result.ok === fixture.expectedOk, `Install/update authority success mismatch: ${fixture.name}`);
+    assert(result.result.reasonCode === fixture.expectedReasonCode, `Install/update authority reason mismatch: ${fixture.name}`);
+    assert(result.result.lifecycle.to === fixture.expectedLifecycleTo, `Install/update authority lifecycle mismatch: ${fixture.name}`);
+    if (result.result.ok) {
+      const app = result.snapshot.entitlements.find((candidate) => candidate.id === fixture.input.appId);
+      assert(app, `Install/update authority must preserve target app in snapshot: ${fixture.name}`);
+    }
+  }
+
+  const controlPlaneVmFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-view-model-snapshots.json"), "utf-8")
+  );
+  for (const fixture of controlPlaneVmFixtures) {
+    const actual = controlPlaneViewModel.toControlPlaneViewModel(fixture.hubState);
+    assertEqual(actual, fixture.expected, `Control-plane view-model snapshot mismatch: ${fixture.name}`);
+    const repeat = controlPlaneViewModel.toControlPlaneViewModel(fixture.hubState);
+    assertEqual(repeat, actual, `Control-plane view-model determinism mismatch: ${fixture.name}`);
+  }
 }
 
 run().catch((error) => {

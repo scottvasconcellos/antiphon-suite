@@ -1,0 +1,50 @@
+[
+  {
+    "name": "deterministic-serialization-sorts-install-state",
+    "state": {
+      "schema": "antiphon.control-plane-cache",
+      "version": 1,
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 20,
+        "cacheState": "valid"
+      },
+      "installState": [
+        {
+          "appId": "antiphon.b-app",
+          "installedVersion": null,
+          "installState": "not-installed",
+          "updateAvailable": false
+        },
+        {
+          "appId": "antiphon.a-app",
+          "installedVersion": "1.0.0",
+          "installState": "installed",
+          "updateAvailable": true
+        }
+      ],
+      "entitlementDecision": {
+        "input": {
+          "identity": {
+            "authenticated": true
+          },
+          "license": {
+            "owned": true,
+            "revoked": false
+          },
+          "offlineCache": {
+            "cacheState": "valid",
+            "offlineDaysRemaining": 20
+          }
+        },
+        "outcome": {
+          "outcome": "Authorized",
+          "reason": "owned_active_identity"
+        },
+        "evaluatedAt": "2026-02-13T00:00:00.000Z"
+      }
+    },
+    "expectedSerialized": "{\n  \"schema\": \"antiphon.control-plane-cache\",\n  \"version\": 1,\n  \"offlineCache\": {\n    \"lastValidatedAt\": \"2026-02-13T00:00:00.000Z\",\n    \"maxOfflineDays\": 21,\n    \"offlineDaysRemaining\": 20,\n    \"cacheState\": \"valid\"\n  },\n  \"installState\": [\n    {\n      \"appId\": \"antiphon.a-app\",\n      \"installedVersion\": \"1.0.0\",\n      \"installState\": \"installed\",\n      \"updateAvailable\": true\n    },\n    {\n      \"appId\": \"antiphon.b-app\",\n      \"installedVersion\": null,\n      \"installState\": \"not-installed\",\n      \"updateAvailable\": false\n    }\n  ],\n  \"entitlementDecision\": {\n    \"input\": {\n      \"identity\": {\n        \"authenticated\": true\n      },\n      \"license\": {\n        \"owned\": true,\n        \"revoked\": false\n      },\n      \"offlineCache\": {\n        \"cacheState\": \"valid\",\n        \"offlineDaysRemaining\": 20\n      }\n    },\n    \"outcome\": {\n      \"outcome\": \"Authorized\",\n      \"reason\": \"owned_active_identity\"\n    },\n    \"evaluatedAt\": \"2026-02-13T00:00:00.000Z\"\n  }\n}"
+  }
+]

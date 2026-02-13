@@ -16,6 +16,20 @@ function assert(condition, message) {
   }
 }
 
+function stable(value) {
+  if (Array.isArray(value)) {
+    return value.map((entry) => stable(entry));
+  }
+  if (value && typeof value === "object") {
+    const out = {};
+    for (const key of Object.keys(value).sort()) {
+      out[key] = stable(value[key]);
+    }
+    return out;
+  }
+  return value;
+}
+
 function patchImports(filePath, replacements) {
   let source = readFileSync(filePath, "utf-8");
   for (const [from, to] of replacements) {
@@ -39,14 +53,17 @@ async function run() {
     ["from \"./musicEngineRegistry\";", "from \"./musicEngineRegistry.js\";"],
     ["from \"./musicIntelligenceEngine\";", "from \"./musicIntelligenceEngine.js\";"],
     ["from \"./uiMusicProjectionAdapter\";", "from \"./uiMusicProjectionAdapter.js\";"],
-    ["from \"../services/musicTelemetryDto\";", "from \"../services/musicTelemetryDto.js\";"]
+    ["from \"../services/musicTelemetryDto\";", "from \"../services/musicTelemetryDto.js\";"],
+    ["from \"../services/installUpdateAuthority\";", "from \"../services/installUpdateAuthority.js\";"]
   ]);
   patchImports(join(domainRoot, "hubMusicOrchestrator.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);
   patchImports(join(domainRoot, "musicIntelligenceEngine.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);
   patchImports(join(domainRoot, "minimalRealMusicIntelligenceEngine.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);
+  patchImports(join(domainRoot, "ruleBasedMusicIntelligenceEngine.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);
   patchImports(join(domainRoot, "musicEngineRegistry.js"), [
     ["from \"./minimalRealMusicIntelligenceEngine\";", "from \"./minimalRealMusicIntelligenceEngine.js\";"],
-    ["from \"./musicIntelligenceEngine\";", "from \"./musicIntelligenceEngine.js\";"]
+    ["from \"./musicIntelligenceEngine\";", "from \"./musicIntelligenceEngine.js\";"],
+    ["from \"./ruleBasedMusicIntelligenceEngine\";", "from \"./ruleBasedMusicIntelligenceEngine.js\";"]
   ]);
   patchImports(join(domainRoot, "uiMusicProjectionAdapter.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);
   patchImports(join(servicesRoot, "stubHubEngine.js"), [
@@ -59,11 +76,15 @@ async function run() {
     ["from \"./musicTelemetryDto\";", "from \"./musicTelemetryDto.js\";"]
   ]);
   patchImports(join(servicesRoot, "hubViewModel.js"), [
-    ["from \"../domain/musicEngineContracts\";", "from \"../domain/musicEngineContracts.js\";"]
+    ["from \"../domain/musicEngineContracts\";", "from \"../domain/musicEngineContracts.js\";"],
+    ["from \"../domain/musicEngineRegistry\";", "from \"../domain/musicEngineRegistry.js\";"]
   ]);
   patchImports(join(servicesRoot, "musicTelemetryDto.js"), [
     ["from \"../domain/musicEngineContracts\";", "from \"../domain/musicEngineContracts.js\";"],
     ["from \"../domain/musicTelemetryContracts\";", "from \"../domain/musicTelemetryContracts.js\";"]
+  ]);
+  patchImports(join(servicesRoot, "installUpdateAuthority.js"), [
+    ["from \"../domain/installUpdateStateMachine\";", "from \"../domain/installUpdateStateMachine.js\";"]
   ]);
 
   const defaults = await import(pathToFileURL(join(domainRoot, "defaults.js")).href);
@@ -73,6 +94,7 @@ async function run() {
   const registry = await import(pathToFileURL(join(domainRoot, "musicEngineRegistry.js")).href);
   const stubMusicEngine = await import(pathToFileURL(join(domainRoot, "musicIntelligenceEngine.js")).href);
   const realMusicEngine = await import(pathToFileURL(join(domainRoot, "minimalRealMusicIntelligenceEngine.js")).href);
+  const ruleMusicEngine = await import(pathToFileURL(join(domainRoot, "ruleBasedMusicIntelligenceEngine.js")).href);
   const projectionAdapter = await import(pathToFileURL(join(domainRoot, "uiMusicProjectionAdapter.js")).href);
   const contracts = await import(pathToFileURL(join(domainRoot, "musicEngineContracts.js")).href);
   const telemetryContracts = await import(pathToFileURL(join(domainRoot, "musicTelemetryContracts.js")).href);
@@ -207,16 +229,51 @@ async function run() {
   for (const fixture of selectionFixtures) {
     const selection = registry.selectMusicEngine(fixture.snapshot, fixture.requestedEngineId ?? undefined);
     assert(
-      JSON.stringify({
+      JSON.stringify(stable({
         engineId: selection.engine.id,
         source: selection.source,
-        reason: selection.reason
-      }) === JSON.stringify(fixture.expected),
+        reason: selection.reason,
+        selectedEngineId: selection.selectedEngineId,
+        selectedCapabilitySummary: selection.selectedCapabilitySummary,
+        matrixSnapshotRef: selection.matrixSnapshotRef
+      })) === JSON.stringify(stable(fixture.expected)),
       `Music selection snapshot mismatch: ${fixture.name}`
     );
   }
-  const requested = registry.selectMusicEngine(defaults.DEFAULT_HUB_SNAPSHOT, realMusicEngine.MinimalRealMusicIntelligenceEngine.id).engine.id;
+  const requestEligibleSnapshot = {
+    ...defaults.DEFAULT_HUB_SNAPSHOT,
+    session: { userId: "usr_req", email: "req@antiphon.audio", displayName: "Req", signedInAt: "2026-02-13T00:00:00.000Z" },
+    offlineCache: { ...defaults.DEFAULT_HUB_SNAPSHOT.offlineCache, offlineDaysRemaining: 21 }
+  };
+  const requested = registry.selectMusicEngine(requestEligibleSnapshot, realMusicEngine.MinimalRealMusicIntelligenceEngine.id).engine.id;
   assert(requested === realMusicEngine.MinimalRealMusicIntelligenceEngine.id, "Requested engine ID must be honored deterministically.");
+  const requestedRule = registry.selectMusicEngine(requestEligibleSnapshot, ruleMusicEngine.RuleBasedMusicIntelligenceEngine.id).engine.id;
+  assert(requestedRule === ruleMusicEngine.RuleBasedMusicIntelligenceEngine.id, "Requested rule-based engine ID must be honored deterministically.");
+  const tieBreakSnapshot = {
+    ...defaults.DEFAULT_HUB_SNAPSHOT,
+    session: { userId: "usr_tie", email: "tie@antiphon.audio", displayName: "Tie", signedInAt: "2026-02-13T00:00:00.000Z" },
+    offlineCache: { ...defaults.DEFAULT_HUB_SNAPSHOT.offlineCache, offlineDaysRemaining: 21 }
+  };
+  const tieBreakSelection = registry.selectMusicEngine(tieBreakSnapshot);
+  assert(
+    tieBreakSelection.engine.id === "minimal-real-music-intelligence-v1",
+    "Multiple eligible engines must resolve with deterministic tie-breaker."
+  );
+  const ineligibleRequested = registry.selectMusicEngine(defaults.DEFAULT_HUB_SNAPSHOT, "minimal-real-music-intelligence-v1");
+  assert(
+    ineligibleRequested.source === "default" && ineligibleRequested.reason.includes("ineligible"),
+    "Requested ineligible engine must deterministically fall back."
+  );
+  const noEligibleSnapshot = {
+    ...defaults.DEFAULT_HUB_SNAPSHOT,
+    session: null,
+    offlineCache: { ...defaults.DEFAULT_HUB_SNAPSHOT.offlineCache, offlineDaysRemaining: -1 }
+  };
+  const noEligibleSelection = registry.selectMusicEngine(noEligibleSnapshot);
+  assert(
+    noEligibleSelection.engine.id === "emergency-fallback-music-intelligence-v1",
+    "Zero eligible engines must deterministically select emergency fallback."
+  );
 
   const explicitStubEngine = new hubEngineModule.HubEngine(fakeGateway, fakeStore, { musicEngineId: stubMusicEngine.StubMusicIntelligenceEngine.id });
   const explicitStubProjection = explicitStubEngine.runMusicIntelligence();
@@ -256,10 +313,22 @@ async function run() {
       `Hub engine summary mismatch: ${fixture.name}`
     );
     assert(
-      JSON.stringify(actual) === JSON.stringify(fixture.expected),
+      JSON.stringify(stable(actual)) === JSON.stringify(stable(fixture.expected)),
       `Hub view-model snapshot mismatch: ${fixture.name}`
     );
   }
+  const capabilityMatrixFixture = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json"), "utf-8")
+  );
+  const capabilityMatrix = hubViewModel.toCapabilityMatrixViewModel();
+  assert(
+    JSON.stringify(stable(capabilityMatrix)) === JSON.stringify(stable(capabilityMatrixFixture)),
+    "Engine capability matrix snapshot mismatch."
+  );
+  assert(
+    JSON.stringify(hubViewModel.toCapabilityMatrixViewModel()) === JSON.stringify(capabilityMatrix),
+    "Engine capability matrix projection must be deterministic."
+  );
 
   const pipelineFixtures = JSON.parse(
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/music-pipeline-snapshots.json"), "utf-8")
@@ -267,17 +336,21 @@ async function run() {
   for (const fixture of pipelineFixtures) {
     const selection = registry.selectMusicEngine(fixture.snapshot, fixture.requestedEngineId ?? undefined);
     const actual = orchestrator.runMusicPipeline(fixture.snapshot, selection, projectionAdapter.UiMusicProjectionAdapter);
+    const comparable = {
+      status: actual.status,
+      engineId: actual.engineId,
+      engineName: actual.engineName,
+      engineVersion: actual.engineVersion,
+      selectionSource: actual.selectionSource,
+      selectionReason: actual.selectionReason,
+      selectedEngineId: actual.selectedEngineId,
+      selectedCapabilitySummary: actual.selectedCapabilitySummary,
+      matrixSnapshotRef: actual.matrixSnapshotRef,
+      projection: actual.projection
+    };
     assert(
-      JSON.stringify({
-        status: actual.status,
-        engineId: actual.engineId,
-        engineName: actual.engineName,
-        engineVersion: actual.engineVersion,
-        selectionSource: actual.selectionSource,
-        selectionReason: actual.selectionReason,
-        projection: actual.projection
-      }) === JSON.stringify(fixture.expected),
-      `Music pipeline snapshot mismatch: ${fixture.name}`
+      JSON.stringify(stable(comparable)) === JSON.stringify(stable(fixture.expected)),
+      `Music pipeline snapshot mismatch: ${fixture.name}\nactual=${JSON.stringify(comparable)}\nexpected=${JSON.stringify(fixture.expected)}`
     );
   }
 
@@ -289,7 +362,7 @@ async function run() {
     const pipeline = orchestrator.runMusicPipeline(fixture.snapshot, selection, projectionAdapter.UiMusicProjectionAdapter);
     const dto = telemetry.toAuthorityMusicTelemetryDto(fixture.snapshot, pipeline);
     assert(
-      JSON.stringify(dto) === JSON.stringify(fixture.expected),
+      JSON.stringify(stable(dto)) === JSON.stringify(stable(fixture.expected)),
       `Music telemetry snapshot mismatch: ${fixture.name}`
     );
     assert(
@@ -297,6 +370,28 @@ async function run() {
       `Telemetry schema version mismatch: ${fixture.name}`
     );
   }
+  const missingTelemetry = telemetry.toAuthorityMusicTelemetryDto(defaults.DEFAULT_HUB_SNAPSHOT, null);
+  assert(
+    missingTelemetry.decision.status === "runtime-error" && missingTelemetry.engine.id === "none",
+    "Missing telemetry input must normalize deterministically."
+  );
+  const invalidTelemetry = telemetry.toAuthorityMusicTelemetryDto(defaults.DEFAULT_HUB_SNAPSHOT, {
+    status: "ready",
+    message: "x",
+    engineId: "",
+    engineName: "",
+    engineVersion: "",
+    selectionSource: "default",
+    selectionReason: "x",
+    selectedEngineId: "",
+    selectedCapabilitySummary: "",
+    matrixSnapshotRef: "",
+    projection: null
+  });
+  assert(
+    invalidTelemetry.decision.status === "runtime-error" && invalidTelemetry.engine.id === "none",
+    "Invalid telemetry input must normalize deterministically."
+  );
 }
 
 run().catch((error) => {

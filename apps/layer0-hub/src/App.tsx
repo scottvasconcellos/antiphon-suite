@@ -10,6 +10,7 @@ import {
   toInstallActionLabel,
   toTransactionLabel
 } from "./services/hubViewModel";
+import { toControlPlaneViewModel } from "./services/controlPlaneViewModel";
 
 const INITIAL_EMAIL = "producer@antiphon.audio";
 const built = buildHubEngine();
@@ -28,6 +29,7 @@ export default function App() {
 
   const intelligence = built.engine ? built.engine.runMusicIntelligence() : null;
   const vm = toHubViewModel(hubState, intelligence);
+  const controlPlaneVm = toControlPlaneViewModel(hubState);
 
   async function runAction(actionId: string, task: () => Promise<HubState>) {
     setBusyState(actionId);
@@ -72,6 +74,10 @@ export default function App() {
       <p className="status-line">{vm.intelligenceHeadline}: {vm.intelligenceDetail}</p>
       <p className="status-line">{toEngineSummaryLine(vm)}</p>
       <p className="status-line">Selection: {vm.intelligenceSelectionReason}</p>
+      <p className="status-line">Entitlement: {controlPlaneVm.entitlement.outcome} ({controlPlaneVm.entitlement.reason})</p>
+      <p className="status-line">Install/Update: {controlPlaneVm.installUpdate.state} ({controlPlaneVm.installUpdate.reasonCode})</p>
+      <p className="status-line">Launch token: {controlPlaneVm.launchToken.status} ({controlPlaneVm.launchToken.reason})</p>
+      <p className="status-line">Cache schema: {controlPlaneVm.persistedCache.schema}@v{controlPlaneVm.persistedCache.version} restorable={String(controlPlaneVm.persistedCache.restorable)}</p>
 
       <section className="grid-layout">
         <SectionCard

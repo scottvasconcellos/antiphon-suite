@@ -18,9 +18,12 @@
     "src/domain/hubEngine.ts",
     "src/domain/musicIntelligenceEngine.ts",
     "src/domain/minimalRealMusicIntelligenceEngine.ts",
+    "src/domain/ruleBasedMusicIntelligenceEngine.ts",
     "src/services/stubHubEngine.ts",
     "src/services/musicIntelligenceAdapter.ts",
     "src/services/hubViewModel.ts",
-    "src/services/musicTelemetryDto.ts"
+    "src/services/musicTelemetryDto.ts",
+    "src/services/installUpdateAuthority.ts",
+    "src/domain/installUpdateStateMachine.ts"
   ]
 }
