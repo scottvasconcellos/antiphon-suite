@@ -10,6 +10,7 @@
     "src/domain/defaults.ts",
     "src/domain/ports.ts",
     "src/domain/hubEngineCore.ts",
-    "src/domain/hubEngine.ts"
+    "src/domain/hubEngine.ts",
+    "src/services/stubHubEngine.ts"
   ]
 }

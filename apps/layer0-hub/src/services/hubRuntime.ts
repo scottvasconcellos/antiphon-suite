@@ -1,4 +1,4 @@
-import { type HubEngine } from "../domain/hubEngine";
+import { type HubEngineContract } from "../domain/engineContract";
 import { type HubState } from "../domain/types";
 
 type GetCurrentState = () => HubState;
@@ -14,7 +14,7 @@ function runtimeErrorState(base: HubState, message: string): HubState {
 }
 
 export async function runHubTask(
-  engine: HubEngine | null,
+  engine: HubEngineContract | null,
   task: () => Promise<HubState>,
   getCurrentState: GetCurrentState
 ): Promise<HubState> {

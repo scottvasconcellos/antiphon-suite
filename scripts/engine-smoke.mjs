@@ -28,9 +28,15 @@ async function run() {
     .replace('from "./defaults";', 'from "./defaults.js";')
     .replace('from "./hubEngineCore";', 'from "./hubEngineCore.js";');
   writeFileSync(enginePath, engineSource, "utf-8");
+  const stubPath = join(process.cwd(), "apps/layer0-hub/.tmp-engine-smoke/services/stubHubEngine.js");
+  const stubSource = readFileSync(stubPath, "utf-8")
+    .replace('from "../domain/defaults";', 'from "../domain/defaults.js";')
+    .replace('from "../domain/hubEngineCore";', 'from "../domain/hubEngineCore.js";');
+  writeFileSync(stubPath, stubSource, "utf-8");
   const core = await import(pathToFileURL(join(basePath, "hubEngineCore.js")).href);
   const defaults = await import(pathToFileURL(join(basePath, "defaults.js")).href);
   const hubEngineModule = await import(pathToFileURL(enginePath).href);
+  const stubModule = await import(pathToFileURL(stubPath).href);
 
   const seed = structuredClone(defaults.DEFAULT_HUB_SNAPSHOT);
   const payload = {
@@ -94,6 +100,12 @@ async function run() {
   assert(installedState.snapshot.entitlements[0].installedVersion === "1.0.0", "HubEngine installApp should upsert installed version.");
   const signedOutState = await hubEngine.signOut();
   assert(signedOutState.snapshot.session === null, "HubEngine signOut should clear session.");
+
+  const stubEngineA = new stubModule.StubHubEngine();
+  const stubEngineB = new stubModule.StubHubEngine();
+  const stubA = await stubEngineA.bootstrap();
+  const stubB = await stubEngineB.bootstrap();
+  assert(JSON.stringify(stubA) === JSON.stringify(stubB), "StubHubEngine bootstrap should be deterministic.");
 }
 
 run().catch((error) => {

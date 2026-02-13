@@ -1,7 +1,9 @@
+import { type HubEngineContract } from "../domain/engineContract";
 import { HubEngine } from "../domain/hubEngine";
 import { type HubState } from "../domain/types";
 import { HttpHubGateway } from "./httpHubGateway";
 import { LocalSnapshotStore } from "./localSnapshotStore";
+import { StubHubEngine } from "./stubHubEngine";
 
 function missingConfigState(message: string): HubState {
   return {
@@ -23,7 +25,15 @@ function missingConfigState(message: string): HubState {
   };
 }
 
-export function buildHubEngine(): { engine: HubEngine | null; initialState: HubState } {
+export function buildHubEngine(): { engine: HubEngineContract | null; initialState: HubState } {
+  const engineMode = import.meta.env.VITE_ANTIPHON_ENGINE_MODE;
+  if (engineMode === "stub") {
+    return {
+      engine: new StubHubEngine(),
+      initialState: missingConfigState("Booting...")
+    };
+  }
+
   const apiBaseUrl = import.meta.env.VITE_ANTIPHON_API_URL;
   if (!apiBaseUrl) {
     return {

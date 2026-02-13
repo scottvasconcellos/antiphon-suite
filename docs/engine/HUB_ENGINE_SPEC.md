@@ -22,6 +22,7 @@
 - Domain (`applyHubEvent`) accepts only resolved data payloads and never performs IO.
 - Services/gateways own all network and storage side effects.
 - UI consumes only returned `HubState` and never mutates snapshot directly.
+- Adapter boundary uses `HubEngineContract`; runtime may wire `HubEngine` (networked) or `StubHubEngine` (headless deterministic).
 
 ## Invariants
 - `session = null` after `SIGNED_OUT`.

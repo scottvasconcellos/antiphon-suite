@@ -1,9 +1,10 @@
 import { DEFAULT_HUB_SNAPSHOT } from "./defaults";
+import { type HubEngineContract } from "./engineContract";
 import { type HubGateway, type HubStore } from "./ports";
 import { applyHubEvent } from "./hubEngineCore";
 import { type HubState } from "./types";
 
-export class HubEngine {
+export class HubEngine implements HubEngineContract {
   constructor(
     private readonly gateway: HubGateway,
     private readonly store: HubStore
