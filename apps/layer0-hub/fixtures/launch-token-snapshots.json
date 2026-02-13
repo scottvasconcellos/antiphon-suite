@@ -1,0 +1,44 @@
+[
+  {
+    "name": "issue_and_verify_online",
+    "claims": {
+      "appId": "app.antiphon.synth",
+      "userId": "usr_123",
+      "entitlementOutcome": "Authorized",
+      "issuedAt": 1739400000,
+      "expiresAt": 1739403600
+    },
+    "secret": "layer0-secret",
+    "verifyAt": 1739400100,
+    "expectedValid": true,
+    "expectedReason": "verified"
+  },
+  {
+    "name": "offline_authorized_verify_without_hub",
+    "claims": {
+      "appId": "app.antiphon.synth",
+      "userId": "usr_123",
+      "entitlementOutcome": "OfflineAuthorized",
+      "issuedAt": 1739400000,
+      "expiresAt": 1739403600
+    },
+    "secret": "layer0-secret",
+    "verifyAt": 1739400200,
+    "expectedValid": true,
+    "expectedReason": "verified"
+  },
+  {
+    "name": "expired_token",
+    "claims": {
+      "appId": "app.antiphon.synth",
+      "userId": "usr_123",
+      "entitlementOutcome": "Authorized",
+      "issuedAt": 1739400000,
+      "expiresAt": 1739400100
+    },
+    "secret": "layer0-secret",
+    "verifyAt": 1739400200,
+    "expectedValid": false,
+    "expectedReason": "expired"
+  }
+]

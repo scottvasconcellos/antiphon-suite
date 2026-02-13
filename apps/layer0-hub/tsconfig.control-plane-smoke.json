@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "./.tmp-control-plane-smoke",
+    "rootDir": "./src"
+  },
+  "include": [
+    "src/domain/types.ts",
+    "src/domain/entitlementDecision.ts",
+    "src/domain/installUpdateStateMachine.ts",
+    "src/domain/launchTokenBoundary.ts"
+  ]
+}

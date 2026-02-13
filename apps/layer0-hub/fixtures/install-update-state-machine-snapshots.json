@@ -1,0 +1,8 @@
+[
+  { "name": "install_flow", "from": "NotInstalled", "event": "BeginInstall", "expected": { "from": "NotInstalled", "event": "BeginInstall", "to": "Installing", "reason": "install_started" } },
+  { "name": "install_success", "from": "Installing", "event": "InstallSucceeded", "expected": { "from": "Installing", "event": "InstallSucceeded", "to": "Installed", "reason": "install_completed" } },
+  { "name": "update_available", "from": "Installed", "event": "MarkUpdateAvailable", "expected": { "from": "Installed", "event": "MarkUpdateAvailable", "to": "UpdateAvailable", "reason": "update_detected" } },
+  { "name": "update_failure", "from": "Updating", "event": "UpdateFailed", "expected": { "from": "Updating", "event": "UpdateFailed", "to": "UpdateFailed", "reason": "update_failed" } },
+  { "name": "recover_update_failure", "from": "UpdateFailed", "event": "AcknowledgeFailure", "expected": { "from": "UpdateFailed", "event": "AcknowledgeFailure", "to": "UpdateAvailable", "reason": "recovery_to_update_available" } },
+  { "name": "invalid_transition_noop", "from": "NotInstalled", "event": "UpdateSucceeded", "expected": { "from": "NotInstalled", "event": "UpdateSucceeded", "to": "NotInstalled", "reason": "no_op_invalid_transition" } }
+]
