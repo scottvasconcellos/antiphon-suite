@@ -11,11 +11,14 @@
     "src/domain/ports.ts",
     "src/domain/musicEngineContracts.ts",
     "src/domain/hubMusicOrchestrator.ts",
+    "src/domain/musicEngineRegistry.ts",
     "src/domain/uiMusicProjectionAdapter.ts",
     "src/domain/hubEngineCore.ts",
     "src/domain/hubEngine.ts",
     "src/domain/musicIntelligenceEngine.ts",
+    "src/domain/minimalRealMusicIntelligenceEngine.ts",
     "src/services/stubHubEngine.ts",
-    "src/services/musicIntelligenceAdapter.ts"
+    "src/services/musicIntelligenceAdapter.ts",
+    "src/services/hubViewModel.ts"
   ]
 }

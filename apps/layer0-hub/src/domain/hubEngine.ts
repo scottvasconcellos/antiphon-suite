@@ -1,8 +1,8 @@
 import { DEFAULT_HUB_SNAPSHOT } from "./defaults";
 import { type HubEngineContract } from "./engineContract";
 import { runMusicPipeline } from "./hubMusicOrchestrator";
+import { selectMusicEngine } from "./musicEngineRegistry";
 import { type HubGateway, type HubStore } from "./ports";
-import { StubMusicIntelligenceEngine } from "./musicIntelligenceEngine";
 import { UiMusicProjectionAdapter } from "./uiMusicProjectionAdapter";
 import { applyHubEvent } from "./hubEngineCore";
 import { type HubState } from "./types";
@@ -10,7 +10,8 @@ import { type HubState } from "./types";
 export class HubEngine implements HubEngineContract {
   constructor(
     private readonly gateway: HubGateway,
-    private readonly store: HubStore
+    private readonly store: HubStore,
+    private readonly options: { musicEngineId?: string } = {}
   ) {}
 
   async bootstrap(): Promise<HubState> {
@@ -111,7 +112,9 @@ export class HubEngine implements HubEngineContract {
   }
 
   runMusicIntelligence() {
-    return runMusicPipeline(this.store.load(), StubMusicIntelligenceEngine, UiMusicProjectionAdapter);
+    const snapshot = this.store.load();
+    const selected = selectMusicEngine(snapshot, this.options.musicEngineId);
+    return runMusicPipeline(snapshot, selected.engine, UiMusicProjectionAdapter);
   }
 
   reset(): HubState {

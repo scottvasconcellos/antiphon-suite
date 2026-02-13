@@ -27,9 +27,10 @@ function missingConfigState(message: string): HubState {
 
 export function buildHubEngine(): { engine: HubEngineContract | null; initialState: HubState } {
   const engineMode = import.meta.env.VITE_ANTIPHON_ENGINE_MODE;
+  const musicEngineId = import.meta.env.VITE_ANTIPHON_MUSIC_ENGINE_ID;
   if (engineMode === "stub") {
     return {
-      engine: new StubHubEngine(),
+      engine: new StubHubEngine({ musicEngineId }),
       initialState: missingConfigState("Booting...")
     };
   }
@@ -42,7 +43,7 @@ export function buildHubEngine(): { engine: HubEngineContract | null; initialSta
     };
   }
 
-  const engine = new HubEngine(new HttpHubGateway({ apiBaseUrl }), new LocalSnapshotStore());
+  const engine = new HubEngine(new HttpHubGateway({ apiBaseUrl }), new LocalSnapshotStore(), { musicEngineId });
   return {
     engine,
     initialState: missingConfigState("Booting...")

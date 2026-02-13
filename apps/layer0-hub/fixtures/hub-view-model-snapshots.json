@@ -1,0 +1,84 @@
+[
+  {
+    "name": "ready_signed_in_install_lane",
+    "hubState": {
+      "snapshot": {
+        "session": {
+          "userId": "usr_1",
+          "email": "producer@antiphon.audio",
+          "displayName": "Producer",
+          "signedInAt": "2026-02-13T00:00:00.000Z"
+        },
+        "entitlements": [
+          {
+            "id": "app.1",
+            "name": "App One",
+            "version": "1.0.0",
+            "installedVersion": null,
+            "owned": true,
+            "installState": "not-installed",
+            "updateAvailable": false
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 21,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "ready",
+        "message": "ok"
+      }
+    },
+    "intelligence": {
+      "status": "ready",
+      "message": "Engine minimal-real-music-intelligence-v1 evaluated.",
+      "projection": {
+        "lane": "install",
+        "headline": "Install recommended tools",
+        "detail": "Install owned tools to unlock full production flow.",
+        "confidencePct": 82
+      }
+    },
+    "expected": {
+      "statusLine": "Signed in: ownership state synced and ready for install authority actions.",
+      "installedCount": 0,
+      "ownedCount": 1,
+      "pendingUpdates": 0,
+      "intelligenceHeadline": "Install recommended tools",
+      "intelligenceDetail": "Install owned tools to unlock full production flow."
+    }
+  },
+  {
+    "name": "runtime_error_fallback",
+    "hubState": {
+      "snapshot": {
+        "session": null,
+        "entitlements": [],
+        "offlineCache": {
+          "lastValidatedAt": null,
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 0,
+          "cacheState": "empty"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "runtime-error",
+        "message": "Authority unreachable"
+      }
+    },
+    "intelligence": null,
+    "expected": {
+      "statusLine": "Authority unreachable",
+      "installedCount": 0,
+      "ownedCount": 0,
+      "pendingUpdates": 0,
+      "intelligenceHeadline": "Music Intelligence offline",
+      "intelligenceDetail": "Unavailable while runtime is in error state."
+    }
+  }
+]

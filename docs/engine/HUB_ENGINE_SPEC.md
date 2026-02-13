@@ -11,6 +11,7 @@
 - Enforce plugin output contract before adapter projection.
 - Return taxonomy-safe result (`ready` or `runtime-error`) without throwing.
 - Preserve deterministic behavior for identical snapshot and plugin inputs.
+- Select engine deterministically via registry rules (requested engine id if valid; otherwise default rule by snapshot state).
 
 ## State Model
 - Snapshot fields: `session`, `entitlements`, `offlineCache`, `transactions`.
@@ -50,3 +51,5 @@
 - `pnpm test:engine` validates orchestrator -> `StubHubEngine` -> `MusicIntelligence` adapter determinism.
 - `pnpm test:engine` validates contract enforcement on invalid plugin output and runtime-error taxonomy mapping.
 - `pnpm test:engine` validates edge cases: expired offline trust, zero-owned install routing, adapter exception mapping, and confidence clamping.
+- `pnpm test:engine` validates registry selection defaults and requested-engine override behavior.
+- `pnpm test:engine` validates hub view-model projection snapshots from `apps/layer0-hub/fixtures/hub-view-model-snapshots.json`.

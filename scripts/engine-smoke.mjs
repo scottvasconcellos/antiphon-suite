@@ -36,28 +36,41 @@ async function run() {
     ["from \"./defaults\";", "from \"./defaults.js\";"],
     ["from \"./hubEngineCore\";", "from \"./hubEngineCore.js\";"],
     ["from \"./hubMusicOrchestrator\";", "from \"./hubMusicOrchestrator.js\";"],
+    ["from \"./musicEngineRegistry\";", "from \"./musicEngineRegistry.js\";"],
     ["from \"./musicIntelligenceEngine\";", "from \"./musicIntelligenceEngine.js\";"],
     ["from \"./uiMusicProjectionAdapter\";", "from \"./uiMusicProjectionAdapter.js\";"]
   ]);
   patchImports(join(domainRoot, "hubMusicOrchestrator.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);
   patchImports(join(domainRoot, "musicIntelligenceEngine.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);
+  patchImports(join(domainRoot, "minimalRealMusicIntelligenceEngine.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);
+  patchImports(join(domainRoot, "musicEngineRegistry.js"), [
+    ["from \"./minimalRealMusicIntelligenceEngine\";", "from \"./minimalRealMusicIntelligenceEngine.js\";"],
+    ["from \"./musicIntelligenceEngine\";", "from \"./musicIntelligenceEngine.js\";"]
+  ]);
   patchImports(join(domainRoot, "uiMusicProjectionAdapter.js"), [["from \"./musicEngineContracts\";", "from \"./musicEngineContracts.js\";"]]);
   patchImports(join(servicesRoot, "stubHubEngine.js"), [
     ["from \"../domain/defaults\";", "from \"../domain/defaults.js\";"],
     ["from \"../domain/hubEngineCore\";", "from \"../domain/hubEngineCore.js\";"],
     ["from \"../domain/hubMusicOrchestrator\";", "from \"../domain/hubMusicOrchestrator.js\";"],
+    ["from \"../domain/musicEngineRegistry\";", "from \"../domain/musicEngineRegistry.js\";"],
     ["from \"../domain/musicIntelligenceEngine\";", "from \"../domain/musicIntelligenceEngine.js\";"],
     ["from \"../domain/uiMusicProjectionAdapter\";", "from \"../domain/uiMusicProjectionAdapter.js\";"]
+  ]);
+  patchImports(join(servicesRoot, "hubViewModel.js"), [
+    ["from \"../domain/musicEngineContracts\";", "from \"../domain/musicEngineContracts.js\";"]
   ]);
 
   const defaults = await import(pathToFileURL(join(domainRoot, "defaults.js")).href);
   const core = await import(pathToFileURL(join(domainRoot, "hubEngineCore.js")).href);
   const hubEngineModule = await import(pathToFileURL(join(domainRoot, "hubEngine.js")).href);
   const orchestrator = await import(pathToFileURL(join(domainRoot, "hubMusicOrchestrator.js")).href);
+  const registry = await import(pathToFileURL(join(domainRoot, "musicEngineRegistry.js")).href);
   const stubMusicEngine = await import(pathToFileURL(join(domainRoot, "musicIntelligenceEngine.js")).href);
+  const realMusicEngine = await import(pathToFileURL(join(domainRoot, "minimalRealMusicIntelligenceEngine.js")).href);
   const projectionAdapter = await import(pathToFileURL(join(domainRoot, "uiMusicProjectionAdapter.js")).href);
   const contracts = await import(pathToFileURL(join(domainRoot, "musicEngineContracts.js")).href);
   const stubModule = await import(pathToFileURL(join(servicesRoot, "stubHubEngine.js")).href);
+  const hubViewModel = await import(pathToFileURL(join(servicesRoot, "hubViewModel.js")).href);
 
   const seed = structuredClone(defaults.DEFAULT_HUB_SNAPSHOT);
   const syncEvent = {
@@ -146,6 +159,19 @@ async function run() {
   const pluginB = orchestrator.runMusicPipeline(stubB.snapshot, stubMusicEngine.StubMusicIntelligenceEngine, projectionAdapter.UiMusicProjectionAdapter);
   assert(JSON.stringify(pluginA) === JSON.stringify(pluginB), "Engine plugin + adapter projection must be deterministic.");
 
+  const registryIds = registry.getRegisteredMusicEngineIds();
+  assert(JSON.stringify(registryIds) === JSON.stringify([...registryIds].sort()), "Engine registry IDs must be deterministic.");
+  const defaultSignedOut = registry.selectMusicEngine(defaults.DEFAULT_HUB_SNAPSHOT).engine.id;
+  assert(defaultSignedOut === stubMusicEngine.StubMusicIntelligenceEngine.id, "Signed-out default must select stub engine.");
+  const signedInSnapshot = {
+    ...defaults.DEFAULT_HUB_SNAPSHOT,
+    session: { userId: "usr_sel", email: "sel@antiphon.audio", displayName: "Sel", signedInAt: "2026-02-13T00:00:00.000Z" }
+  };
+  const defaultSignedIn = registry.selectMusicEngine(signedInSnapshot).engine.id;
+  assert(defaultSignedIn === realMusicEngine.MinimalRealMusicIntelligenceEngine.id, "Signed-in default must select minimal real engine.");
+  const requested = registry.selectMusicEngine(defaults.DEFAULT_HUB_SNAPSHOT, realMusicEngine.MinimalRealMusicIntelligenceEngine.id).engine.id;
+  assert(requested === realMusicEngine.MinimalRealMusicIntelligenceEngine.id, "Requested engine ID must be honored deterministically.");
+
   const staleInput = { hasSession: true, ownedCount: 2, installedCount: 2, offlineDaysRemaining: 0 };
   const staleDecision = stubMusicEngine.evaluateMusicIntelligence(staleInput);
   assert(staleDecision.lane === "authenticate", "Expired offline trust should route to authenticate lane.");
@@ -159,6 +185,17 @@ async function run() {
   const inputA = contracts.toMusicIntelligenceInput(stubA.snapshot);
   const inputB = contracts.toMusicIntelligenceInput(stubA.snapshot);
   assert(JSON.stringify(inputA) === JSON.stringify(inputB), "Input mapping must remain deterministic.");
+
+  const fixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/hub-view-model-snapshots.json"), "utf-8")
+  );
+  for (const fixture of fixtures) {
+    const actual = hubViewModel.toHubViewModel(fixture.hubState, fixture.intelligence);
+    assert(
+      JSON.stringify(actual) === JSON.stringify(fixture.expected),
+      `Hub view-model snapshot mismatch: ${fixture.name}`
+    );
+  }
 }
 
 run().catch((error) => {

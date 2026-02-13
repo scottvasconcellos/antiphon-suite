@@ -2,7 +2,7 @@ import { type HubEngineContract } from "../domain/engineContract";
 import { DEFAULT_HUB_SNAPSHOT } from "../domain/defaults";
 import { applyHubEvent } from "../domain/hubEngineCore";
 import { runMusicPipeline } from "../domain/hubMusicOrchestrator";
-import { StubMusicIntelligenceEngine } from "../domain/musicIntelligenceEngine";
+import { selectMusicEngine } from "../domain/musicEngineRegistry";
 import { type EntitledApp, type HubSnapshot, type HubState } from "../domain/types";
 import { UiMusicProjectionAdapter } from "../domain/uiMusicProjectionAdapter";
 
@@ -26,6 +26,8 @@ const STUB_OFFLINE_CACHE: HubSnapshot["offlineCache"] = {
 };
 
 export class StubHubEngine implements HubEngineContract {
+  constructor(private readonly options: { musicEngineId?: string } = {}) {}
+
   private snapshot: HubSnapshot = structuredClone(DEFAULT_HUB_SNAPSHOT);
 
   async bootstrap(): Promise<HubState> {
@@ -103,7 +105,8 @@ export class StubHubEngine implements HubEngineContract {
   }
 
   runMusicIntelligence() {
-    return runMusicPipeline(this.snapshot, StubMusicIntelligenceEngine, UiMusicProjectionAdapter);
+    const selected = selectMusicEngine(this.snapshot, this.options.musicEngineId);
+    return runMusicPipeline(this.snapshot, selected.engine, UiMusicProjectionAdapter);
   }
 
   reset(): HubState {
