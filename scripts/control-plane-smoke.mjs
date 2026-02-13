@@ -122,6 +122,12 @@ async function run() {
   const controlPlaneOperations = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneOperationsViewModel.js")).href
   );
+  const controlPlaneContracts = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneContracts.js")).href
+  );
+  const controlPlaneUiContract = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneUiContract.js")).href
+  );
 
   const entitlementFixtures = JSON.parse(readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/entitlement-decision-snapshots.json"), "utf-8"));
   for (const fixture of entitlementFixtures) {
@@ -168,6 +174,23 @@ async function run() {
     const parsed = persistence.parsePersistedControlPlaneState(serialized);
     assert(parsed !== null, `Persistence parser should accept serialized state: ${fixture.name}`);
     assertEqual(parsed, JSON.parse(fixture.expectedSerialized), `Persistence parse result mismatch: ${fixture.name}`);
+  }
+
+  const persistenceTortureFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-persistence-torture-snapshots.json"), "utf-8")
+  );
+  for (const fixture of persistenceTortureFixtures) {
+    const report = persistence.parsePersistedControlPlaneStateWithReport(
+      fixture.raw,
+      fixture.nowIso ? { nowIso: fixture.nowIso, maxSkewSeconds: fixture.maxSkewSeconds } : undefined
+    );
+    assertEqual(report.reasonCode, fixture.expected.reasonCode, `Persistence torture reason mismatch: ${fixture.name}`);
+    assertEqual(report.remediation, fixture.expected.remediation, `Persistence torture remediation mismatch: ${fixture.name}`);
+    if ("state" in fixture.expected) {
+      assertEqual(report.state, fixture.expected.state, `Persistence torture state mismatch: ${fixture.name}`);
+    } else {
+      assert(report.state !== null, `Persistence torture should produce valid state: ${fixture.name}`);
+    }
   }
 
   const tempDir = mkdtempSync(join(os.tmpdir(), "antiphon-control-plane-smoke-"));
@@ -273,6 +296,29 @@ async function run() {
   for (const fixture of operationsFixtures) {
     const actual = controlPlaneOperations.toControlPlaneOperations(fixture.snapshot, 5);
     assertEqual(actual, fixture.expected, `Control-plane operations snapshot mismatch: ${fixture.name}`);
+  }
+
+  const contractFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-contract-compat-snapshots.json"), "utf-8")
+  );
+  for (const fixture of contractFixtures) {
+    const actual = controlPlaneContracts.evaluateContractCompatibility(
+      fixture.contract,
+      fixture.requestedVersion
+    );
+    assertEqual(actual, fixture.expected, `Control-plane contract compatibility mismatch: ${fixture.name}`);
+  }
+
+  const uiContractFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-ui-contract-snapshots.json"), "utf-8")
+  );
+  for (const fixture of uiContractFixtures) {
+    const actual = controlPlaneUiContract.toControlPlaneUiContract(
+      fixture.hubVm,
+      fixture.controlPlaneVm,
+      fixture.opsVm
+    );
+    assertEqual(actual, fixture.expected, `Control-plane UI contract mismatch: ${fixture.name}`);
   }
 }
 

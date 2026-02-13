@@ -1,0 +1,48 @@
+[
+  {
+    "name": "corrupted-json",
+    "raw": "{not-json",
+    "expected": {
+      "reasonCode": "invalid_json",
+      "remediation": "rebuild_cache",
+      "state": null
+    }
+  },
+  {
+    "name": "partial-write-root",
+    "raw": "{\"schema\":\"antiphon.control-plane-cache\"}",
+    "expected": {
+      "reasonCode": "unsupported_schema_or_version",
+      "remediation": "upgrade_or_downgrade_cache_version",
+      "state": null
+    }
+  },
+  {
+    "name": "missing-fields",
+    "raw": "{\"schema\":\"antiphon.control-plane-cache\",\"version\":1,\"offlineCache\":{\"lastValidatedAt\":null,\"maxOfflineDays\":21,\"offlineDaysRemaining\":0,\"cacheState\":\"empty\"},\"installState\":\"bad\",\"entitlementDecision\":null}",
+    "expected": {
+      "reasonCode": "invalid_install_state",
+      "remediation": "rebuild_cache",
+      "state": null
+    }
+  },
+  {
+    "name": "extra-fields-allowed",
+    "raw": "{\"schema\":\"antiphon.control-plane-cache\",\"version\":1,\"offlineCache\":{\"lastValidatedAt\":\"2026-02-13T00:00:00.000Z\",\"maxOfflineDays\":21,\"offlineDaysRemaining\":20,\"cacheState\":\"valid\"},\"installState\":[],\"entitlementDecision\":null,\"extra\":\"ignored\"}",
+    "expected": {
+      "reasonCode": "ok_cache_loaded",
+      "remediation": "none"
+    }
+  },
+  {
+    "name": "clock-skew-stale",
+    "raw": "{\"schema\":\"antiphon.control-plane-cache\",\"version\":1,\"offlineCache\":{\"lastValidatedAt\":\"2010-01-01T00:00:00.000Z\",\"maxOfflineDays\":21,\"offlineDaysRemaining\":20,\"cacheState\":\"valid\"},\"installState\":[],\"entitlementDecision\":null}",
+    "nowIso": "2026-02-13T00:00:00.000Z",
+    "maxSkewSeconds": 86400,
+    "expected": {
+      "reasonCode": "stale_timestamp",
+      "remediation": "refresh_online_session",
+      "state": null
+    }
+  }
+]

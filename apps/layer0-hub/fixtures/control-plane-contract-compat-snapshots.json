@@ -1,0 +1,41 @@
+[
+  {
+    "name": "entitlement-supported-version",
+    "contract": "entitlementDecision",
+    "requestedVersion": "1.0.0",
+    "expected": {
+      "contract": "entitlementDecision",
+      "requestedVersion": "1.0.0",
+      "supportedVersion": "1.0.0",
+      "compatible": true,
+      "reasonCode": "ok_version_supported",
+      "remediation": "none"
+    }
+  },
+  {
+    "name": "install-update-unsupported-version",
+    "contract": "installUpdateAuthority",
+    "requestedVersion": "2.0.0",
+    "expected": {
+      "contract": "installUpdateAuthority",
+      "requestedVersion": "2.0.0",
+      "supportedVersion": "1.0.0",
+      "compatible": false,
+      "reasonCode": "unsupported_contract_version",
+      "remediation": "upgrade_or_downgrade_to_supported_version"
+    }
+  },
+  {
+    "name": "launch-token-unsupported-version",
+    "contract": "launchTokenBoundary",
+    "requestedVersion": "0.9.0",
+    "expected": {
+      "contract": "launchTokenBoundary",
+      "requestedVersion": "0.9.0",
+      "supportedVersion": "1.0.0",
+      "compatible": false,
+      "reasonCode": "unsupported_contract_version",
+      "remediation": "upgrade_or_downgrade_to_supported_version"
+    }
+  }
+]

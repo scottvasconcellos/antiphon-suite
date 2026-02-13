@@ -11,6 +11,7 @@ import {
 } from "./services/hubViewModel";
 import { toControlPlaneViewModel } from "./services/controlPlaneViewModel";
 import { toControlPlaneOperations } from "./services/controlPlaneOperationsViewModel";
+import { toControlPlaneUiContract } from "./services/controlPlaneUiContract";
 
 const INITIAL_EMAIL = "producer@antiphon.audio";
 const built = buildHubEngine();
@@ -30,6 +31,7 @@ export default function App() {
   const vm = toHubViewModel(hubState);
   const controlPlaneVm = toControlPlaneViewModel(hubState);
   const opsVm = toControlPlaneOperations(hubState.snapshot);
+  const uiContract = toControlPlaneUiContract(vm, controlPlaneVm, opsVm);
 
   async function runAction(actionId: string, task: () => Promise<HubState>) {
     setBusyState(actionId);
@@ -70,18 +72,13 @@ export default function App() {
         </div>
       </header>
 
-      <p className="status-line">{vm.statusLine}</p>
-      <p className="status-line">Entitlement: {controlPlaneVm.entitlement.outcome} ({controlPlaneVm.entitlement.reason})</p>
-      <p className="status-line">Install/Update: {controlPlaneVm.installUpdate.state} ({controlPlaneVm.installUpdate.reasonCode})</p>
-      <p className="status-line">Launch token: {controlPlaneVm.launchToken.status} ({controlPlaneVm.launchToken.reason})</p>
-      <p className="status-line">Cache schema: {controlPlaneVm.persistedCache.schema}@v{controlPlaneVm.persistedCache.version} restorable={String(controlPlaneVm.persistedCache.restorable)}</p>
-      <p className="status-line">
-        Launch readiness:{" "}
-        {controlPlaneVm.launchReadiness.length === 0
-          ? "none"
-          : controlPlaneVm.launchReadiness.map((entry) => `${entry.appId}:${entry.reason}`).join(", ")}
-      </p>
-      <p className="status-line">Recent ops: {opsVm.length === 0 ? "none" : opsVm.map((op) => `${op.id}:${op.status}`).join(", ")}</p>
+      <p className="status-line">{uiContract.statusLine}</p>
+      <p className="status-line">{uiContract.entitlementLine}</p>
+      <p className="status-line">{uiContract.installUpdateLine}</p>
+      <p className="status-line">{uiContract.launchTokenLine}</p>
+      <p className="status-line">{uiContract.cacheLine}</p>
+      <p className="status-line">{uiContract.launchReadinessLine}</p>
+      <p className="status-line">{uiContract.recentOpsLine}</p>
 
       <section className="grid-layout">
         <SectionCard
