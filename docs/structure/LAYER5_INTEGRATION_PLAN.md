@@ -22,6 +22,10 @@
 ## Batch 6 Progress
 - Added dedicated `pnpm test:structure` script for direct structure-level verification.
 
+## Batch 7 Progress
+- Extended structure smoke to execute `HttpHubGateway` endpoint-path verification against a local test server.
+- Added explicit success + failure-path checks for sign-in, entitlements, refresh, install, and update-error propagation.
+
 ## Done Criteria For Structure Entry
 - Domain contracts documented and enforced at compile-time.
 - Service adapters cover all authority routes.

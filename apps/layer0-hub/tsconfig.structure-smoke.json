@@ -5,5 +5,10 @@
     "outDir": "./.tmp-structure-smoke",
     "rootDir": "./src"
   },
-  "include": ["src/domain/types.ts", "src/services/authorityContracts.ts", "src/services/hubRuntime.ts"]
+  "include": [
+    "src/domain/types.ts",
+    "src/services/authorityContracts.ts",
+    "src/services/hubRuntime.ts",
+    "src/services/httpHubGateway.ts"
+  ]
 }
