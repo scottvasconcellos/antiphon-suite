@@ -1,3 +1,4 @@
+import { type MusicPipelineResult } from "../domain/musicEngineContracts";
 import { type EntitledApp, type HubState, type InstallTransaction } from "../domain/types";
 
 export type HubViewModel = {
@@ -5,15 +6,19 @@ export type HubViewModel = {
   installedCount: number;
   ownedCount: number;
   pendingUpdates: number;
+  intelligenceHeadline: string;
+  intelligenceDetail: string;
 };
 
-export function toHubViewModel(hubState: HubState): HubViewModel {
+export function toHubViewModel(hubState: HubState, intelligence: MusicPipelineResult | null): HubViewModel {
   if (hubState.status.mode !== "ready") {
     return {
       statusLine: hubState.status.message,
       installedCount: 0,
       ownedCount: 0,
-      pendingUpdates: 0
+      pendingUpdates: 0,
+      intelligenceHeadline: "Music Intelligence offline",
+      intelligenceDetail: intelligence?.message ?? "Unavailable while runtime is in error state."
     };
   }
 
@@ -24,7 +29,9 @@ export function toHubViewModel(hubState: HubState): HubViewModel {
       : "Signed out: offline cache remains available for existing installs.",
     installedCount: snapshot.entitlements.filter((app) => app.installedVersion).length,
     ownedCount: snapshot.entitlements.filter((app) => app.owned).length,
-    pendingUpdates: snapshot.entitlements.filter((app) => app.updateAvailable).length
+    pendingUpdates: snapshot.entitlements.filter((app) => app.updateAvailable).length,
+    intelligenceHeadline: intelligence?.projection?.headline ?? "Music Intelligence unavailable",
+    intelligenceDetail: intelligence?.projection?.detail ?? intelligence?.message ?? "No recommendation available."
   };
 }
 

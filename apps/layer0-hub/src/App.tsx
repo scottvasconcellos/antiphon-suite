@@ -20,7 +20,8 @@ export default function App() {
     void built.engine.bootstrap().then(setHubState);
   }, []);
 
-  const vm = toHubViewModel(hubState);
+  const intelligence = built.engine ? built.engine.runMusicIntelligence() : null;
+  const vm = toHubViewModel(hubState, intelligence);
 
   async function runAction(actionId: string, task: () => Promise<HubState>) {
     setBusyState(actionId);
@@ -62,6 +63,7 @@ export default function App() {
       </header>
 
       <p className="status-line">{vm.statusLine}</p>
+      <p className="status-line">{vm.intelligenceHeadline}: {vm.intelligenceDetail}</p>
 
       <section className="grid-layout">
         <SectionCard
