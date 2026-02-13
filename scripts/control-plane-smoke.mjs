@@ -64,7 +64,37 @@ async function run() {
     'from "./controlPlanePersistence";',
     'from "./controlPlanePersistence.js";'
   );
+  controlPlaneVmSource = controlPlaneVmSource.replace(
+    'from "./launchReadinessMatrix";',
+    'from "./launchReadinessMatrix.js";'
+  );
   writeFileSync(controlPlaneVmPath, controlPlaneVmSource, "utf-8");
+  const launchReadinessPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/launchReadinessMatrix.js");
+  let launchReadinessSource = readFileSync(launchReadinessPath, "utf-8");
+  launchReadinessSource = launchReadinessSource.replace(
+    'from "../domain/launchTokenBoundary";',
+    'from "../domain/launchTokenBoundary.js";'
+  );
+  writeFileSync(launchReadinessPath, launchReadinessSource, "utf-8");
+  const scenarioRunnerPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneScenarioRunner.js");
+  let scenarioRunnerSource = readFileSync(scenarioRunnerPath, "utf-8");
+  scenarioRunnerSource = scenarioRunnerSource.replace(
+    'from "../domain/entitlementDecision";',
+    'from "../domain/entitlementDecision.js";'
+  );
+  scenarioRunnerSource = scenarioRunnerSource.replace(
+    'from "../domain/installUpdateStateMachine";',
+    'from "../domain/installUpdateStateMachine.js";'
+  );
+  scenarioRunnerSource = scenarioRunnerSource.replace(
+    'from "./installUpdateAuthority";',
+    'from "./installUpdateAuthority.js";'
+  );
+  scenarioRunnerSource = scenarioRunnerSource.replace(
+    'from "./controlPlaneViewModel";',
+    'from "./controlPlaneViewModel.js";'
+  );
+  writeFileSync(scenarioRunnerPath, scenarioRunnerSource, "utf-8");
 
   const entitlement = await import(pathToFileURL(join(domainRoot, "entitlementDecision.js")).href);
   const lifecycle = await import(pathToFileURL(join(domainRoot, "installUpdateStateMachine.js")).href);
@@ -78,6 +108,9 @@ async function run() {
   );
   const controlPlaneBootstrap = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneBootstrap.js")).href
+  );
+  const controlPlaneScenarioRunner = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneScenarioRunner.js")).href
   );
 
   const entitlementFixtures = JSON.parse(readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/entitlement-decision-snapshots.json"), "utf-8"));
@@ -178,6 +211,32 @@ async function run() {
     assertEqual(actual.status, fixture.expected.status, `Control-plane bootstrap snapshot mismatch: ${fixture.name}`);
     const repeat = controlPlaneBootstrap.resolveBootstrapFailure(fixture.snapshot, fixture.errorMessage);
     assertEqual(repeat.status, actual.status, `Control-plane bootstrap determinism mismatch: ${fixture.name}`);
+  }
+
+  const happyFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-happy-path-snapshots.json"), "utf-8")
+  );
+  for (const fixture of happyFixtures) {
+    const actual = await controlPlaneScenarioRunner.runHappyPathScenario(fixture.seed);
+    assertEqual(actual, fixture.expected, `Control-plane happy path snapshot mismatch: ${fixture.name}`);
+    const repeat = await controlPlaneScenarioRunner.runHappyPathScenario(fixture.seed);
+    assertEqual(repeat, actual, `Control-plane happy path determinism mismatch: ${fixture.name}`);
+  }
+
+  const offlineMatrix = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-offline-matrix-snapshots.json"), "utf-8")
+  );
+  for (const fixture of offlineMatrix) {
+    const projection = controlPlaneViewModel.toControlPlaneViewModel(fixture.hubState);
+    assertEqual(projection.entitlement, fixture.expectedEntitlement, `Control-plane offline matrix mismatch: ${fixture.name}`);
+  }
+
+  const failureMatrix = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-failure-matrix-snapshots.json"), "utf-8")
+  );
+  for (const fixture of failureMatrix) {
+    const actual = await controlPlaneScenarioRunner.runFailureScenario(fixture.seed, fixture.action, fixture.reasonCode);
+    assertEqual(actual, fixture.expected, `Control-plane failure matrix mismatch: ${fixture.name}`);
   }
 }
 

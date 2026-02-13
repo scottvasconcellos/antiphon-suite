@@ -13,6 +13,8 @@
     "src/services/controlPlanePersistence.ts",
     "src/services/installUpdateAuthority.ts",
     "src/services/controlPlaneViewModel.ts",
-    "src/services/controlPlaneBootstrap.ts"
+    "src/services/controlPlaneBootstrap.ts",
+    "src/services/launchReadinessMatrix.ts",
+    "src/services/controlPlaneScenarioRunner.ts"
   ]
 }

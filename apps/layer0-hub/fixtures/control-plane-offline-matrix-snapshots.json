@@ -1,0 +1,117 @@
+[
+  {
+    "name": "offline-valid-cache",
+    "hubState": {
+      "snapshot": {
+        "session": null,
+        "entitlements": [],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 7,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "ready",
+        "message": "offline",
+        "code": "ok_bootstrap_offline_cache"
+      }
+    },
+    "expectedEntitlement": {
+      "outcome": "OfflineAuthorized",
+      "reason": "offline_cache_valid"
+    }
+  },
+  {
+    "name": "offline-stale-cache",
+    "hubState": {
+      "snapshot": {
+        "session": null,
+        "entitlements": [],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 0,
+          "cacheState": "stale"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "runtime-error",
+        "message": "stale",
+        "code": "runtime_bootstrap_failed"
+      }
+    },
+    "expectedEntitlement": {
+      "outcome": "OfflineDenied",
+      "reason": "offline_cache_stale"
+    }
+  },
+  {
+    "name": "offline-missing-cache",
+    "hubState": {
+      "snapshot": {
+        "session": null,
+        "entitlements": [],
+        "offlineCache": {
+          "lastValidatedAt": null,
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 0,
+          "cacheState": "empty"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "runtime-error",
+        "message": "missing",
+        "code": "runtime_bootstrap_failed"
+      }
+    },
+    "expectedEntitlement": {
+      "outcome": "OfflineDenied",
+      "reason": "offline_cache_invalid"
+    }
+  },
+  {
+    "name": "online-entitlement-denied",
+    "hubState": {
+      "snapshot": {
+        "session": {
+          "userId": "usr_denied",
+          "email": "denied@antiphon.audio",
+          "displayName": "Denied",
+          "signedInAt": "2026-02-13T00:00:00.000Z"
+        },
+        "entitlements": [
+          {
+            "id": "antiphon.denied.app",
+            "name": "Denied App",
+            "version": "1.0.0",
+            "installedVersion": null,
+            "owned": false,
+            "installState": "not-installed",
+            "updateAvailable": false
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 21,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "ready",
+        "message": "online denied",
+        "code": "ok_signed_in"
+      }
+    },
+    "expectedEntitlement": {
+      "outcome": "Unauthorized",
+      "reason": "license_not_owned"
+    }
+  }
+]

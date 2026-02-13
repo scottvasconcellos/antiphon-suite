@@ -1,0 +1,110 @@
+[
+  {
+    "name": "download-failure-recovery",
+    "action": "install",
+    "reasonCode": "failed_download_step",
+    "seed": {
+      "session": {
+        "userId": "usr_fail",
+        "email": "fail@antiphon.audio",
+        "displayName": "Fail",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [
+        {
+          "id": "antiphon.fail.app",
+          "name": "Fail App",
+          "version": "1.0.0",
+          "installedVersion": null,
+          "owned": true,
+          "installState": "not-installed",
+          "updateAvailable": false
+        }
+      ],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 20,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "expected": {
+      "reasonCode": "failed_download_step",
+      "lifecycleTo": "InstallFailed",
+      "recoveryTo": "NotInstalled"
+    }
+  },
+  {
+    "name": "install-failure-recovery",
+    "action": "install",
+    "reasonCode": "failed_install_step",
+    "seed": {
+      "session": {
+        "userId": "usr_fail",
+        "email": "fail@antiphon.audio",
+        "displayName": "Fail",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [
+        {
+          "id": "antiphon.fail.app",
+          "name": "Fail App",
+          "version": "1.0.0",
+          "installedVersion": null,
+          "owned": true,
+          "installState": "not-installed",
+          "updateAvailable": false
+        }
+      ],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 20,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "expected": {
+      "reasonCode": "failed_install_step",
+      "lifecycleTo": "InstallFailed",
+      "recoveryTo": "NotInstalled"
+    }
+  },
+  {
+    "name": "update-failure-recovery",
+    "action": "update",
+    "reasonCode": "failed_update_step",
+    "seed": {
+      "session": {
+        "userId": "usr_fail",
+        "email": "fail@antiphon.audio",
+        "displayName": "Fail",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [
+        {
+          "id": "antiphon.fail.app",
+          "name": "Fail App",
+          "version": "1.0.0",
+          "installedVersion": "1.0.0",
+          "owned": true,
+          "installState": "installed",
+          "updateAvailable": true
+        }
+      ],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 20,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "expected": {
+      "reasonCode": "failed_update_step",
+      "lifecycleTo": "UpdateFailed",
+      "recoveryTo": "UpdateAvailable"
+    }
+  }
+]

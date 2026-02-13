@@ -11,13 +11,14 @@ export type InstallUpdateReasonCode =
   | "blocked_not_installed"
   | "blocked_no_update_available"
   | "blocked_invalid_transition"
+  | "failed_download_step"
   | "failed_install_step"
   | "failed_update_step"
   | "failed_gateway";
 
 export type InstallUpdateStepResult =
   | { ok: true; app: EntitledApp }
-  | { ok: false; reasonCode: "failed_install_step" | "failed_update_step" | "failed_gateway" };
+  | { ok: false; reasonCode: "failed_download_step" | "failed_install_step" | "failed_update_step" | "failed_gateway" };
 
 export type InstallUpdateAuthorityResult = {
   ok: boolean;

@@ -1,0 +1,66 @@
+[
+  {
+    "name": "identity-entitlement-install-update-launch-projection",
+    "seed": {
+      "session": {
+        "userId": "usr_happy",
+        "email": "happy@antiphon.audio",
+        "displayName": "Happy",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [
+        {
+          "id": "antiphon.happy.app",
+          "name": "Happy App",
+          "version": "1.0.0",
+          "installedVersion": null,
+          "owned": true,
+          "installState": "not-installed",
+          "updateAvailable": false
+        }
+      ],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 21,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "expected": {
+      "entitlement": {
+        "outcome": "Authorized",
+        "reason": "owned_active_identity"
+      },
+      "installReasonCode": "ok_install_completed",
+      "updateReasonCode": "ok_update_completed",
+      "projection": {
+        "entitlement": {
+          "outcome": "Authorized",
+          "reason": "owned_active_identity"
+        },
+        "installUpdate": {
+          "state": "ready",
+          "reasonCode": "ok_update_completed"
+        },
+        "launchToken": {
+          "ready": true,
+          "status": "issued_verified",
+          "reason": "verified"
+        },
+        "persistedCache": {
+          "schema": "antiphon.control-plane-cache",
+          "version": 1,
+          "restorable": true
+        },
+        "launchReadiness": [
+          {
+            "appId": "antiphon.happy.app",
+            "ready": true,
+            "reason": "token_issued"
+          }
+        ]
+      }
+    }
+  }
+]

@@ -52,7 +52,14 @@
         "schema": "antiphon.control-plane-cache",
         "version": 1,
         "restorable": true
-      }
+      },
+      "launchReadiness": [
+        {
+          "appId": "antiphon.a-app",
+          "ready": true,
+          "reason": "token_issued"
+        }
+      ]
     }
   },
   {
@@ -93,7 +100,8 @@
         "schema": "antiphon.control-plane-cache",
         "version": 1,
         "restorable": true
-      }
+      },
+      "launchReadiness": []
     }
   },
   {
@@ -134,7 +142,8 @@
         "schema": "antiphon.control-plane-cache",
         "version": 1,
         "restorable": true
-      }
+      },
+      "launchReadiness": []
     }
   }
 ]
