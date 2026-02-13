@@ -10,6 +10,13 @@ export type LaunchTokenVerification =
   | { valid: true; claims: LaunchTokenClaims; reason: "verified" }
   | { valid: false; reason: "malformed" | "signature_invalid" | "expired" | "claims_invalid" };
 
+export const LAUNCH_TOKEN_REASON_CODES = [
+  "malformed",
+  "signature_invalid",
+  "expired",
+  "claims_invalid"
+] as const;
+
 function encode(value: string): string {
   return encodeURIComponent(value).replaceAll(".", "%2E");
 }

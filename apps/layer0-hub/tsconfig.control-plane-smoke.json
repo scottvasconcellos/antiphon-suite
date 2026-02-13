@@ -19,6 +19,8 @@
     "src/services/controlPlaneOperationsViewModel.ts",
     "src/services/controlPlaneContracts.ts",
     "src/services/controlPlaneUiContract.ts",
-    "src/services/controlPlaneTrustEnvelope.ts"
+    "src/services/controlPlaneTrustEnvelope.ts",
+    "src/services/publicControlPlane.ts",
+    "src/services/controlPlaneReasonTaxonomy.ts"
   ]
 }

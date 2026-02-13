@@ -8,6 +8,7 @@
     "dev:authority": "pnpm --filter @antiphon/layer0-authority dev",
     "build": "pnpm --filter @antiphon/layer0-authority build && pnpm --filter @antiphon/layer0-hub build",
     "typecheck": "pnpm --filter @antiphon/layer0-authority typecheck && pnpm --filter @antiphon/layer0-hub typecheck",
+    "smoke": "node scripts/control-plane-smoke.mjs && node scripts/foundation-smoke.mjs",
     "test:control-plane": "node scripts/control-plane-smoke.mjs",
     "test:engine": "node scripts/engine-smoke.mjs",
     "test:structure": "node scripts/structure-smoke.mjs",

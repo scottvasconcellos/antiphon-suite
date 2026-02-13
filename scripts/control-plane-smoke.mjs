@@ -80,6 +80,23 @@ async function run() {
     'from "../domain/launchTokenBoundary.js";'
   );
   writeFileSync(launchReadinessPath, launchReadinessSource, "utf-8");
+  const publicControlPlanePath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/publicControlPlane.js");
+  let publicControlPlaneSource = readFileSync(publicControlPlanePath, "utf-8");
+  publicControlPlaneSource = publicControlPlaneSource.replaceAll('from "./controlPlaneAuthority";', 'from "./controlPlaneAuthority.js";');
+  publicControlPlaneSource = publicControlPlaneSource.replaceAll('from "./controlPlaneContracts";', 'from "./controlPlaneContracts.js";');
+  publicControlPlaneSource = publicControlPlaneSource.replaceAll('from "./controlPlanePersistence";', 'from "./controlPlanePersistence.js";');
+  publicControlPlaneSource = publicControlPlaneSource.replaceAll('from "./controlPlaneViewModel";', 'from "./controlPlaneViewModel.js";');
+  publicControlPlaneSource = publicControlPlaneSource.replaceAll('from "./controlPlaneTrustEnvelope";', 'from "./controlPlaneTrustEnvelope.js";');
+  publicControlPlaneSource = publicControlPlaneSource.replaceAll('from "./controlPlaneScenarioRunner";', 'from "./controlPlaneScenarioRunner.js";');
+  writeFileSync(publicControlPlanePath, publicControlPlaneSource, "utf-8");
+  const authorityIndexPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneAuthority.js");
+  let authorityIndexSource = readFileSync(authorityIndexPath, "utf-8");
+  authorityIndexSource = authorityIndexSource.replaceAll('from "../domain/entitlementDecision";', 'from "../domain/entitlementDecision.js";');
+  authorityIndexSource = authorityIndexSource.replaceAll('from "./installUpdateAuthority";', 'from "./installUpdateAuthority.js";');
+  authorityIndexSource = authorityIndexSource.replaceAll('from "../domain/launchTokenBoundary";', 'from "../domain/launchTokenBoundary.js";');
+  authorityIndexSource = authorityIndexSource.replaceAll('from "./controlPlaneBootstrap";', 'from "./controlPlaneBootstrap.js";');
+  authorityIndexSource = authorityIndexSource.replaceAll('from "./controlPlanePersistence";', 'from "./controlPlanePersistence.js";');
+  writeFileSync(authorityIndexPath, authorityIndexSource, "utf-8");
   const scenarioRunnerPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneScenarioRunner.js");
   let scenarioRunnerSource = readFileSync(scenarioRunnerPath, "utf-8");
   scenarioRunnerSource = scenarioRunnerSource.replace(
@@ -129,11 +146,23 @@ async function run() {
   const controlPlaneContracts = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneContracts.js")).href
   );
+  const controlPlaneReasonTaxonomy = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneReasonTaxonomy.js")).href
+  );
+  const installUpdateAuthorityModule = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/installUpdateAuthority.js")).href
+  );
+  const launchTokenBoundaryModule = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/domain/launchTokenBoundary.js")).href
+  );
   const controlPlaneTrustEnvelope = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneTrustEnvelope.js")).href
   );
   const controlPlaneUiContract = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneUiContract.js")).href
+  );
+  const publicControlPlane = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/publicControlPlane.js")).href
   );
 
   const entitlementFixtures = JSON.parse(readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/entitlement-decision-snapshots.json"), "utf-8"));
@@ -342,6 +371,31 @@ async function run() {
   for (const fixture of trustEnvelopeFixtures) {
     const actual = controlPlaneTrustEnvelope.toTrustEnvelopeView();
     assertEqual(actual, fixture.expected, `Control-plane trust envelope snapshot mismatch: ${fixture.name}`);
+  }
+
+  const publicSurfaceFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-public-surface-snapshots.json"), "utf-8")
+  );
+  for (const fixture of publicSurfaceFixtures) {
+    const actual = Object.keys(publicControlPlane).sort();
+    assertEqual(actual, fixture.expected, `Control-plane public surface mismatch: ${fixture.name}`);
+  }
+
+  const reasonCoverageFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-reason-coverage-snapshots.json"), "utf-8")
+  );
+  for (const fixture of reasonCoverageFixtures) {
+    const actual = [
+      ...controlPlaneContracts.CONTRACT_COMPAT_REASON_CODES,
+      ...persistence.PERSISTENCE_REASON_CODES,
+      ...installUpdateAuthorityModule.INSTALL_UPDATE_REASON_CODES,
+      ...launchTokenBoundaryModule.LAUNCH_TOKEN_REASON_CODES
+    ].sort();
+    assertEqual(actual, fixture.expectedReasonCodes, `Control-plane reason coverage mismatch: ${fixture.name}`);
+    for (const code of actual) {
+      const remediation = controlPlaneReasonTaxonomy.remediationForReason(code);
+      assert(typeof remediation === "string" && remediation.length > 0, `Missing remediation mapping for reason code: ${code}`);
+    }
   }
 }
 

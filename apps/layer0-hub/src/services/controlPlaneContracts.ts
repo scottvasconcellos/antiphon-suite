@@ -16,6 +16,11 @@ export type ContractCompatibilityReport = {
   remediation: "none" | "upgrade_or_downgrade_to_supported_version";
 };
 
+export const CONTRACT_COMPAT_REASON_CODES = [
+  "ok_version_supported",
+  "unsupported_contract_version"
+] as const;
+
 const SUPPORTED: Record<ContractName, string> = {
   entitlementDecision: ENTITLEMENT_DECISION_CONTRACT_VERSION,
   installUpdateAuthority: INSTALL_UPDATE_AUTHORITY_CONTRACT_VERSION,

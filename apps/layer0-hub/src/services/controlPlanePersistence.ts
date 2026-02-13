@@ -135,6 +135,17 @@ export type PersistenceParseReport = {
     | "refresh_online_session";
 };
 
+export const PERSISTENCE_REASON_CODES = [
+  "ok_cache_loaded",
+  "invalid_json",
+  "invalid_root_shape",
+  "unsupported_schema_or_version",
+  "invalid_offline_cache",
+  "invalid_install_state",
+  "invalid_entitlement_decision",
+  "stale_timestamp"
+] as const;
+
 export function parsePersistedControlPlaneStateWithReport(
   raw: string,
   options?: { nowIso?: string; maxSkewSeconds?: number }

@@ -30,6 +30,20 @@ export type InstallUpdateAuthorityResult = {
   };
 };
 
+export const INSTALL_UPDATE_REASON_CODES = [
+  "ok_install_completed",
+  "ok_update_completed",
+  "blocked_app_not_found",
+  "blocked_not_owned",
+  "blocked_not_installed",
+  "blocked_no_update_available",
+  "blocked_invalid_transition",
+  "failed_download_step",
+  "failed_install_step",
+  "failed_update_step",
+  "failed_gateway"
+] as const;
+
 type InstallUpdateStepExecutor = (action: InstallUpdateAction, appId: string) => Promise<InstallUpdateStepResult>;
 
 function toLifecycleState(app: EntitledApp): AppLifecycleState {

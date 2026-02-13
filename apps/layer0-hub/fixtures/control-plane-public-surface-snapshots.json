@@ -1,0 +1,13 @@
+[
+  {
+    "name": "public-control-plane-export-surface",
+    "expected": [
+      "ControlPlaneAuthority",
+      "ControlPlaneContracts",
+      "ControlPlanePersistence",
+      "ControlPlaneScenarioRunner",
+      "ControlPlaneTrustEnvelope",
+      "ControlPlaneViewModel"
+    ]
+  }
+]
