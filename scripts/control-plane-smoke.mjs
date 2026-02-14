@@ -394,6 +394,11 @@ async function run() {
     assertEqual(serialized, fixture.expectedSerialized, `Artifact manifest serialization mismatch: ${fixture.name}`);
     const parsed = artifactManifestContract.parseArtifactManifest(serialized);
     assertEqual(parsed, fixture.expectedParse, `Artifact manifest parse mismatch: ${fixture.name}`);
+    assertEqual(
+      parsed.remediation,
+      controlPlaneReasonTaxonomy.remediationForReason(parsed.reasonCode),
+      `Artifact manifest remediation mapping mismatch: ${fixture.name}`
+    );
   }
 
   const artifactTrustFixtures = JSON.parse(
@@ -402,6 +407,11 @@ async function run() {
   for (const fixture of artifactTrustFixtures) {
     const actual = artifactTrustVerification.verifyArtifactTrust(fixture.input);
     assertEqual(actual, fixture.expected, `Artifact trust verification mismatch: ${fixture.name}`);
+    assertEqual(
+      actual.remediation,
+      controlPlaneReasonTaxonomy.remediationForReason(actual.reasonCode),
+      `Artifact trust remediation mapping mismatch: ${fixture.name}`
+    );
   }
 
   const layerArtifactInputFixtures = JSON.parse(
@@ -924,6 +934,11 @@ async function run() {
       fixture.nowIso ? { nowIso: fixture.nowIso, maxSkewSeconds: fixture.maxSkewSeconds } : undefined
     );
     assertEqual(actual, fixture.expected, `Control-plane trust artifact compat mismatch: ${fixture.name}`);
+    assertEqual(
+      actual.remediation,
+      controlPlaneReasonTaxonomy.remediationForReason(actual.reasonCode),
+      `Control-plane trust artifact remediation mapping mismatch: ${fixture.name}`
+    );
   }
 }
 
