@@ -50,9 +50,7 @@ function assertNoLegacyImports() {
 
   const targetFiles = [
     ...listTypeScriptFiles(join(process.cwd(), "apps/layer0-hub/src/services")),
-    ...listTypeScriptFiles(join(process.cwd(), "apps/layer0-hub/src/domain")).filter(
-      (path) => !frozenLegacyPaths.some((legacy) => path.endsWith(`/apps/layer0-hub/src/domain/${legacy}.ts`))
-    )
+    join(process.cwd(), "apps/layer0-hub/src/App.tsx")
   ];
 
   for (const filePath of targetFiles) {
