@@ -1,23 +1,16 @@
-# Engine Configuration
+# ENGINE_CONFIGURATION (Legacy / Frozen)
 
-## Hub Runtime Variables
-- `VITE_ANTIPHON_ENGINE_MODE`: `network` (default) or `stub`.
-- `VITE_ANTIPHON_MUSIC_ENGINE_ID`: optional explicit engine id.
-  - `stub-music-intelligence-v1`
-  - `minimal-real-music-intelligence-v1`
+This document is retained for historical context only.
 
-## Deterministic Selection Policy
-1. If `VITE_ANTIPHON_MUSIC_ENGINE_ID` matches a registered engine id, select it (`selectionSource=requested`).
-2. Otherwise apply default policy (`selectionSource=default`):
-   - session present -> `minimal-real-music-intelligence-v1`
-   - no session -> `stub-music-intelligence-v1`
-3. Unknown requested id falls back to default with explicit `selectionReason`.
+Status:
+- Frozen legacy (out of Layer 1 control-plane scope).
+- Not part of active runtime, validation, or release criteria.
 
-## Registry Snapshot
-- Engine registry snapshot is locked at `apps/layer0-hub/fixtures/music-engine-registry-snapshot.json`.
-- `pnpm test:engine` fails when registry identity metadata (`id`, `name`, `version`) changes without fixture updates.
+Authoritative scope:
+- `/docs/layer0_antiphon_hub.md`
+- `/docs/codex-starter-lean.xml`
+- `/docs/PROJECT_COMPLETION_PLAN.md`
 
-## Telemetry DTO Snapshot
-- Authority-facing telemetry DTO snapshot is locked at `apps/layer0-hub/fixtures/music-telemetry-snapshots.json`.
-- DTO builder lives in `apps/layer0-hub/src/services/musicTelemetryDto.ts`.
-- Schema constant is `AUTHORITY_MUSIC_TELEMETRY_SCHEMA_VERSION` in `apps/layer0-hub/src/domain/musicTelemetryContracts.ts`.
+Notes:
+- Layer 1 Hub remains a deterministic entitlement/install/update control-plane.
+- Engine-specific music logic belongs to future standalone Layer apps.
