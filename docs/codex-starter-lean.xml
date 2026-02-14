@@ -1,147 +1,119 @@
-<MANUAL_CORE priority="PERMANENT">
+<ANTIPHON_EXECUTION_SOURCE version="2026-02-14" status="ACTIVE" priority="PERMANENT">
 
-  <model_routing>
-    <default>GPT-5.3-Codex Low — handles ~85–90% of implementation work.</default>
-    <engine_specs>GPT-5.3-Codex Medium — required when designing NEW engine specifications, contracts, or architectural shifts.</engine_specs>
-    <audit_and_bugs>GPT-5.3-Codex High/Extra High — use for persistent logic bugs after a fix attempt, security risks, or final production audits.</audit_and_bugs>
-    <self_awareness>At every checkpoint, explicitly confirm the current tier is still appropriate. Escalate immediately if triggers are met.</self_awareness>
-  </model_routing>
+  <authority_precedence>
+    <highest>/docs/layer0_antiphon_hub.md</highest>
+    <second>/docs/codex-starter-lean.xml</second>
+    <third>all previous manuals, prompts, and ad-hoc instructions</third>
+    <rule>Any conflict is resolved in favor of layer0_antiphon_hub.md.</rule>
+  </authority_precedence>
 
-  <batching_rules>
-    - Batch 3–5 tightly related tasks per message.
-    - Prefer single large scaffolds over many micro-prompts.
-    - After scaffolding or bug fixes, request “changed files only.”
-    - Avoid regenerating unaffected files.
-    - Optimize for token efficiency and execution momentum.
-  </batching_rules>
+  <app_definition>
+    <name>Antiphon Hub</name>
+    <layer>Layer 1 control-plane application (Layer 0 remains conceptual product authority).</layer>
+    <purpose>
+      Silent infrastructure for identity, entitlement, install/update authority, offline trust caching,
+      launch boundary issuance/verification, and deterministic operator flows.
+    </purpose>
+    <non_goals>
+      No storefront. No creative workspace. No plugin host. No runtime container.
+      No music-intelligence domain in Hub runtime paths.
+    </non_goals>
+    <anti_drm_posture>
+      Authorized apps must remain runnable offline without Hub process presence.
+    </anti_drm_posture>
+  </app_definition>
 
-  <communication_rules>
-    - Use concise, structured prompts.
-    - Front-load critical context once; reference it thereafter.
-    - Do not explain decisions unless explicitly asked.
-    - Avoid conversational filler.
-    - Treat instructions as operational directives, not discussion topics.
-  </communication_rules>
+  <ruthless_audit_summary>
+    <overall_verdict>
+      The project is technically strong and reproducible, but currently over-invested in orchestration/check layering
+      relative to remaining product-value gaps.
+    </overall_verdict>
 
-  <execution_rules>
-    - Complete the ENTIRE batch before asking questions.
-    - NO mid-batch interruptions.
-    - NO speculative questions when defaults exist.
-    - Use specification defaults for assumptions.
-    - Prefer forward progress over hesitation.
-  </execution_rules>
+    <over_invested>
+      <item>Check-script overlap and repeated gate chains increase cycle time without equivalent risk reduction.</item>
+      <item>Large fixture surface (60+ files) creates maintenance drag and cognitive load.</item>
+      <item>Legacy music-engine artifacts still create conceptual noise, even when runtime-isolated.</item>
+      <item>Naming debt (“Layer0 hub” path vs Layer 1 reality) adds constant interpretation overhead.</item>
+    </over_invested>
 
-  <autonomy_law>
-    The builder is operationally autonomous.
-    Allowed without permission:
-    - create / modify / delete files
-    - refactor decisively
-    - install or update dependencies
-    - run builds and tests
-    - reorganize structure
+    <under_invested>
+      <item>Authority backend realism (auth edge cases, entitlement lifecycle realism, durable failure handling).</item>
+      <item>Operational runbook simplicity for humans under pressure (one clean path, fewer equivalent commands).</item>
+      <item>Real app lifecycle proving in practical operator terms (install/update/rollback across versions).</item>
+      <item>Codebase simplification pass (dead exports, stale helper functions, legacy-only references in active folders).</item>
+    </under_invested>
 
-    Governance stops are separate and must still be honored.
-  </autonomy_law>
+    <not_for_show>
+      Existing determinism, scoped clean-state policy, operator contract locks, and RC0 release/finalize flows are valid.
+      They are meaningful infrastructure, not cosmetic ceremony.
+    </not_for_show>
 
-  <foundation_first>
-    Build order is immutable:
-    FOUNDATION → STRUCTURE → SKIN
+    <bloat_risk>
+      Future work must default to capability delivery and simplification. New meta-governance is forbidden unless tied
+      to a demonstrated production-risk failure.
+    </bloat_risk>
+  </ruthless_audit_summary>
 
-    Never style your way out of missing architecture.
-    Ugly but correct &gt; beautiful but fragile.
-    Do not polish what may be rewritten.
-  </foundation_first>
+  <layer_map>
+    <layer id="0" name="Product Authority" status="defined">
+      Source-of-truth philosophy and constraints only. No runtime code obligations.
+    </layer>
+    <layer id="1" name="Hub Control-Plane" status="advanced">
+      Implemented core: entitlement decisions, install/update orchestration, offline trust artifacts,
+      launch boundary, scoped reproducibility checks, deterministic proof harnesses.
+    </layer>
+    <layer id="2plus" name="Standalone Layer Apps" status="early">
+      Demonstration harnesses exist; production app feature delivery still ahead.
+    </layer>
+  </layer_map>
 
-  <architecture_law>
-    Enforce strict separation:
+  <project_status>
+    <foundation>Strong</foundation>
+    <structure>Strong with simplification debt</structure>
+    <skin>Intentionally minimal (correct for Hub)</skin>
+    <release_posture>RC0 mechanics operational; finalization path is deterministic and tag-verified.</release_posture>
+    <primary_gap>
+      Shift from governance depth to product-value throughput while preserving deterministic guarantees.
+    </primary_gap>
+  </project_status>
 
-    Domain:
-    - Pure business logic
-    - UI-agnostic
-    - Deterministic
-    - Headlessly testable
+  <execution_law>
+    <rules>
+      <rule>Prefer smallest high-value arc that either increases operator product value or removes proven risk.</rule>
+      <rule>No new governance/meta-check tooling unless a real failure occurred and the arc fixes that failure.</rule>
+      <rule>UI/skin changes are out-of-scope unless explicitly required by Layer 0 purpose.</rule>
+      <rule>Keep deterministic outputs: sorted structures, stable hashes, no wall-clock fields in contract artifacts.</rule>
+      <rule>Legacy frozen music-engine files remain frozen and excluded from Layer 1 runtime decisions.</rule>
+    </rules>
 
-    Services:
-    - Bridge domain to filesystem, network, platform APIs
+    <required_validation_before_done>
+      <cmd>npm run smoke</cmd>
+      <cmd>npm run gate</cmd>
+      <cmd>npm run rc-check</cmd>
+      <cmd>node scripts/operator-contract-check.mjs</cmd>
+      <cmd>plus any proofs already wired into gate</cmd>
+    </required_validation_before_done>
+  </execution_law>
 
-    UI:
-    - Presentation only
-    - NO business logic
+  <finish_strategy id="RC1" reference="/docs/PROJECT_COMPLETION_PLAN.md">
+    <principle>
+      Consolidate first, ship operator-trust outcomes second, then transition Hub to maintenance mode while Layer apps scale.
+    </principle>
+  </finish_strategy>
 
-    Forbidden:
-    - Domain → UI
-    - Domain → Services
-  </architecture_law>
+  <model_routing_recommendation>
+    <default>
+      GPT-5.3-Codex Low for implementation loops. This is the best cost/performance baseline for this repo now.
+    </default>
+    <escalate_medium>
+      Use GPT-5.3-Codex Medium only for architectural refactors spanning multiple boundaries or non-trivial contract redesign.
+    </escalate_medium>
+    <escalate_high>
+      Use High/Extra High only for persistent logic bugs, contradictory evidence between checks, or final release audits.
+    </escalate_high>
+    <avoid>
+      Continuous high-tier use for routine coding; this project now benefits more from disciplined scope than deeper model reasoning.
+    </avoid>
+  </model_routing_recommendation>
 
-  <engine_discipline>
-    Proprietary engines are the intellectual core and must be:
-    - UI-agnostic
-    - deterministic (same input → same output)
-    - contract-defined
-    - headlessly testable
-    - benchmarked
-    - specified BEFORE implementation
-
-    No engine implementation without an approved spec.
-  </engine_discipline>
-
-  <design_system_law>
-    All visual decisions originate from ANTIPHON_COLOR_TYPE_STYLE_GUIDE/.
-
-    Rules:
-    - Never invent colors, spacing, typography, or motion.
-    - Missing token → use explicit placeholder + emit warning.
-    - Extend via shared modules; never modify the root guide.
-    - Shared components must consume tokens only.
-
-    Motion must be purposeful, restrained, and never mask broken flows.
-  </design_system_law>
-
-  <determinism_and_state>
-    Same input + same prior state must produce the same result.
-
-    Ban from core logic:
-    - unseeded randomness
-    - hidden global state
-    - time-dependent calculations
-
-    All side effects belong in Services.
-  </determinism_and_state>
-
-  <mandatory_stops>
-    Hard-stop ONLY for:
-    - Foundation checkpoint
-    - Structure checkpoint
-    - Skin checkpoint
-    - New engine specification required
-    - Persistent logic bug after fix attempt
-    - Final pre-release audit
-    - Missing intent that blocks execution
-
-    Missing/Deleted legacy governing docs are NOT a stop condition:
-    - If older manuals/constitutions are unavailable, proceed using this XML + current Layer0 docs.
-    - Record the absence in /docs/FOUNDATION_STATUS.md and continue.
-
-    Everything else proceeds autonomously.
-  </mandatory_stops>
-
-  <output_format>
-    **Next Step Check:**
-    ✅ Status: [complete | incomplete | blocked]
-    📍 Next: [single highest-leverage task]
-    🔄 Routing: Continue → [model tier] | Escalate → [tier + reason]
-  </output_format>
-
-  <failure_prevention>
-    Design against the 5-minute close test:
-    If a professional opens the app and exits immediately,
-    the likely causes are unclear purpose, fragility, or DRM-like friction.
-
-    Optimize relentlessly for:
-    - speed
-    - clarity
-    - trust
-    - creative momentum
-  </failure_prevention>
-
-</MANUAL_CORE>
+</ANTIPHON_EXECUTION_SOURCE>

@@ -1,7 +1,8 @@
 # FOUNDATION_STATUS
 
 ## Constitutional Law
-- Authoritative law: `docs/codex-starter-lean.xml`
+- Authoritative law: `docs/codex-starter-lean.xml` (updated execution source, anchored to Layer 0 doc)
+- Immutable north star: `docs/layer0_antiphon_hub.md`
 - Build order enforced: FOUNDATION -> STRUCTURE -> SKIN
 
 ## Current True State
@@ -13,7 +14,7 @@
 ## Missing / Unavailable
 - Legacy manuals previously in `/docs` are currently unavailable in the working tree (deleted state detected).
 - We do not recreate unavailable legacy manuals.
-- This restart proceeds using `docs/codex-starter-lean.xml` as sole constitutional law.
+- Current operations proceed using Layer 0 doc + the updated execution source XML.
 - No placeholder token files required for the latest Premium Dark-Mode ZIP import (color/radius/shadow categories were all present).
 
 ## Executable Foundation Gates
