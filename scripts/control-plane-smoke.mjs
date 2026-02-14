@@ -509,10 +509,22 @@ async function run() {
       fixture.decisionInput
     );
     assertEqual(decisions, fixture.expectedEntitlements, `Layer app manifest entitlement bridge mismatch: ${fixture.name}`);
+    for (const decision of decisions) {
+      assertEqual(
+        decision.remediation,
+        controlPlaneReasonTaxonomy.remediationForReason(decision.reasonCode),
+        `Layer app manifest entitlement remediation mismatch: ${fixture.name}:${decision.appId}`
+      );
+    }
     const updateManifest = fixture.manifests.find((manifest) => manifest.id === fixture.expectedUpdateSelection.appId);
     assert(updateManifest, `Layer app manifest update target missing: ${fixture.name}`);
     const updateDecision = updateChannelPolicy.selectUpdateByManifestPolicy(updateManifest, fixture.updateCandidates);
     assertEqual(updateDecision, fixture.expectedUpdateSelection, `Layer app manifest update policy mismatch: ${fixture.name}`);
+    assertEqual(
+      updateDecision.remediation,
+      controlPlaneReasonTaxonomy.remediationForReason(updateDecision.reasonCode),
+      `Layer app manifest update remediation mismatch: ${fixture.name}`
+    );
   }
 
   const multiAppFixtures = JSON.parse(
@@ -521,6 +533,13 @@ async function run() {
   for (const fixture of multiAppFixtures) {
     const actual = multiAppEntitlement.decideMultiAppEntitlements(fixture.input);
     assertEqual(actual, fixture.expected, `Multi-app entitlement snapshot mismatch: ${fixture.name}`);
+    for (const decision of actual) {
+      assertEqual(
+        decision.remediation,
+        controlPlaneReasonTaxonomy.remediationForReason(decision.reasonCode),
+        `Multi-app entitlement remediation mismatch: ${fixture.name}:${decision.appId}`
+      );
+    }
   }
 
   const updateChannelFixtures = JSON.parse(
