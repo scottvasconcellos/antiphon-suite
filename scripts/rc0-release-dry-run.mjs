@@ -2,11 +2,13 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { spawnSync } from "node:child_process";
+import { readVersionStamp } from "./version-stamp.mjs";
 
 const RELEASE_DIR = join(process.cwd(), "dist", "rc0");
 const MANIFEST_PATH = join(RELEASE_DIR, "release-manifest.json");
 const RELEASE_CONTRACT_PATH = join(process.cwd(), "apps", "layer0-hub", "fixtures", "rc0-release-contract.json");
 const OPERATOR_CONTRACT_DEF_PATH = join(process.cwd(), "apps", "layer0-hub", "fixtures", "operator-contract-definition.json");
+const VERSION_STAMP_PATH = join(process.cwd(), "apps", "layer0-hub", "fixtures", "version.json");
 const SCOPE_PATH = join(process.cwd(), "control-plane.scope.json");
 const SCOPE_ACK_PATH = join(process.cwd(), "control-plane.scope.ack.json");
 
@@ -66,16 +68,22 @@ function validateManifestContract(manifest) {
 }
 
 function buildManifest() {
+  const versionStamp = readVersionStamp();
   const commit = runCapture("git", ["rev-parse", "HEAD"]);
 
   const includePaths = [
+    "CHANGELOG.md",
     "README.md",
+    "RELEASE_NOTES_RC0.md",
     "control-plane.scope.json",
     "control-plane.scope.ack.json",
     "apps/layer0-hub/fixtures/operator-contract-definition.json",
     "apps/layer0-hub/fixtures/operator-contract-lock-snapshots.json",
     "apps/layer0-hub/fixtures/rc0-release-contract.json",
+    "apps/layer0-hub/fixtures/version.json",
     "scripts/rc0-release-dry-run.mjs",
+    "scripts/rc0-tag.mjs",
+    "scripts/version-stamp.mjs",
     "scripts/operator-contract-check.mjs",
     "scripts/gate.mjs",
     "scripts/rc-check.mjs"
@@ -89,16 +97,32 @@ function buildManifest() {
   const scopeHash = fileHash(SCOPE_PATH);
   const scopeAckHash = fileHash(SCOPE_ACK_PATH);
   const operatorContractDefinitionHash = fileHash(OPERATOR_CONTRACT_DEF_PATH);
+  const versionStampHash = fileHash(VERSION_STAMP_PATH);
 
   const manifest = {
-    contract_version: "rc0",
+    contract_version: versionStamp.contractVersion,
+    layer0_version: versionStamp.layer0Version,
+    release_channel: versionStamp.releaseChannel,
     release_kind: "dry-run",
     commit,
     files,
     control_plane_scope_sha256: scopeHash,
     control_plane_scope_ack_sha256: scopeAckHash,
     operator_contract_definition_sha256: operatorContractDefinitionHash,
-    manifest_digest: sha256(stableStringify({ commit, files, scopeHash, scopeAckHash, operatorContractDefinitionHash }))
+    version_stamp_sha256: versionStampHash,
+    manifest_digest: sha256(
+      stableStringify({
+        contractVersion: versionStamp.contractVersion,
+        layer0Version: versionStamp.layer0Version,
+        releaseChannel: versionStamp.releaseChannel,
+        commit,
+        files,
+        scopeHash,
+        scopeAckHash,
+        operatorContractDefinitionHash,
+        versionStampHash
+      })
+    )
   };
 
   validateManifestContract(manifest);

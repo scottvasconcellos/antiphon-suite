@@ -6,9 +6,12 @@
     "control_plane_scope_ack_sha256",
     "control_plane_scope_sha256",
     "files",
+    "layer0_version",
     "manifest_digest",
     "operator_contract_definition_sha256",
-    "release_kind"
+    "release_channel",
+    "release_kind",
+    "version_stamp_sha256"
   ],
   "allowed_keys": [
     "commit",
@@ -16,8 +19,11 @@
     "control_plane_scope_ack_sha256",
     "control_plane_scope_sha256",
     "files",
+    "layer0_version",
     "manifest_digest",
     "operator_contract_definition_sha256",
-    "release_kind"
+    "release_channel",
+    "release_kind",
+    "version_stamp_sha256"
   ]
 }

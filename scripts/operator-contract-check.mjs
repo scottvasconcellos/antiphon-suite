@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
+import { readVersionStamp } from "./version-stamp.mjs";
 
 function fail(message) {
   console.error(`[operator-contract-check] FAIL: operator_contract_violation:${message}`);
@@ -23,13 +24,14 @@ function stableStringify(value) {
 }
 
 function parseGateContractSurface() {
+  const { contractVersion } = readVersionStamp();
   const source = readFileSync(join(process.cwd(), "scripts/gate.mjs"), "utf-8");
   const steps = [...source.matchAll(/console\.log\("\[gate\] ([^"]+)"\);/g)]
     .map((match) => match[1])
     .filter((label) => label !== "repo status" && label !== "PASS")
     .sort((a, b) => a.localeCompare(b));
   return {
-    contract_version: "rc0",
+    contract_version: contractVersion,
     script: "gate",
     step_labels: steps,
     final_marker: "PASS"
@@ -67,13 +69,14 @@ function runJsonScript(scriptPath) {
 }
 
 export function buildOperatorContractSurface() {
+  const { contractVersion } = readVersionStamp();
   const demo = runJsonScript("scripts/demo.mjs");
   const trust = runJsonScript("scripts/proof-trust-install-boundary.mjs");
   const longRun = runJsonScript("scripts/proof-long-run-determinism.mjs");
   const gate = parseGateContractSurface();
 
   return {
-    contract_version: "rc0",
+    contract_version: contractVersion,
     contracts: [demo, gate, longRun, trust].sort((a, b) => a.script.localeCompare(b.script))
   };
 }

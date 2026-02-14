@@ -3,8 +3,9 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { runOperatorLoop } from "./layer-app-install-loop.mjs";
+import { readVersionStamp } from "./version-stamp.mjs";
 
-const OPERATOR_CONTRACT_VERSION = "rc0";
+const { contractVersion: OPERATOR_CONTRACT_VERSION } = readVersionStamp();
 
 function assertEqual(actual, expected, message) {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {

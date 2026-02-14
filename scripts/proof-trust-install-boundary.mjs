@@ -3,8 +3,9 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { readVersionStamp } from "./version-stamp.mjs";
 
-const OPERATOR_CONTRACT_VERSION = "rc0";
+const { contractVersion: OPERATOR_CONTRACT_VERSION } = readVersionStamp();
 
 function run(command, args) {
   const result = spawnSync(command, args, { stdio: "inherit", shell: false });
