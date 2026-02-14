@@ -195,6 +195,10 @@ async function run() {
     'from "./clockDriftPolicy.js";'
   );
   scenarioRunnerSource = scenarioRunnerSource.replace(
+    'from "./artifactTrustVerification";',
+    'from "./artifactTrustVerification.js";'
+  );
+  scenarioRunnerSource = scenarioRunnerSource.replace(
     'from "./updateRecoveryPolicy";',
     'from "./updateRecoveryPolicy.js";'
   );
@@ -347,6 +351,26 @@ async function run() {
   for (const fixture of artifactTrustFixtures) {
     const actual = artifactTrustVerification.verifyArtifactTrust(fixture.input);
     assertEqual(actual, fixture.expected, `Artifact trust verification mismatch: ${fixture.name}`);
+  }
+
+  const layerArtifactInputFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-layer-artifact-input-snapshots.json"), "utf-8")
+  );
+  for (const fixture of layerArtifactInputFixtures) {
+    const installManifestRaw = readFileSync(join(process.cwd(), fixture.install.manifestPath), "utf-8");
+    const updateManifestRaw = readFileSync(join(process.cwd(), fixture.update.manifestPath), "utf-8");
+    const installManifest = artifactManifestContract.parseArtifactManifest(installManifestRaw);
+    const updateManifest = artifactManifestContract.parseArtifactManifest(updateManifestRaw);
+    assert(installManifest.manifest !== null && updateManifest.manifest !== null, `Layer artifact manifests must parse: ${fixture.name}`);
+    const actual = {
+      appId: installManifest.manifest.appId,
+      installVersion: installManifest.manifest.appVersion,
+      updateVersion: updateManifest.manifest.appVersion,
+      channel: installManifest.manifest.channel,
+      installDigest: installManifest.manifest.files[0]?.sha256 ?? "",
+      updateDigest: updateManifest.manifest.files[0]?.sha256 ?? ""
+    };
+    assertEqual(actual, fixture.expected, `Layer artifact input fixture mismatch: ${fixture.name}`);
   }
 
   const artifactInstallerFixtures = JSON.parse(
@@ -601,6 +625,14 @@ async function run() {
   for (const fixture of artifactFlowFixtures) {
     const actual = await controlPlaneScenarioRunner.runArtifactInstallUpdateScenario(fixture.input);
     assertEqual(actual, fixture.expected, `Control-plane artifact flow mismatch: ${fixture.name}`);
+  }
+
+  const realLayerPipelineFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-real-layer-app-pipeline-snapshots.json"), "utf-8")
+  );
+  for (const fixture of realLayerPipelineFixtures) {
+    const actual = await controlPlaneScenarioRunner.runRealLayerAppPipelineScenario(fixture.input);
+    assertEqual(actual, fixture.expected, `Control-plane real layer app pipeline mismatch: ${fixture.name}`);
   }
 
   const clockDriftFixtures = JSON.parse(

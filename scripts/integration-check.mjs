@@ -40,6 +40,7 @@ export async function runIntegrationCheck() {
 
   run("node", ["scripts/demo-hub.mjs"]);
   run("node", ["scripts/demo-layer.mjs"]);
+  run("node", ["scripts/proof-layer-app.mjs"]);
 
   const demoSnapshot = JSON.parse(
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-demo-output-snapshots.json"), "utf-8")

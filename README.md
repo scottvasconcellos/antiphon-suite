@@ -1,29 +1,29 @@
 # Antiphon Suite Monorepo (Layer 1 Control-Plane)
 
-This repo provides the Layer 1 Hub control-plane foundation:
-auth, entitlement, install/update authority, offline trust, launch boundaries.
+Silent control-plane for auth, entitlement, install/update authority, offline trust, and launch boundaries.
 
 ## Operator Handbook
 
-- `npm run smoke`
-  - Proves deterministic headless control-plane + foundation behavior is stable.
+- `npm run smoke`  
+  Deterministic control-plane + foundation checks (includes artifact trust and installer paths).
 
-- `npm run gate`
-  - Proves smoke passes, public surface snapshot is unchanged, and reason coverage is valid.
+- `npm run gate`  
+  Runs smoke + public surface lock + reason coverage + integration checks.
 
-- `node scripts/demo-hub.mjs`
-  - Proves 60-second operator flow: catalog, entitlements, install/update transitions, channel selection, hub-optional trust proof.
+- `node scripts/demo-hub.mjs`  
+  60-second human-readable control-plane status flow.
 
-- `node scripts/demo-layer.mjs`
-  - Proves a layer-app consumer can read control-plane outcomes deterministically using current artifacts.
+- `node scripts/demo-layer.mjs`  
+  Headless layer-app consumer projection proof.
+
+- `node scripts/proof-layer-app.mjs`  
+  End-to-end real layer-app artifact pipeline proof (install -> update -> rollback -> hub-optional).
 
 ## Hub-Optional
 
-Hub-optional means previously authorized apps remain runnable offline without Hub process presence.
-Trust artifacts are persisted and validated deterministically.
+Previously authorized apps remain runnable offline without Hub process presence.
 
 ## Public API Surface
 
-Layer-app integrations must use:
-
-- `apps/layer0-hub/src/services/publicControlPlane.ts`
+Layer apps integrate only through:
+`apps/layer0-hub/src/services/publicControlPlane.ts`

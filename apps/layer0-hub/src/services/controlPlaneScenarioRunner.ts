@@ -8,6 +8,7 @@ import { remediationForReason } from "./controlPlaneReasonTaxonomy";
 import { isRunnableWithoutHub, issueTrustArtifact, parseTrustArtifact, serializeTrustArtifact } from "./controlPlaneTrustArtifact";
 import { evaluateClockDrift, evaluateMixedEntitlementTimestamps } from "./clockDriftPolicy";
 import { applyUpdateRollback } from "./updateRecoveryPolicy";
+import { verifyArtifactTrust } from "./artifactTrustVerification";
 
 export type HappyPathScenarioResult = {
   entitlement: ReturnType<typeof decideEntitlement>;
@@ -614,5 +615,124 @@ export async function runArtifactInstallUpdateScenario(input: {
       rollbackPrepared: failingUpdate.result.artifactRollback?.rollbackPrepared ?? false,
       finalInstalledVersion: rollback.preservedInstalledVersion
     }
+  };
+}
+
+export async function runRealLayerAppPipelineScenario(input: {
+  seed: HubSnapshot;
+  appId: string;
+  installManifestRaw: string;
+  updateManifestRaw: string;
+  payloadFilesV1: Record<string, string>;
+  payloadFilesV2: Record<string, string>;
+  targetDir: string;
+  nowIso: string;
+}): Promise<{
+  install: { reasonCode: string; lifecycleTo: string };
+  launchAfterInstall: { ready: boolean; status: string; reason: string };
+  update: { reasonCode: string; lifecycleTo: string };
+  launchAfterUpdate: { ready: boolean; status: string; reason: string };
+  rollback: { reasonCode: string; rollbackReasonCode: string; finalInstalledVersion: string | null };
+  trustEnvelopeOps: string[];
+  hubOptional: boolean;
+}> {
+  const installTrust = verifyArtifactTrust({
+    manifestRaw: input.installManifestRaw,
+    expectedAppId: input.appId,
+    expectedVersion: "1.0.0",
+    nowIso: input.nowIso,
+    requireSignature: true
+  });
+  if (!installTrust.trusted) {
+    throw new Error("real_layer_install_trust_failed");
+  }
+
+  const install = await runInstallUpdateAuthorityWithArtifactExecutor(input.seed, "install", input.appId, {
+    manifestRaw: input.installManifestRaw,
+    payloadFiles: input.payloadFilesV1,
+    targetDir: input.targetDir,
+    fileSystem: {}
+  });
+
+  const installVm = toControlPlaneViewModel({
+    snapshot: install.snapshot,
+    status: { mode: "ready", message: "install complete", code: install.result.reasonCode }
+  });
+
+  const updateSeed: HubSnapshot = {
+    ...install.snapshot,
+    entitlements: install.snapshot.entitlements.map((app) =>
+      app.id === input.appId ? { ...app, version: "1.1.0", updateAvailable: true } : app
+    )
+  };
+  const updateTrust = verifyArtifactTrust({
+    manifestRaw: input.updateManifestRaw,
+    expectedAppId: input.appId,
+    expectedVersion: "1.1.0",
+    nowIso: input.nowIso,
+    requireSignature: true
+  });
+  if (!updateTrust.trusted) {
+    throw new Error("real_layer_update_trust_failed");
+  }
+
+  const update = await runInstallUpdateAuthorityWithArtifactExecutor(updateSeed, "update", input.appId, {
+    manifestRaw: input.updateManifestRaw,
+    payloadFiles: input.payloadFilesV2,
+    targetDir: input.targetDir,
+    fileSystem: install.fileSystem
+  });
+
+  const updateVm = toControlPlaneViewModel({
+    snapshot: update.snapshot,
+    status: { mode: "ready", message: "update complete", code: update.result.reasonCode }
+  });
+
+  const failUpdate = await runInstallUpdateAuthorityWithArtifactExecutor(updateSeed, "update", input.appId, {
+    manifestRaw: input.updateManifestRaw,
+    payloadFiles: input.payloadFilesV2,
+    targetDir: input.targetDir,
+    fileSystem: install.fileSystem,
+    inject: { mode: "partial_apply" }
+  });
+  const app = updateSeed.entitlements.find((entry) => entry.id === input.appId);
+  if (!app) {
+    throw new Error("real_layer_missing_app_for_rollback");
+  }
+  const rollback = applyUpdateRollback(
+    {
+      ...app,
+      installedVersion: install.snapshot.entitlements.find((entry) => entry.id === input.appId)?.installedVersion ?? app.installedVersion
+    },
+    {}
+  );
+
+  const hubOptional = runTrustEnvelopeValidationScenario({
+    ...update.snapshot,
+    entitlements: update.snapshot.entitlements.map((entry) =>
+      entry.id === input.appId ? { ...entry, owned: true, installedVersion: "1.1.0" } : entry
+    )
+  }).offlineRunnableWithoutHub;
+
+  return {
+    install: { reasonCode: install.result.reasonCode, lifecycleTo: install.result.lifecycle.to },
+    launchAfterInstall: {
+      ready: installVm.launchToken.ready,
+      status: installVm.launchToken.status,
+      reason: installVm.launchToken.reason
+    },
+    update: { reasonCode: update.result.reasonCode, lifecycleTo: update.result.lifecycle.to },
+    launchAfterUpdate: {
+      ready: updateVm.launchToken.ready,
+      status: updateVm.launchToken.status,
+      reason: updateVm.launchToken.reason
+    },
+    rollback: {
+      reasonCode: failUpdate.result.reasonCode,
+      rollbackReasonCode: rollback.reasonCode,
+      finalInstalledVersion: rollback.preservedInstalledVersion
+    },
+    trustEnvelopeOps: updateVm.trustEnvelope.map((op) => op.operation),
+    hubOptional
   };
 }
