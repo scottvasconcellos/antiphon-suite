@@ -1,5 +1,6 @@
 import { issueLaunchToken, verifyLaunchToken } from "../domain/launchTokenBoundary";
 import { type HubSnapshot } from "../domain/types";
+import { toEpochSeconds } from "./timeControl";
 
 const TOKEN_SECRET = "antiphon.layer1.launch";
 const TOKEN_TTL_SECONDS = 3600;
@@ -12,7 +13,7 @@ export type LaunchReadinessEntry = {
 
 function deterministicEpoch(snapshot: HubSnapshot): number {
   const source = snapshot.offlineCache.lastValidatedAt ?? snapshot.session?.signedInAt ?? "2026-02-13T00:00:00.000Z";
-  return Math.floor(new Date(source).getTime() / 1000);
+  return toEpochSeconds(source);
 }
 
 export function toLaunchReadinessMatrix(snapshot: HubSnapshot): LaunchReadinessEntry[] {

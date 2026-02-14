@@ -135,12 +135,20 @@ async function run() {
     'from "./controlPlaneTrustEnvelope";',
     'from "./controlPlaneTrustEnvelope.js";'
   );
+  controlPlaneVmSource = controlPlaneVmSource.replace(
+    'from "./timeControl";',
+    'from "./timeControl.js";'
+  );
   writeFileSync(controlPlaneVmPath, controlPlaneVmSource, "utf-8");
   const launchReadinessPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/launchReadinessMatrix.js");
   let launchReadinessSource = readFileSync(launchReadinessPath, "utf-8");
   launchReadinessSource = launchReadinessSource.replace(
     'from "../domain/launchTokenBoundary";',
     'from "../domain/launchTokenBoundary.js";'
+  );
+  launchReadinessSource = launchReadinessSource.replace(
+    'from "./timeControl";',
+    'from "./timeControl.js";'
   );
   writeFileSync(launchReadinessPath, launchReadinessSource, "utf-8");
   const publicControlPlanePath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/publicControlPlane.js");
