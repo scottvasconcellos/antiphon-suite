@@ -56,6 +56,8 @@
           "contract_version": "rc0",
           "script": "proof-trust-install-boundary",
           "trust_reason_codes": [
+            "artifact_app_version_mismatch",
+            "artifact_app_version_mismatch",
             "artifact_signature_invalid",
             "artifact_signature_missing",
             "invalid_artifact_manifest_json",
@@ -83,7 +85,7 @@
               "atomicGuaranteed": false
             }
           ],
-          "digest": "918357daff4db5bbe0e8791fa3a8f4676e82d42b1c1383391c3d7b3c1752bfcf"
+          "digest": "e86c3e6281f116d30d409e36d911fe0c704930e98010cdca63f3ed19494ca69e"
         }
       ]
     }
