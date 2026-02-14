@@ -1,53 +1,89 @@
 [
   {
-    "name": "long-run-determinism",
+    "name": "repeated-control-plane-cycles-remain-stable",
+    "cycles": 3,
+    "seed": {
+      "session": {
+        "userId": "usr_long_run",
+        "email": "loop@antiphon.audio",
+        "displayName": "Loop",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [
+        {
+          "id": "antiphon.loop.app",
+          "name": "Loop App",
+          "version": "1.0.0",
+          "installedVersion": null,
+          "owned": true,
+          "installState": "not-installed",
+          "updateAvailable": false
+        }
+      ],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 21,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
     "expected": {
-      "iterations": 40,
-      "stable": true,
-      "finalStateHash": "066297fc7dedf6e340cf5db57db3e3adb0f8b4b504b9f5edded46682c7b0c638",
-      "cycleDigest": "61880971044c595d745bb95b5e2cf3fdc0255dbb2e7401c6e215b628134c3b4c",
-      "reasonSignature": [
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
-        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded"
-      ]
+      "cycles": 3,
+      "projectionStable": true,
+      "finalProjection": {
+        "entitlement": {
+          "outcome": "Authorized",
+          "reason": "owned_active_identity"
+        },
+        "installUpdate": {
+          "state": "ready",
+          "reasonCode": "ok_update_completed"
+        },
+        "launchToken": {
+          "ready": true,
+          "status": "issued_verified",
+          "reason": "verified"
+        },
+        "persistedCache": {
+          "schema": "antiphon.control-plane-cache",
+          "version": 1,
+          "restorable": true
+        },
+        "launchReadiness": [
+          {
+            "appId": "antiphon.loop.app",
+            "ready": true,
+            "reason": "token_issued"
+          }
+        ],
+        "trustEnvelope": [
+          {
+            "operation": "entitlementDecision",
+            "latencyTier": "instant",
+            "latencyBudgetMs": 25,
+            "failureBudgetPct": 0.1
+          },
+          {
+            "operation": "installUpdateAuthority",
+            "latencyTier": "short",
+            "latencyBudgetMs": 300,
+            "failureBudgetPct": 1
+          },
+          {
+            "operation": "launchTokenBoundary",
+            "latencyTier": "instant",
+            "latencyBudgetMs": 25,
+            "failureBudgetPct": 0.1
+          },
+          {
+            "operation": "offlineCache",
+            "latencyTier": "instant",
+            "latencyBudgetMs": 15,
+            "failureBudgetPct": 0.1
+          }
+        ]
+      }
     }
   }
 ]

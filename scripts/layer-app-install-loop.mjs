@@ -51,12 +51,14 @@ async function loadModules() {
   };
   rewrite("artifactInstallerExecution.js", 'from "./artifactManifestContract";', 'from "./artifactManifestContract.js";');
   rewrite("artifactTrustVerification.js", 'from "./artifactManifestContract";', 'from "./artifactManifestContract.js";');
+  rewrite("artifactTrustVerification.js", 'from "./timeControl";', 'from "./timeControl.js";');
   rewrite("updateChannelPolicy.js", 'from "./controlPlaneReasonTaxonomy";', 'from "./controlPlaneReasonTaxonomy.js";');
   rewrite("updateChannelPolicy.js", 'from "./appCatalog";', 'from "./appCatalog.js";');
   rewrite("multiAppEntitlement.js", 'from "../domain/entitlementDecision";', 'from "../domain/entitlementDecision.js";');
   rewrite("multiAppEntitlement.js", 'from "./controlPlaneReasonTaxonomy";', 'from "./controlPlaneReasonTaxonomy.js";');
   rewrite("multiAppEntitlement.js", 'from "./appCatalog";', 'from "./appCatalog.js";');
   rewrite("controlPlanePersistence.js", 'from "./appCatalog";', 'from "./appCatalog.js";');
+  rewrite("controlPlanePersistence.js", 'from "./timeControl";', 'from "./timeControl.js";');
   rewrite("updateRecoveryPolicy.js", 'from "./controlPlaneReasonTaxonomy";', 'from "./controlPlaneReasonTaxonomy.js";');
 
   const artifactManifestContract = await import(pathToFileURL(join(base, "artifactManifestContract.js")).href);
