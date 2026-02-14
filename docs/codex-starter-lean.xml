@@ -116,4 +116,19 @@
     </avoid>
   </model_routing_recommendation>
 
+  <operator_collaboration_profile>
+    <default_reporting>
+      Minimize interruptions. Report only at meaningful milestones, blocking conditions, or explicit operator requests.
+    </default_reporting>
+    <model_switch_protocol>
+      <rule>Stay on GPT-5.3-Codex Low by default.</rule>
+      <rule>Before any required escalation, stop once and provide: recommended tier, reason, and clear return-to-low point.</rule>
+      <rule>After escalated task completes, explicitly recommend returning to Low.</rule>
+    </model_switch_protocol>
+    <design_handoff_trigger>
+      Stop and request the operator's in-progress design/Figma package only when entering intentional UI/component/branding implementation.
+      Do not request it during control-plane/domain/services hardening phases.
+    </design_handoff_trigger>
+  </operator_collaboration_profile>
+
 </ANTIPHON_EXECUTION_SOURCE>
