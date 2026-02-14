@@ -58,6 +58,16 @@
       ],
       "installBoundaryFailures": [
         {
+          "case": "download_step_failure",
+          "reasonCode": "failed_download_step",
+          "lifecycleTo": "UpdateFailed"
+        },
+        {
+          "case": "download_gateway_failure",
+          "reasonCode": "failed_gateway",
+          "lifecycleTo": "UpdateFailed"
+        },
+        {
           "case": "installer_non_zero_exit",
           "reasonCode": "failed_update_non_zero",
           "lifecycleTo": "UpdateFailed"

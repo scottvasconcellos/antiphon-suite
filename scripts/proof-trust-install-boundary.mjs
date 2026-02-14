@@ -259,6 +259,14 @@ export async function buildProofOutput() {
     ok: false,
     reasonCode: "failed_update_non_zero"
   }));
+  const downloadStepFailure = await installUpdateAuthority.runInstallUpdateAuthority(snapshot, "update", "antiphon.layer.alpha", async () => ({
+    ok: false,
+    reasonCode: "failed_download_step"
+  }));
+  const gatewayFailure = await installUpdateAuthority.runInstallUpdateAuthority(snapshot, "update", "antiphon.layer.alpha", async () => ({
+    ok: false,
+    reasonCode: "failed_gateway"
+  }));
   const updateTimeout = await installUpdateAuthority.runInstallUpdateAuthority(snapshot, "update", "antiphon.layer.alpha", async () => ({
     ok: false,
     reasonCode: "failed_update_timeout"
@@ -268,6 +276,16 @@ export async function buildProofOutput() {
     trustFailures,
     trustArtifactFailures,
     installBoundaryFailures: [
+      {
+        case: "download_step_failure",
+        reasonCode: downloadStepFailure.result.reasonCode,
+        lifecycleTo: downloadStepFailure.result.lifecycle.to
+      },
+      {
+        case: "download_gateway_failure",
+        reasonCode: gatewayFailure.result.reasonCode,
+        lifecycleTo: gatewayFailure.result.lifecycle.to
+      },
       {
         case: "installer_non_zero_exit",
         reasonCode: installNonZero.result.reasonCode,
