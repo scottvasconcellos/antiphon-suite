@@ -438,6 +438,11 @@ async function run() {
         `Artifact installer failure mismatch: ${fixture.name}`
       );
     }
+    assertEqual(
+      actual.remediation,
+      controlPlaneReasonTaxonomy.remediationForReason(actual.reasonCode),
+      `Artifact installer remediation mapping mismatch: ${fixture.name}`
+    );
   }
 
   const artifactTransactionFixtures = JSON.parse(
@@ -449,6 +454,11 @@ async function run() {
       { applied: { ok: actual.applied.ok, reasonCode: actual.applied.reasonCode }, atomicity: actual.atomicity },
       fixture.expected,
       `Artifact atomic transaction mismatch: ${fixture.name}`
+    );
+    assertEqual(
+      actual.applied.remediation,
+      controlPlaneReasonTaxonomy.remediationForReason(actual.applied.reasonCode),
+      `Artifact transaction remediation mapping mismatch: ${fixture.name}`
     );
   }
 
