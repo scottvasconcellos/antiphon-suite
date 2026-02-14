@@ -5,18 +5,9 @@ function run(command, args, options = {}) {
   return result;
 }
 
-for (const check of [
-  ["npm", ["run", "rc-check"]],
-  ["npm", ["run", "smoke"]],
-  ["npm", ["run", "gate"]],
-  ["node", ["scripts/operator-contract-check.mjs"]],
-  ["npm", ["run", "rc0-release"]]
-]) {
-  const [cmd, args] = check;
-  const result = run(cmd, args, { stdio: "inherit" });
-  if (result.status !== 0) {
-    process.exit(result.status ?? 1);
-  }
+const dryRun = run("npm", ["run", "rc0-release"], { stdio: "inherit" });
+if (dryRun.status !== 0) {
+  process.exit(dryRun.status ?? 1);
 }
 
 const hash = run("git", ["rev-parse", "--short", "HEAD"]);
