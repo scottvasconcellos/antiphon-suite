@@ -58,6 +58,10 @@ async function run() {
     'from "./artifactInstallerExecution";',
     'from "./artifactInstallerExecution.js";'
   );
+  authoritySource = authoritySource.replace(
+    'from "./artifactManifestContract";',
+    'from "./artifactManifestContract.js";'
+  );
   writeFileSync(authorityPath, authoritySource, "utf-8");
   const artifactExecPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/artifactInstallerExecution.js");
   let artifactExecSource = readFileSync(artifactExecPath, "utf-8");

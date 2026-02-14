@@ -2,6 +2,7 @@ import { transitionLifecycleState, type AppLifecycleState } from "../domain/inst
 import { type EntitledApp, type HubSnapshot } from "../domain/types";
 import { createInstallUpdateExecutor, type DownloadProvider, type Installer } from "./downloadInstallerBoundary";
 import { applyArtifactManifest, type ArtifactApplyResult, type VirtualFileSystem } from "./artifactInstallerExecution";
+import { parseArtifactManifest } from "./artifactManifestContract";
 
 export type InstallUpdateAction = "install" | "update";
 
@@ -235,6 +236,7 @@ export async function runInstallUpdateAuthorityWithArtifactExecutor(
   }
 
   let fileSystemAfter = input.fileSystem;
+  const manifestVersionHint = parseArtifactManifest(input.manifestRaw).manifest?.appVersion ?? null;
 
   const result = await runInstallUpdateAuthority(snapshot, action, appId, async () => {
     const applied = applyArtifactManifest({
@@ -260,7 +262,7 @@ export async function runInstallUpdateAuthorityWithArtifactExecutor(
       ok: true,
       app: {
         ...app,
-        installedVersion: applied.rollback.manifestVersion.split(":")[0] ?? app.version,
+        installedVersion: manifestVersionHint ?? app.version,
         installState: "installed",
         updateAvailable: action === "install"
       }
