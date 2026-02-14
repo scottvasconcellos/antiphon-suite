@@ -83,6 +83,11 @@ async function loadModules() {
     'from "./artifactInstallerExecution";',
     'from "./artifactInstallerExecution.js";'
   );
+  patchImport(
+    "apps/layer0-hub/.tmp-control-plane-smoke/services/installUpdateAuthority.js",
+    'from "./artifactManifestContract";',
+    'from "./artifactManifestContract.js";'
+  );
 
   const artifactTrustVerification = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/artifactTrustVerification.js")).href
