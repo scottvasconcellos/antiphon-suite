@@ -28,4 +28,7 @@ run("node", ["scripts/legacy-staged-guard.mjs"]);
 console.log("[gate] running integration checks");
 run("node", ["scripts/integration-check.mjs"]);
 
+console.log("[gate] running trust/install boundary proof");
+run("node", ["scripts/proof-trust-install-boundary.mjs"]);
+
 console.log("[gate] PASS");

@@ -10,7 +10,11 @@ export type InstallerResultCode =
   | "ok_install_apply"
   | "ok_update_apply"
   | "failed_install_step"
-  | "failed_update_step";
+  | "failed_update_step"
+  | "failed_install_non_zero"
+  | "failed_update_non_zero"
+  | "failed_install_timeout"
+  | "failed_update_timeout";
 
 export type DownloadProviderResult = {
   ok: boolean;
@@ -20,7 +24,16 @@ export type DownloadProviderResult = {
 
 export type InstallerResult =
   | { ok: true; reasonCode: "ok_install_apply" | "ok_update_apply"; app: EntitledApp }
-  | { ok: false; reasonCode: "failed_install_step" | "failed_update_step" };
+  | {
+      ok: false;
+      reasonCode:
+        | "failed_install_step"
+        | "failed_update_step"
+        | "failed_install_non_zero"
+        | "failed_update_non_zero"
+        | "failed_install_timeout"
+        | "failed_update_timeout";
+    };
 
 export type DownloadProvider = {
   fetchPackage(action: InstallUpdateAction, appId: string): Promise<DownloadProviderResult>;

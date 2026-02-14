@@ -25,6 +25,7 @@
     "rc-check": "node scripts/rc-check.mjs",
     "rc-scope-proof": "node scripts/rc-scope-proof.mjs",
     "proof:legacy-staged-guard": "node scripts/legacy-staged-guard-proof.mjs",
-    "proof:scope-governance": "node scripts/scope-governance-proof.mjs"
+    "proof:scope-governance": "node scripts/scope-governance-proof.mjs",
+    "proof:trust-install-boundary": "node scripts/proof-trust-install-boundary.mjs"
   }
 }

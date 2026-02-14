@@ -34,6 +34,9 @@ If `npm run rc-check` fails, it reports scoped control-plane dirt only; legacy q
 - `node scripts/proof-layer-app.mjs`  
   End-to-end real layer-app artifact pipeline proof (install -> update -> rollback -> hub-optional).
 
+- `node scripts/proof-trust-install-boundary.mjs`  
+  Deterministic trust + installer boundary failure semantics proof.
+
 ## Hub-Optional
 
 Previously authorized apps remain runnable offline without Hub process presence.

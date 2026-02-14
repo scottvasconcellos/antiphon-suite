@@ -16,6 +16,10 @@ export type InstallUpdateReasonCode =
   | "failed_download_step"
   | "failed_install_step"
   | "failed_update_step"
+  | "failed_install_non_zero"
+  | "failed_update_non_zero"
+  | "failed_install_timeout"
+  | "failed_update_timeout"
   | "failed_gateway"
   | "artifact_missing_file"
   | "artifact_digest_mismatch"
@@ -33,6 +37,10 @@ export type InstallUpdateStepResult =
         | "failed_download_step"
         | "failed_install_step"
         | "failed_update_step"
+        | "failed_install_non_zero"
+        | "failed_update_non_zero"
+        | "failed_install_timeout"
+        | "failed_update_timeout"
         | "failed_gateway"
         | "artifact_missing_file"
         | "artifact_digest_mismatch"
@@ -66,6 +74,10 @@ export const INSTALL_UPDATE_REASON_CODES = [
   "failed_download_step",
   "failed_install_step",
   "failed_update_step",
+  "failed_install_non_zero",
+  "failed_update_non_zero",
+  "failed_install_timeout",
+  "failed_update_timeout",
   "failed_gateway",
   "artifact_missing_file",
   "artifact_digest_mismatch",
