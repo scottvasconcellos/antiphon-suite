@@ -111,3 +111,9 @@ Run before any “done” call:
 2. Commit once with a scope-reduction message.
 3. Re-run reproducibility in clean detached worktree and record result.
 
+## 7) Reproducibility Log
+
+- Detached worktree run completed at commit `344ebea`:
+  - `pnpm install` PASS
+  - `npm run gate` PASS
+- Result: clean-checkout reproducibility confirmed for active control-plane workflow.
