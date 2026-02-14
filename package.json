@@ -18,6 +18,8 @@
     "demo:layer": "node scripts/demo-layer.mjs",
     "release:check": "node scripts/release-check.mjs",
     "verify": "node scripts/integration-check.mjs",
-    "proof:layer-app": "node scripts/proof-layer-app.mjs"
+    "proof:layer-app": "node scripts/proof-layer-app.mjs",
+    "loop:layer-app": "node scripts/layer-app-install-loop.mjs",
+    "loop:layer-app:multi": "node scripts/layer-app-install-loop.mjs --multi"
   }
 }

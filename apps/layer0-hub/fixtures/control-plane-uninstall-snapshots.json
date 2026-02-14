@@ -1,0 +1,105 @@
+[
+  {
+    "name": "uninstall-success-leaves-cache-intact",
+    "input": {
+      "snapshot": {
+        "session": {
+          "userId": "usr_uninstall",
+          "email": "uninstall@antiphon.audio",
+          "displayName": "Uninstall",
+          "signedInAt": "2026-02-13T00:00:00.000Z"
+        },
+        "entitlements": [
+          {
+            "id": "antiphon.layer.hello-world",
+            "name": "Hello World",
+            "version": "1.1.0",
+            "installedVersion": "1.1.0",
+            "owned": true,
+            "installState": "installed",
+            "updateAvailable": false
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 7,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "appId": "antiphon.layer.hello-world"
+    },
+    "expected": {
+      "ok": true,
+      "reasonCode": "ok_uninstall_completed",
+      "remediation": "none",
+      "installedVersion": null,
+      "cacheState": "valid"
+    }
+  },
+  {
+    "name": "uninstall-refused-not-installed",
+    "input": {
+      "snapshot": {
+        "session": null,
+        "entitlements": [
+          {
+            "id": "antiphon.layer.hello-world",
+            "name": "Hello World",
+            "version": "1.1.0",
+            "installedVersion": null,
+            "owned": true,
+            "installState": "not-installed",
+            "updateAvailable": false
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 7,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "appId": "antiphon.layer.hello-world"
+    },
+    "expected": {
+      "ok": false,
+      "reasonCode": "blocked_not_installed",
+      "remediation": "none"
+    }
+  },
+  {
+    "name": "uninstall-refused-busy-updating",
+    "input": {
+      "snapshot": {
+        "session": null,
+        "entitlements": [
+          {
+            "id": "antiphon.layer.hello-world",
+            "name": "Hello World",
+            "version": "1.1.0",
+            "installedVersion": "1.0.0",
+            "owned": true,
+            "installState": "installed",
+            "updateAvailable": true
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 7,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "appId": "antiphon.layer.hello-world"
+    },
+    "expected": {
+      "ok": false,
+      "reasonCode": "blocked_uninstall_busy",
+      "remediation": "none"
+    }
+  }
+]

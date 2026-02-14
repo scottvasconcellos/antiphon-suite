@@ -43,6 +43,13 @@
           }
         ]
       },
+      "rollbackPlan": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "reasonCode": "ok_update_rollback_applied",
+          "finalInstalledVersion": "1.0.0"
+        }
+      ],
       "rollbackMetadataCount": 0,
       "persistenceStableHash": "{\"entitlementDecision\":null,\"installState\":[],\"offlineCache\":{\"cacheState\":\"valid\",\"lastValidatedAt\":\"2026-02-13T00:00:00.000Z\",\"maxOfflineDays\":21,\"offlineDaysRemaining\":7},\"schema\":\"antiphon.control-plane-cache\",\"version\":1}"
     }

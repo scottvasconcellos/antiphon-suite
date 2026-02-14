@@ -47,6 +47,13 @@
           }
         ]
       },
+      "rollbackPlan": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "reasonCode": "blocked_no_last_known_good",
+          "finalInstalledVersion": null
+        }
+      ],
       "rollbackMetadataCount": 2,
       "persistenceStableHash": "{\"entitlementDecision\":null,\"installState\":[],\"offlineCache\":{\"cacheState\":\"valid\",\"lastValidatedAt\":\"2026-02-13T00:00:00.000Z\",\"maxOfflineDays\":21,\"offlineDaysRemaining\":7},\"rollbackMetadata\":[{\"appId\":\"antiphon.layer.hello-world\",\"manifestVersion\":\"1.0.0\",\"previousTargetHash\":\"n/a\",\"rollbackPrepared\":true},{\"appId\":\"antiphon.layer.hello-world\",\"manifestVersion\":\"1.1.0\",\"previousTargetHash\":\"n/a\",\"rollbackPrepared\":true}],\"schema\":\"antiphon.control-plane-cache\",\"version\":1}"
     }
@@ -99,6 +106,13 @@
           }
         ]
       },
+      "rollbackPlan": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "reasonCode": "blocked_no_last_known_good",
+          "finalInstalledVersion": null
+        }
+      ],
       "rollbackMetadataCount": 2,
       "persistenceStableHash": "{\"entitlementDecision\":null,\"installState\":[],\"offlineCache\":{\"cacheState\":\"valid\",\"lastValidatedAt\":\"2026-02-13T00:00:00.000Z\",\"maxOfflineDays\":21,\"offlineDaysRemaining\":7},\"rollbackMetadata\":[{\"appId\":\"antiphon.layer.hello-world\",\"manifestVersion\":\"1.0.0\",\"previousTargetHash\":\"n/a\",\"rollbackPrepared\":true},{\"appId\":\"antiphon.layer.hello-world\",\"manifestVersion\":\"1.1.0\",\"previousTargetHash\":\"n/a\",\"rollbackPrepared\":true}],\"schema\":\"antiphon.control-plane-cache\",\"version\":1}"
     }
@@ -150,6 +164,13 @@
           }
         ]
       },
+      "rollbackPlan": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "reasonCode": "blocked_no_last_known_good",
+          "finalInstalledVersion": null
+        }
+      ],
       "rollbackMetadataCount": 1,
       "persistenceStableHash": "{\"entitlementDecision\":null,\"installState\":[],\"offlineCache\":{\"cacheState\":\"valid\",\"lastValidatedAt\":\"2026-02-13T00:00:00.000Z\",\"maxOfflineDays\":21,\"offlineDaysRemaining\":7},\"rollbackMetadata\":[{\"appId\":\"antiphon.layer.hello-world\",\"manifestVersion\":\"1.1.0\",\"previousTargetHash\":\"n/a\",\"rollbackPrepared\":true}],\"schema\":\"antiphon.control-plane-cache\",\"version\":1}"
     }

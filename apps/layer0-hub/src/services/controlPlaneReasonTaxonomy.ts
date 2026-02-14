@@ -56,6 +56,9 @@ export const CONTROL_PLANE_REASON_TAXONOMY = {
   artifact_manifest_corrupt: "rebuild_artifact_manifest",
   artifact_app_version_mismatch: "retry_install",
   artifact_signature_clock_skew: "refresh_online_session"
+  ,
+  ok_uninstall_completed: "none",
+  blocked_uninstall_busy: "none"
 } as const;
 
 export type ControlPlaneReasonCode = keyof typeof CONTROL_PLANE_REASON_TAXONOMY;

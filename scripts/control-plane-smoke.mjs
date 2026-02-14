@@ -73,6 +73,13 @@ async function run() {
     'from "./artifactManifestContract.js";'
   );
   writeFileSync(artifactTrustPath, artifactTrustSource, "utf-8");
+  const uninstallPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/uninstallAuthority.js");
+  let uninstallSource = readFileSync(uninstallPath, "utf-8");
+  uninstallSource = uninstallSource.replace(
+    'from "./controlPlaneReasonTaxonomy";',
+    'from "./controlPlaneReasonTaxonomy.js";'
+  );
+  writeFileSync(uninstallPath, uninstallSource, "utf-8");
   const controlPlaneVmPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneViewModel.js");
   let controlPlaneVmSource = readFileSync(controlPlaneVmPath, "utf-8");
   controlPlaneVmSource = controlPlaneVmSource.replace(
@@ -277,6 +284,9 @@ async function run() {
   const artifactTrustVerification = await import(
     pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/artifactTrustVerification.js")).href
   );
+  const uninstallAuthority = await import(
+    pathToFileURL(join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/uninstallAuthority.js")).href
+  );
 
   const entitlementFixtures = JSON.parse(readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/entitlement-decision-snapshots.json"), "utf-8"));
   for (const fixture of entitlementFixtures) {
@@ -399,6 +409,34 @@ async function run() {
       fixture.expected,
       `Artifact atomic transaction mismatch: ${fixture.name}`
     );
+  }
+
+  const uninstallFixtures = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-uninstall-snapshots.json"), "utf-8")
+  );
+  for (const fixture of uninstallFixtures) {
+    const actual = uninstallAuthority.runUninstall(fixture.input.snapshot, fixture.input.appId);
+    if (fixture.expected.ok) {
+      const app = actual.snapshot.entitlements.find((entry) => entry.id === fixture.input.appId);
+      assert(app, `Uninstall fixture missing app after uninstall: ${fixture.name}`);
+      assertEqual(
+        {
+          ok: actual.ok,
+          reasonCode: actual.reasonCode,
+          remediation: actual.remediation,
+          installedVersion: app.installedVersion,
+          cacheState: actual.snapshot.offlineCache.cacheState
+        },
+        fixture.expected,
+        `Uninstall fixture mismatch: ${fixture.name}`
+      );
+    } else {
+      assertEqual(
+        { ok: actual.ok, reasonCode: actual.reasonCode, remediation: actual.remediation },
+        fixture.expected,
+        `Uninstall refusal mismatch: ${fixture.name}`
+      );
+    }
   }
 
   const layerManifestFixtures = JSON.parse(
@@ -782,7 +820,8 @@ async function run() {
       ,
       ...artifactManifestContract.ARTIFACT_MANIFEST_REASON_CODES,
       ...artifactInstallerExecution.ARTIFACT_INSTALLER_REASON_CODES,
-      ...artifactTrustVerification.ARTIFACT_TRUST_REASON_CODES
+      ...artifactTrustVerification.ARTIFACT_TRUST_REASON_CODES,
+      ...uninstallAuthority.UNINSTALL_REASON_CODES
     ])].sort();
     assertEqual(actual, fixture.expectedReasonCodes, `Control-plane reason coverage mismatch: ${fixture.name}`);
     for (const code of actual) {

@@ -22,6 +22,7 @@
     "src/services/controlPlaneTrustEnvelope.ts",
     "src/services/publicControlPlane.ts",
     "src/services/controlPlaneReasonTaxonomy.ts",
+    "src/services/uninstallAuthority.ts",
     "src/services/artifactManifestContract.ts",
     "src/services/artifactTrustVerification.ts",
     "src/services/artifactInstallerExecution.ts",

@@ -57,6 +57,7 @@ async function loadModules() {
   rewrite("multiAppEntitlement.js", 'from "./controlPlaneReasonTaxonomy";', 'from "./controlPlaneReasonTaxonomy.js";');
   rewrite("multiAppEntitlement.js", 'from "./appCatalog";', 'from "./appCatalog.js";');
   rewrite("controlPlanePersistence.js", 'from "./appCatalog";', 'from "./appCatalog.js";');
+  rewrite("updateRecoveryPolicy.js", 'from "./controlPlaneReasonTaxonomy";', 'from "./controlPlaneReasonTaxonomy.js";');
 
   const artifactManifestContract = await import(pathToFileURL(join(base, "artifactManifestContract.js")).href);
   const artifactTrustVerification = await import(pathToFileURL(join(base, "artifactTrustVerification.js")).href);
@@ -64,6 +65,7 @@ async function loadModules() {
   const updateChannelPolicy = await import(pathToFileURL(join(base, "updateChannelPolicy.js")).href);
   const multiAppEntitlement = await import(pathToFileURL(join(base, "multiAppEntitlement.js")).href);
   const controlPlanePersistence = await import(pathToFileURL(join(base, "controlPlanePersistence.js")).href);
+  const updateRecoveryPolicy = await import(pathToFileURL(join(base, "updateRecoveryPolicy.js")).href);
 
   return {
     artifactManifestContract,
@@ -72,6 +74,8 @@ async function loadModules() {
     updateChannelPolicy,
     multiAppEntitlement,
     controlPlanePersistence
+    ,
+    updateRecoveryPolicy
   };
 }
 
@@ -227,10 +231,34 @@ export async function runOperatorLoop(options = {}) {
     entitlement: entitlement.sort((a, b) => a.appId.localeCompare(b.appId))
   };
 
+  const rollbackPlan = store
+    .map((entry) => {
+      const versions = [...entry.versions].sort((a, b) => a.version.localeCompare(b.version));
+      const newest = versions[versions.length - 1] ?? null;
+      const previous = versions.length > 1 ? versions[versions.length - 2] : null;
+      const appInput = {
+        id: entry.appId,
+        name: entry.appId,
+        version: newest?.version ?? "0.0.0",
+        installedVersion: previous?.version ?? null,
+        owned: true,
+        installState: "installed",
+        updateAvailable: Boolean(newest && previous)
+      };
+      const decision = modules.updateRecoveryPolicy.applyUpdateRollback(appInput, {});
+      return {
+        appId: entry.appId,
+        reasonCode: decision.reasonCode,
+        finalInstalledVersion: decision.preservedInstalledVersion
+      };
+    })
+    .sort((a, b) => a.appId.localeCompare(b.appId));
+
   return {
     installStoreLayout: store.sort((a, b) => a.appId.localeCompare(b.appId)),
     activeSelectionState: activeSelection.sort((a, b) => a.appId.localeCompare(b.appId)),
     runPlan,
+    rollbackPlan,
     rollbackMetadataCount: persisted.rollbackMetadata?.length ?? 0,
     persistenceStableHash: stableStringify(persisted)
   };
