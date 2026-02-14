@@ -31,7 +31,6 @@
           "contract_version": "rc0",
           "script": "gate",
           "step_labels": [
-            "control-plane scoped status",
             "running integration checks",
             "running long-run determinism proof",
             "running operator contract check",

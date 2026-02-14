@@ -28,7 +28,7 @@ function parseGateContractSurface() {
   const source = readFileSync(join(process.cwd(), "scripts/gate.mjs"), "utf-8");
   const steps = [...source.matchAll(/console\.log\("\[gate\] ([^"]+)"\);/g)]
     .map((match) => match[1])
-    .filter((label) => label !== "repo status" && label !== "PASS")
+    .filter((label) => !["repo status", "control-plane scoped status", "PASS"].includes(label))
     .sort((a, b) => a.localeCompare(b));
   return {
     contract_version: contractVersion,
