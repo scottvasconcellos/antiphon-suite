@@ -180,6 +180,26 @@ export async function buildProofOutput() {
         nowIso: "2026-02-13T00:00:00.000Z",
         requireSignature: true
       })
+    },
+    {
+      case: "expected_appid_mismatch",
+      result: artifactTrustVerification.verifyArtifactTrust({
+        manifestRaw: makeManifest(),
+        expectedAppId: "antiphon.layer.beta",
+        expectedVersion: "2.0.0",
+        nowIso: "2026-02-13T00:00:00.000Z",
+        requireSignature: true
+      })
+    },
+    {
+      case: "expected_version_mismatch",
+      result: artifactTrustVerification.verifyArtifactTrust({
+        manifestRaw: makeManifest(),
+        expectedAppId: "antiphon.layer.alpha",
+        expectedVersion: "2.0.1",
+        nowIso: "2026-02-13T00:00:00.000Z",
+        requireSignature: true
+      })
     }
   ].map((entry) => ({ case: entry.case, reasonCode: entry.result.reasonCode, remediation: entry.result.remediation }));
 

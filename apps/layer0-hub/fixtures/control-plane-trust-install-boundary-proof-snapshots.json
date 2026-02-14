@@ -27,6 +27,16 @@
           "case": "signature_invalid",
           "reasonCode": "artifact_signature_invalid",
           "remediation": "reissue_artifact_signature"
+        },
+        {
+          "case": "expected_appid_mismatch",
+          "reasonCode": "artifact_app_version_mismatch",
+          "remediation": "retry_install"
+        },
+        {
+          "case": "expected_version_mismatch",
+          "reasonCode": "artifact_app_version_mismatch",
+          "remediation": "retry_install"
         }
       ],
       "trustArtifactFailures": [
