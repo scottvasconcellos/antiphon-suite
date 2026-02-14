@@ -10,6 +10,8 @@ export type ArtifactSignatureEnvelope = {
   keyId?: string;
   algorithm?: string;
   signature?: string;
+  notBefore?: string;
+  notAfter?: string;
 };
 
 export type ArtifactManifest = {
@@ -44,6 +46,12 @@ function normalizeSignature(signature?: ArtifactSignatureEnvelope): ArtifactSign
   }
   if (typeof signature.signature === "string") {
     normalized.signature = signature.signature;
+  }
+  if (typeof signature.notBefore === "string") {
+    normalized.notBefore = signature.notBefore;
+  }
+  if (typeof signature.notAfter === "string") {
+    normalized.notAfter = signature.notAfter;
   }
   return Object.keys(normalized).length === 0 ? undefined : normalized;
 }

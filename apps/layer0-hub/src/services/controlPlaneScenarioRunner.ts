@@ -516,6 +516,10 @@ export async function runArtifactInstallUpdateScenario(input: {
 }): Promise<{
   install: { reasonCode: string; lifecycleTo: string };
   update: { reasonCode: string; lifecycleTo: string };
+  installFailureRollback: {
+    reasonCode: string;
+    rollbackPrepared: boolean;
+  };
   updateFailureRollback: {
     reasonCode: string;
     rollbackReasonCode: string;
@@ -554,6 +558,19 @@ export async function runArtifactInstallUpdateScenario(input: {
     }
   );
 
+  const installFailure = await runInstallUpdateAuthorityWithArtifactExecutor(
+    input.seed,
+    "install",
+    input.appId,
+    {
+      manifestRaw: input.installManifestRaw,
+      payloadFiles: input.payloadFiles,
+      targetDir: input.targetDir,
+      fileSystem: {},
+      inject: { mode: "partial_apply" }
+    }
+  );
+
   const failingUpdate = await runInstallUpdateAuthorityWithArtifactExecutor(
     updateSeed,
     "update",
@@ -586,6 +603,10 @@ export async function runArtifactInstallUpdateScenario(input: {
     update: {
       reasonCode: update.result.reasonCode,
       lifecycleTo: update.result.lifecycle.to
+    },
+    installFailureRollback: {
+      reasonCode: installFailure.result.reasonCode,
+      rollbackPrepared: installFailure.result.artifactRollback?.rollbackPrepared ?? false
     },
     updateFailureRollback: {
       reasonCode: failingUpdate.result.reasonCode,

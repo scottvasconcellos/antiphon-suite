@@ -2,10 +2,15 @@
   {
     "name": "canonical-reason-coverage",
     "expectedReasonCodes": [
+      "artifact_app_version_mismatch",
       "artifact_digest_mismatch",
+      "artifact_manifest_corrupt",
       "artifact_missing_file",
       "artifact_partial_apply",
       "artifact_rollback_failed",
+      "artifact_signature_clock_skew",
+      "artifact_signature_invalid",
+      "artifact_signature_missing",
       "blocked_app_not_found",
       "blocked_channel_policy",
       "blocked_invalid_transition",
@@ -34,6 +39,7 @@
       "offline_entitlement_expired",
       "ok_artifact_apply_completed",
       "ok_artifact_manifest_loaded",
+      "ok_artifact_trust_verified",
       "ok_cache_loaded",
       "ok_install_completed",
       "ok_mixed_entitlement_timestamps",

@@ -49,6 +49,13 @@ export const CONTROL_PLANE_REASON_TAXONOMY = {
   artifact_digest_mismatch: "retry_install",
   artifact_partial_apply: "retry_update",
   artifact_rollback_failed: "rebuild_cache"
+  ,
+  ok_artifact_trust_verified: "none",
+  artifact_signature_missing: "reissue_artifact_signature",
+  artifact_signature_invalid: "reissue_artifact_signature",
+  artifact_manifest_corrupt: "rebuild_artifact_manifest",
+  artifact_app_version_mismatch: "retry_install",
+  artifact_signature_clock_skew: "refresh_online_session"
 } as const;
 
 export type ControlPlaneReasonCode = keyof typeof CONTROL_PLANE_REASON_TAXONOMY;

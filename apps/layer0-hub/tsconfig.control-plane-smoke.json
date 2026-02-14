@@ -23,6 +23,7 @@
     "src/services/publicControlPlane.ts",
     "src/services/controlPlaneReasonTaxonomy.ts",
     "src/services/artifactManifestContract.ts",
+    "src/services/artifactTrustVerification.ts",
     "src/services/artifactInstallerExecution.ts",
     "src/services/clockDriftPolicy.ts",
     "src/services/controlPlaneTrustArtifact.ts",

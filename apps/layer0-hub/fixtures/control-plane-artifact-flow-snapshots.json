@@ -50,6 +50,10 @@
         "rollbackReasonCode": "ok_update_rollback_applied",
         "rollbackPrepared": true,
         "finalInstalledVersion": "2.0.0"
+      },
+      "installFailureRollback": {
+        "reasonCode": "artifact_partial_apply",
+        "rollbackPrepared": true
       }
     }
   }

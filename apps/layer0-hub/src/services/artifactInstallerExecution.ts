@@ -74,6 +74,15 @@ export type ArtifactApplyInput = {
   inject?: InstallerFailureInjection;
 };
 
+export type ArtifactTransactionResult = {
+  applied: ArtifactApplyResult;
+  atomicity: {
+    guaranteed: boolean;
+    rollbackAttempted: boolean;
+    rollbackSucceeded: boolean;
+  };
+};
+
 function sha256(content: string): string {
   let hash = 0x811c9dc5;
   for (let i = 0; i < content.length; i += 1) {
@@ -243,5 +252,29 @@ export function applyArtifactManifest(input: ArtifactApplyInput): ArtifactApplyR
       rollbackPrepared: true
     },
     fileSystem: nextFileSystem
+  };
+}
+
+export function executeAtomicArtifactTransaction(input: ArtifactApplyInput): ArtifactTransactionResult {
+  const applied = applyArtifactManifest(input);
+  if (applied.ok) {
+    return {
+      applied,
+      atomicity: {
+        guaranteed: true,
+        rollbackAttempted: false,
+        rollbackSucceeded: true
+      }
+    };
+  }
+  const rollbackAttempted = applied.rollback.rollbackPrepared;
+  const rollbackSucceeded = rollbackAttempted && applied.reasonCode !== "artifact_rollback_failed";
+  return {
+    applied,
+    atomicity: {
+      guaranteed: rollbackSucceeded,
+      rollbackAttempted,
+      rollbackSucceeded
+    }
   };
 }
