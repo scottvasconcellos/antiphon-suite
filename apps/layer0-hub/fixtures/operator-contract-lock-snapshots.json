@@ -37,7 +37,6 @@
             "running scoped rc-check",
             "running smoke",
             "running trust/install boundary proof",
-            "scoped-dirty-count=0",
             "verifying public surface snapshot",
             "verifying reason coverage snapshot",
             "verifying staged legacy guard"
