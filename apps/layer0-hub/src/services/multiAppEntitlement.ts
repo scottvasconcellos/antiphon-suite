@@ -22,11 +22,12 @@ export function decideMultiAppEntitlements(inputs: MultiAppEntitlementInput[]): 
     .map((entry) => {
       const base = decideEntitlement(entry.decisionInput);
       if (!(base.outcome === "Authorized" || base.outcome === "OfflineAuthorized")) {
+        const reasonCode = "blocked_not_owned";
         return {
           appId: entry.appId,
           outcome: "Denied",
-          reasonCode: base.reason,
-          remediation: remediationForReason("blocked_not_owned")
+          reasonCode,
+          remediation: remediationForReason(reasonCode)
         };
       }
 

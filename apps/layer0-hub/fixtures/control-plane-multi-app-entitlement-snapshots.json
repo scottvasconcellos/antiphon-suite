@@ -76,5 +76,28 @@
         "remediation": "none"
       }
     ]
+  },
+  {
+    "name": "identity-required-denied-maps-to-canonical-reason",
+    "input": [
+      {
+        "appId": "antiphon.theta",
+        "requiredEntitlements": ["core"],
+        "grantedEntitlements": ["core"],
+        "decisionInput": {
+          "identity": { "authenticated": false },
+          "license": { "owned": false, "revoked": false },
+          "offlineCache": { "cacheState": "empty", "offlineDaysRemaining": 0 }
+        }
+      }
+    ],
+    "expected": [
+      {
+        "appId": "antiphon.theta",
+        "outcome": "Denied",
+        "reasonCode": "blocked_not_owned",
+        "remediation": "refresh_online_session"
+      }
+    ]
   }
 ]
