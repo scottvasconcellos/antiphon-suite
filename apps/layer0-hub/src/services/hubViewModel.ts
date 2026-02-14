@@ -1,4 +1,4 @@
-import { type EntitledApp, type HubState, type InstallTransaction } from "../domain/types";
+import { type HubState } from "../domain/types";
 
 export type HubViewModel = {
   statusLine: string;
@@ -17,25 +17,4 @@ export function toHubViewModel(hubState: HubState): HubViewModel {
     ownedCount: snapshot.entitlements.filter((app) => app.owned).length,
     pendingUpdates: snapshot.entitlements.filter((app) => app.updateAvailable).length
   };
-}
-
-export function toInstallActionLabel(app: EntitledApp): string {
-  if (app.installState === "installing") {
-    return "Installing...";
-  }
-  if (app.installedVersion) {
-    return app.updateAvailable ? "Apply update" : "Reinstall";
-  }
-  return "Install";
-}
-
-export function toTransactionLabel(tx: InstallTransaction): string {
-  return `${tx.action.toUpperCase()} ${tx.status.toUpperCase()}`;
-}
-
-export function toDisplayDate(value: string | null): string {
-  if (!value) {
-    return "Never";
-  }
-  return new Date(value).toLocaleString();
 }
