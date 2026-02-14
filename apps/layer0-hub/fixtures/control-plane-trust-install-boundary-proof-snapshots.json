@@ -49,8 +49,8 @@
       "installBoundaryFailures": [
         {
           "case": "installer_non_zero_exit",
-          "reasonCode": "blocked_invalid_transition",
-          "lifecycleTo": "UpdateAvailable"
+          "reasonCode": "failed_update_non_zero",
+          "lifecycleTo": "UpdateFailed"
         },
         {
           "case": "installer_timeout_hung",

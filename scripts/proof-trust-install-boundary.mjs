@@ -235,9 +235,9 @@ export async function buildProofOutput() {
     transactions: []
   };
 
-  const installNonZero = await installUpdateAuthority.runInstallUpdateAuthority(snapshot, "install", "antiphon.layer.alpha", async () => ({
+  const installNonZero = await installUpdateAuthority.runInstallUpdateAuthority(snapshot, "update", "antiphon.layer.alpha", async () => ({
     ok: false,
-    reasonCode: "failed_install_non_zero"
+    reasonCode: "failed_update_non_zero"
   }));
   const updateTimeout = await installUpdateAuthority.runInstallUpdateAuthority(snapshot, "update", "antiphon.layer.alpha", async () => ({
     ok: false,
