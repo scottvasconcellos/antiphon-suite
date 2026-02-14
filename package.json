@@ -10,7 +10,6 @@
     "typecheck": "pnpm --filter @antiphon/layer0-authority typecheck && pnpm --filter @antiphon/layer0-hub typecheck",
     "smoke": "node scripts/control-plane-smoke.mjs && node scripts/foundation-smoke.mjs",
     "test:control-plane": "node scripts/control-plane-smoke.mjs",
-    "test:engine": "node scripts/engine-smoke.mjs",
     "test:structure": "node scripts/structure-smoke.mjs",
     "test": "node scripts/foundation-smoke.mjs",
     "gate": "node scripts/gate.mjs",
