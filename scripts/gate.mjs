@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { getScopedDirtyPaths } from "./scope-clean-check.mjs";
 
 function run(command, args) {
   const result = spawnSync(command, args, { stdio: "inherit", shell: false });
@@ -7,8 +8,16 @@ function run(command, args) {
   }
 }
 
-console.log("[gate] repo status");
-run("git", ["status", "--short"]);
+console.log("[gate] control-plane scoped status");
+const scopedDirtyPaths = getScopedDirtyPaths();
+if (scopedDirtyPaths.length === 0) {
+  console.log("[gate] scoped-dirty-count=0");
+} else {
+  console.log(`[gate] scoped-dirty-count=${scopedDirtyPaths.length}`);
+  for (const filePath of scopedDirtyPaths) {
+    console.log(`[gate] scoped-dirty ${filePath}`);
+  }
+}
 
 console.log("[gate] running smoke");
 run("npm", ["run", "smoke"]);
