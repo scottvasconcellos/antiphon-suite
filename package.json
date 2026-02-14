@@ -20,6 +20,8 @@
     "verify": "node scripts/integration-check.mjs",
     "proof:layer-app": "node scripts/proof-layer-app.mjs",
     "loop:layer-app": "node scripts/layer-app-install-loop.mjs",
-    "loop:layer-app:multi": "node scripts/layer-app-install-loop.mjs --multi"
+    "loop:layer-app:multi": "node scripts/layer-app-install-loop.mjs --multi",
+    "demo": "node scripts/demo.mjs",
+    "rc-check": "node scripts/rc-check.mjs"
   }
 }

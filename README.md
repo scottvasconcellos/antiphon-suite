@@ -2,16 +2,30 @@
 
 Silent control-plane for auth, entitlement, install/update authority, offline trust, and launch boundaries.
 
-## Operator Handbook
+## Quickstart (Operator)
+
+1. `npm install`
+2. `npm run gate`
+3. `npm run demo`
+
+If `npm run demo` fails, run `npm run smoke`.
+
+## Command Reference
 
 - `npm run smoke`  
-  Deterministic control-plane + foundation checks (includes artifact trust and installer paths).
+  Deterministic control-plane + foundation checks.
 
 - `npm run gate`  
-  Runs smoke + public surface lock + reason coverage + integration checks.
+  Smoke + public surface lock + reason coverage + integration checks.
+
+- `npm run demo`  
+  One-command operator proof: entitlements, install/update actions, trust validation, hub-optional marker.
+
+- `npm run rc-check`  
+  Clean-state reproducibility preflight (clean repo, required artifacts, node version).
 
 - `node scripts/demo-hub.mjs`  
-  60-second human-readable control-plane status flow.
+  Hub-oriented human-readable control-plane status flow.
 
 - `node scripts/demo-layer.mjs`  
   Headless layer-app consumer projection proof.

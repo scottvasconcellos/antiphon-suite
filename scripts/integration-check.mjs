@@ -39,6 +39,7 @@ export async function runIntegrationCheck() {
   run("node", ["scripts/verify-reason-coverage.mjs"]);
   run("node", ["scripts/demo-hub.mjs"]);
   run("node", ["scripts/demo-layer.mjs"]);
+  run("node", ["scripts/demo.mjs"]);
   run("node", ["scripts/proof-layer-app.mjs"]);
 
   const demoSnapshot = JSON.parse(
@@ -50,6 +51,11 @@ export async function runIntegrationCheck() {
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-operator-loop-snapshots.json"), "utf-8")
   )[0];
   assert(operatorSnapshot && operatorSnapshot.expected, "operator-loop snapshot missing expected output");
+
+  const operatorDemoSnapshot = JSON.parse(
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-operator-demo-snapshots.json"), "utf-8")
+  )[0];
+  assert(operatorDemoSnapshot && operatorDemoSnapshot.expected, "operator demo snapshot missing expected output");
 
   const loopSource = readFileSync(join(process.cwd(), "scripts/layer-app-install-loop.mjs"), "utf-8");
   const badImport = /from\s+["'](\.\.\/|\.\/)?apps\/layer0-hub\/src\/(?!services\/publicControlPlane)/.test(loopSource);
