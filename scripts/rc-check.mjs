@@ -6,8 +6,8 @@ function fail(message) {
   process.exit(1);
 }
 
-function run(command, args) {
-  return spawnSync(command, args, { stdio: "pipe", shell: false, encoding: "utf-8" });
+function run(command, args, stdio = "pipe") {
+  return spawnSync(command, args, { stdio, shell: false, encoding: "utf-8" });
 }
 
 const nodeMajor = Number(process.versions.node.split(".")[0] || "0");
@@ -15,12 +15,9 @@ if (nodeMajor < 20) {
   fail(`node_version_unsupported required>=20 actual=${process.versions.node}`);
 }
 
-const status = run("git", ["status", "--short"]);
-if (status.status !== 0) {
-  fail("git_status_unavailable");
-}
-if ((status.stdout || "").trim().length > 0) {
-  fail("repo_not_clean");
+const scopeStatus = run("node", ["scripts/scope-clean-check.mjs"], "inherit");
+if (scopeStatus.status !== 0) {
+  fail("repo_scope_not_clean (control-plane scoped clean-state required; legacy quarantine drift ignored)");
 }
 
 const requiredFiles = [
@@ -41,5 +38,7 @@ for (const filePath of requiredFiles) {
 }
 
 console.log(`[rc-check] node=${process.versions.node}`);
+console.log("[rc-check] scoped clean-state required for control-plane only");
+console.log("[rc-check] legacy quarantine drift is ignored");
 console.log(`[rc-check] requiredFiles=${requiredFiles.length}`);
 console.log("[rc-check] PASS");

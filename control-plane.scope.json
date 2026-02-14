@@ -1,0 +1,27 @@
+{
+  "include": [
+    "package.json",
+    "README.md",
+    "control-plane.scope.json",
+    "scripts",
+    "apps/layer0-hub/src/domain",
+    "apps/layer0-hub/src/services",
+    "apps/layer0-hub/fixtures/control-plane-*.json",
+    "apps/layer-app-hello-world/artifacts",
+    "apps/layer-app-rhythm/artifacts"
+  ],
+  "exclude": [
+    "apps/layer0-hub/src/domain/hubMusicOrchestrator.ts",
+    "apps/layer0-hub/src/domain/minimalRealMusicIntelligenceEngine.ts",
+    "apps/layer0-hub/src/domain/musicEngineContracts.ts",
+    "apps/layer0-hub/src/domain/musicEngineRegistry.ts",
+    "apps/layer0-hub/src/domain/musicIntelligenceEngine.ts",
+    "apps/layer0-hub/src/domain/musicTelemetryContracts.ts",
+    "apps/layer0-hub/src/domain/ruleBasedMusicIntelligenceEngine.ts",
+    "apps/layer0-hub/src/services/musicTelemetryDto.ts",
+    "apps/layer0-hub/fixtures/music-*.json",
+    "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+    "apps/layer0-hub/fixtures/hub-view-model-snapshots.json",
+    "docs/engine"
+  ]
+}

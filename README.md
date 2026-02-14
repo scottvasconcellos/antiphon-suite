@@ -9,6 +9,7 @@ Silent control-plane for auth, entitlement, install/update authority, offline tr
 3. `npm run demo`
 
 If `npm run demo` fails, run `npm run smoke`.
+If `npm run rc-check` fails, it reports scoped control-plane dirt only; legacy quarantine drift is ignored.
 
 ## Command Reference
 
@@ -22,7 +23,7 @@ If `npm run demo` fails, run `npm run smoke`.
   One-command operator proof: entitlements, install/update actions, trust validation, hub-optional marker.
 
 - `npm run rc-check`  
-  Clean-state reproducibility preflight (clean repo, required artifacts, node version).
+  Scoped clean-state reproducibility preflight (control-plane scope only, required artifacts, node version).
 
 - `node scripts/demo-hub.mjs`  
   Hub-oriented human-readable control-plane status flow.
