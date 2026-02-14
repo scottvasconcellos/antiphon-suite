@@ -44,14 +44,18 @@ function listTypeScriptFiles(rootDir) {
 
 function assertNoLegacyImports() {
   const scopeConfig = JSON.parse(readFileSync(join(process.cwd(), "control-plane.scope.json"), "utf-8"));
-  const frozenLegacyPaths = (scopeConfig.frozenLegacyDeny ?? [])
+  const frozenLegacyFiles = (scopeConfig.frozenLegacyDeny ?? [])
     .filter((value) => value.startsWith("apps/layer0-hub/src/domain/") && value.endsWith(".ts"))
-    .map((value) => value.replace(/^apps\/layer0-hub\/src\/domain\//, "").replace(/\.ts$/, ""));
+    .map((value) => value.replace(/^apps\/layer0-hub\/src\/domain\//, ""));
+  const frozenLegacyPaths = frozenLegacyFiles.map((value) => value.replace(/\.ts$/, ""));
 
-  const targetFiles = [
-    ...listTypeScriptFiles(join(process.cwd(), "apps/layer0-hub/src/services")),
-    join(process.cwd(), "apps/layer0-hub/src/App.tsx")
-  ];
+  const allDomainFiles = listTypeScriptFiles(join(process.cwd(), "apps/layer0-hub/src/domain"));
+  const activeDomainFiles = allDomainFiles.filter((filePath) => {
+    const relativeDomainPath = filePath.replace(/^.*apps\/layer0-hub\/src\/domain\//, "");
+    return !frozenLegacyFiles.includes(relativeDomainPath);
+  });
+
+  const targetFiles = [...listTypeScriptFiles(join(process.cwd(), "apps/layer0-hub/src/services")), ...activeDomainFiles, join(process.cwd(), "apps/layer0-hub/src/App.tsx")];
 
   for (const filePath of targetFiles) {
     const source = readFileSync(filePath, "utf-8");
