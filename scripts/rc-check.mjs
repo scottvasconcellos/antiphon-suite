@@ -15,6 +15,11 @@ if (nodeMajor < 20) {
   fail(`node_version_unsupported required>=20 actual=${process.versions.node}`);
 }
 
+const scopeGovernance = run("node", ["scripts/scope-governance-check.mjs"], "inherit");
+if (scopeGovernance.status !== 0) {
+  fail("scope_config_changed_unacknowledged");
+}
+
 const scopeStatus = run("node", ["scripts/scope-clean-check.mjs"], "inherit");
 if (scopeStatus.status !== 0) {
   fail("repo_scope_not_clean (control-plane scoped clean-state required; legacy quarantine drift ignored)");

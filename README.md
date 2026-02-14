@@ -17,13 +17,13 @@ If `npm run rc-check` fails, it reports scoped control-plane dirt only; legacy q
   Deterministic control-plane + foundation checks.
 
 - `npm run gate`  
-  Smoke + public surface lock + reason coverage + integration checks.
+  Smoke + public surface lock + reason coverage + scoped rc-check + legacy staged guard + integration checks.
 
 - `npm run demo`  
   One-command operator proof: entitlements, install/update actions, trust validation, hub-optional marker.
 
 - `npm run rc-check`  
-  Scoped clean-state reproducibility preflight (control-plane scope only, required artifacts, node version).
+  Scoped clean-state reproducibility preflight (control-plane scope only, required artifacts, node version, scope governance acknowledgement).
 
 - `node scripts/demo-hub.mjs`  
   Hub-oriented human-readable control-plane status flow.
@@ -42,3 +42,10 @@ Previously authorized apps remain runnable offline without Hub process presence.
 
 Layer apps integrate only through:
 `apps/layer0-hub/src/services/publicControlPlane.ts`
+
+
+## Failure Codes
+
+- `repo_scope_not_clean`: control-plane scoped files have uncommitted changes.
+- `legacy_staged_forbidden`: frozen legacy/music-domain files are staged in git index.
+- `scope_config_changed_unacknowledged`: `control-plane.scope.json` changed without matching acknowledgement hash update.

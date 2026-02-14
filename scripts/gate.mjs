@@ -19,6 +19,12 @@ run("node", ["scripts/verify-public-surface.mjs"]);
 console.log("[gate] verifying reason coverage snapshot");
 run("node", ["scripts/verify-reason-coverage.mjs"]);
 
+console.log("[gate] running scoped rc-check");
+run("npm", ["run", "rc-check"]);
+
+console.log("[gate] verifying staged legacy guard");
+run("node", ["scripts/legacy-staged-guard.mjs"]);
+
 console.log("[gate] running integration checks");
 run("node", ["scripts/integration-check.mjs"]);
 

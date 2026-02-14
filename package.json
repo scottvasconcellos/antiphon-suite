@@ -23,6 +23,8 @@
     "loop:layer-app:multi": "node scripts/layer-app-install-loop.mjs --multi",
     "demo": "node scripts/demo.mjs",
     "rc-check": "node scripts/rc-check.mjs",
-    "rc-scope-proof": "node scripts/rc-scope-proof.mjs"
+    "rc-scope-proof": "node scripts/rc-scope-proof.mjs",
+    "proof:legacy-staged-guard": "node scripts/legacy-staged-guard-proof.mjs",
+    "proof:scope-governance": "node scripts/scope-governance-proof.mjs"
   }
 }
