@@ -1,6 +1,7 @@
 import { type EntitlementDecision, type EntitlementDecisionInput } from "../domain/entitlementDecision";
 import { type HubSnapshot, type OfflineCacheState, type InstallState } from "../domain/types";
 import { normalizeAppCatalog, type AppCatalogEntry } from "./appCatalog";
+import { PERSISTED_CACHE_MAX_SKEW_SECONDS, toEpochSeconds } from "./timeControl";
 
 export const CONTROL_PLANE_CACHE_SCHEMA = "antiphon.control-plane-cache";
 export const CONTROL_PLANE_CACHE_VERSION = 1;
@@ -252,10 +253,10 @@ export function parsePersistedControlPlaneStateWithReport(
   ) {
     const lastValidatedAt = (candidate.offlineCache as OfflineCacheState).lastValidatedAt;
     if (typeof lastValidatedAt === "string") {
-      const now = Math.floor(new Date(options.nowIso).getTime() / 1000);
-      const ts = Math.floor(new Date(lastValidatedAt).getTime() / 1000);
+      const now = toEpochSeconds(options.nowIso);
+      const ts = toEpochSeconds(lastValidatedAt);
       const skew = Math.abs(now - ts);
-      const maxSkew = options.maxSkewSeconds ?? 60 * 60 * 24 * 365;
+      const maxSkew = options.maxSkewSeconds ?? PERSISTED_CACHE_MAX_SKEW_SECONDS;
       if (Number.isFinite(skew) && skew > maxSkew) {
         return { state: null, reasonCode: "stale_timestamp", remediation: "refresh_online_session" };
       }

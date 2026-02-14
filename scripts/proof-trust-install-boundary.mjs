@@ -32,6 +32,11 @@ async function loadModules() {
     'from "./artifactManifestContract.js";'
   );
   patchImport(
+    "apps/layer0-hub/.tmp-control-plane-smoke/services/artifactTrustVerification.js",
+    'from "./timeControl";',
+    'from "./timeControl.js";'
+  );
+  patchImport(
     "apps/layer0-hub/.tmp-control-plane-smoke/services/artifactInstallerExecution.js",
     'from "./artifactManifestContract";',
     'from "./artifactManifestContract.js";'
@@ -40,6 +45,11 @@ async function loadModules() {
     "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneTrustArtifact.js",
     'from "../domain/types";',
     'from "../domain/types.js";'
+  );
+  patchImport(
+    "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneTrustArtifact.js",
+    'from "./timeControl";',
+    'from "./timeControl.js";'
   );
   patchImport(
     "apps/layer0-hub/.tmp-control-plane-smoke/services/installUpdateAuthority.js",

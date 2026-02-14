@@ -36,6 +36,8 @@ If `npm run rc-check` fails, it reports scoped control-plane dirt only; legacy q
 
 - `node scripts/proof-trust-install-boundary.mjs`  
   Deterministic trust + installer boundary failure semantics proof.
+- `node scripts/proof-long-run-determinism.mjs`  
+  Restart + clock-drift + repeated-cycle determinism proof (snapshot-locked).
 
 ## Hub-Optional
 

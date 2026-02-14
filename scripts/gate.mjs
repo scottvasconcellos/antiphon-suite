@@ -31,4 +31,7 @@ run("node", ["scripts/integration-check.mjs"]);
 console.log("[gate] running trust/install boundary proof");
 run("node", ["scripts/proof-trust-install-boundary.mjs"]);
 
+console.log("[gate] running long-run determinism proof");
+run("node", ["scripts/proof-long-run-determinism.mjs"]);
+
 console.log("[gate] PASS");

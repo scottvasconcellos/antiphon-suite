@@ -72,7 +72,40 @@ async function run() {
     'from "./artifactManifestContract";',
     'from "./artifactManifestContract.js";'
   );
+  artifactTrustSource = artifactTrustSource.replace(
+    'from "./timeControl";',
+    'from "./timeControl.js";'
+  );
   writeFileSync(artifactTrustPath, artifactTrustSource, "utf-8");
+  const controlPlanePersistencePath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlanePersistence.js");
+  let controlPlanePersistenceSource = readFileSync(controlPlanePersistencePath, "utf-8");
+  controlPlanePersistenceSource = controlPlanePersistenceSource.replace(
+    'from "./appCatalog";',
+    'from "./appCatalog.js";'
+  );
+  controlPlanePersistenceSource = controlPlanePersistenceSource.replace(
+    'from "./timeControl";',
+    'from "./timeControl.js";'
+  );
+  writeFileSync(controlPlanePersistencePath, controlPlanePersistenceSource, "utf-8");
+  const trustArtifactPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/controlPlaneTrustArtifact.js");
+  let trustArtifactSource = readFileSync(trustArtifactPath, "utf-8");
+  trustArtifactSource = trustArtifactSource.replace(
+    'from "../domain/types";',
+    'from "../domain/types.js";'
+  );
+  trustArtifactSource = trustArtifactSource.replace(
+    'from "./timeControl";',
+    'from "./timeControl.js";'
+  );
+  writeFileSync(trustArtifactPath, trustArtifactSource, "utf-8");
+  const clockDriftPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/clockDriftPolicy.js");
+  let clockDriftSource = readFileSync(clockDriftPath, "utf-8");
+  clockDriftSource = clockDriftSource.replace(
+    'from "./timeControl";',
+    'from "./timeControl.js";'
+  );
+  writeFileSync(clockDriftPath, clockDriftSource, "utf-8");
   const uninstallPath = join(process.cwd(), "apps/layer0-hub/.tmp-control-plane-smoke/services/uninstallAuthority.js");
   let uninstallSource = readFileSync(uninstallPath, "utf-8");
   uninstallSource = uninstallSource.replace(

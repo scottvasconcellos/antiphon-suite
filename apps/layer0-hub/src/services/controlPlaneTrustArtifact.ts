@@ -1,4 +1,5 @@
 import { type HubSnapshot } from "../domain/types";
+import { TRUST_ARTIFACT_MAX_SKEW_SECONDS, toEpochSeconds } from "./timeControl";
 
 export type TrustArtifact = {
   schema: "antiphon.trust-artifact";
@@ -83,10 +84,10 @@ export function parseTrustArtifactWithReport(
     };
   }
   if (options?.nowIso) {
-    const now = Math.floor(new Date(options.nowIso).getTime() / 1000);
-    const issuedAt = Math.floor(new Date(candidate.issuedAt).getTime() / 1000);
+    const now = toEpochSeconds(options.nowIso);
+    const issuedAt = toEpochSeconds(candidate.issuedAt);
     const skew = Math.abs(now - issuedAt);
-    const maxSkew = options.maxSkewSeconds ?? 60 * 60 * 24 * 365;
+    const maxSkew = options.maxSkewSeconds ?? TRUST_ARTIFACT_MAX_SKEW_SECONDS;
     if (Number.isFinite(skew) && skew > maxSkew) {
       return {
         artifact: null,

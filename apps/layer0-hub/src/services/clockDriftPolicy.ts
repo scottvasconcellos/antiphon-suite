@@ -1,3 +1,4 @@
+import { CLOCK_DRIFT_MAX_SKEW_SECONDS, TIMESTAMP_SPREAD_MAX_SECONDS, toEpochSeconds } from "./timeControl";
 export type ClockDriftInput = {
   nowIso: string;
   lastValidatedAt: string | null;
@@ -23,10 +24,8 @@ export const CLOCK_DRIFT_POLICY_REASON_CODES = [
   "mixed_entitlement_timestamps_skewed"
 ] as const;
 
-const DEFAULT_MAX_SKEW_SECONDS = 300;
-
 export function evaluateClockDrift(input: ClockDriftInput): ClockDriftDecision {
-  const maxSkewSeconds = input.maxClockSkewSeconds ?? DEFAULT_MAX_SKEW_SECONDS;
+  const maxSkewSeconds = input.maxClockSkewSeconds ?? CLOCK_DRIFT_MAX_SKEW_SECONDS;
   if (input.lastValidatedAt === null) {
     return {
       outcome: "OfflineExpired",
@@ -35,8 +34,8 @@ export function evaluateClockDrift(input: ClockDriftInput): ClockDriftDecision {
     };
   }
 
-  const nowSeconds = Math.floor(new Date(input.nowIso).getTime() / 1000);
-  const lastValidatedSeconds = Math.floor(new Date(input.lastValidatedAt).getTime() / 1000);
+  const nowSeconds = toEpochSeconds(input.nowIso);
+  const lastValidatedSeconds = toEpochSeconds(input.lastValidatedAt);
   const skewSeconds = nowSeconds - lastValidatedSeconds;
   if (!Number.isFinite(skewSeconds) || Math.abs(skewSeconds) > maxSkewSeconds) {
     return {
@@ -83,13 +82,13 @@ export function evaluateMixedEntitlementTimestamps(input: MixedTimestampInput): 
   }
 
   const sorted = [...input.evaluatedAt]
-    .map((value) => Math.floor(new Date(value).getTime() / 1000))
+    .map((value) => toEpochSeconds(value))
     .filter((value) => Number.isFinite(value))
     .sort((a, b) => a - b);
-  const min = sorted[0] ?? Math.floor(new Date(input.nowIso).getTime() / 1000);
+  const min = sorted[0] ?? toEpochSeconds(input.nowIso);
   const max = sorted[sorted.length - 1] ?? min;
   const spreadSeconds = max - min;
-  const maxSpreadSeconds = input.maxSpreadSeconds ?? 300;
+  const maxSpreadSeconds = input.maxSpreadSeconds ?? TIMESTAMP_SPREAD_MAX_SECONDS;
 
   if (spreadSeconds > maxSpreadSeconds) {
     return {

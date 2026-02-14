@@ -1,4 +1,5 @@
 import { parseArtifactManifest } from "./artifactManifestContract";
+import { ARTIFACT_SIGNATURE_MAX_SKEW_SECONDS, toEpochSeconds } from "./timeControl";
 
 export type ArtifactTrustVerificationInput = {
   manifestRaw: string;
@@ -39,9 +40,6 @@ export const ARTIFACT_TRUST_REASON_CODES = [
   "artifact_signature_clock_skew"
 ] as const;
 
-function toEpochSeconds(value: string): number {
-  return Math.floor(new Date(value).getTime() / 1000);
-}
 
 function computeDeterministicSignatureHash(payload: string, keyId: string): string {
   let hash = 0;
@@ -112,7 +110,7 @@ export function verifyArtifactTrust(input: ArtifactTrustVerificationInput): Arti
     const notAfter = parts.find((part) => part.startsWith("naf:"))?.slice(4) ?? null;
     if (notBefore || notAfter) {
       const now = toEpochSeconds(input.nowIso);
-      const skew = input.maxClockSkewSeconds ?? 300;
+      const skew = input.maxClockSkewSeconds ?? ARTIFACT_SIGNATURE_MAX_SKEW_SECONDS;
       if (notBefore && now + skew < toEpochSeconds(notBefore)) {
         return {
           trusted: false,
