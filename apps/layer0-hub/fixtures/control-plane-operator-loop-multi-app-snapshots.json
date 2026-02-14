@@ -1,0 +1,80 @@
+[
+  {
+    "name": "operator-loop-multi-app",
+    "expected": {
+      "installStoreLayout": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "versions": [
+            {
+              "version": "1.0.0",
+              "digest": "a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666"
+            },
+            {
+              "version": "1.1.0",
+              "digest": "48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee"
+            }
+          ]
+        },
+        {
+          "appId": "antiphon.layer.rhythm",
+          "versions": [
+            {
+              "version": "1.0.0",
+              "digest": "c3cd42dcc3cd42dcc3cd42dcc3cd42dcc3cd42dcc3cd42dcc3cd42dcc3cd42dc"
+            },
+            {
+              "version": "1.1.0-beta.1",
+              "digest": "033707ba033707ba033707ba033707ba033707ba033707ba033707ba033707ba"
+            }
+          ]
+        }
+      ],
+      "activeSelectionState": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "selectedVersion": "1.1.0",
+          "reasonCode": "ok_update_candidate_selected"
+        },
+        {
+          "appId": "antiphon.layer.rhythm",
+          "selectedVersion": "1.1.0-beta.1",
+          "reasonCode": "ok_update_candidate_selected"
+        }
+      ],
+      "runPlan": {
+        "apps": [
+          {
+            "appId": "antiphon.layer.hello-world",
+            "selectedVersion": "1.1.0",
+            "runnable": true,
+            "hubOptional": true
+          },
+          {
+            "appId": "antiphon.layer.rhythm",
+            "selectedVersion": "1.1.0-beta.1",
+            "runnable": true,
+            "hubOptional": true
+          }
+        ],
+        "failures": [],
+        "entitlement": [
+          {
+            "appId": "antiphon.layer.hello-world",
+            "outcome": "Authorized",
+            "reasonCode": "ok_version_supported",
+            "remediation": "none"
+          },
+          {
+            "appId": "antiphon.layer.rhythm",
+            "outcome": "Denied",
+            "reasonCode": "blocked_not_owned",
+            "remediation": "refresh_online_session"
+          }
+        ]
+      },
+      "rollbackMetadataCount": 0,
+      "persistenceStableHash": "{\"entitlementDecision\":null,\"installState\":[],\"offlineCache\":{\"cacheState\":\"valid\",\"lastValidatedAt\":\"2026-02-13T00:00:00.000Z\",\"maxOfflineDays\":21,\"offlineDaysRemaining\":7},\"schema\":\"antiphon.control-plane-cache\",\"version\":1}"
+    }
+  }
+]

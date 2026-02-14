@@ -1,0 +1,50 @@
+[
+  {
+    "name": "operator-loop-single-app",
+    "expected": {
+      "installStoreLayout": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "versions": [
+            {
+              "version": "1.0.0",
+              "digest": "a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666"
+            },
+            {
+              "version": "1.1.0",
+              "digest": "48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee"
+            }
+          ]
+        }
+      ],
+      "activeSelectionState": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "selectedVersion": "1.1.0",
+          "reasonCode": "ok_update_candidate_selected"
+        }
+      ],
+      "runPlan": {
+        "apps": [
+          {
+            "appId": "antiphon.layer.hello-world",
+            "selectedVersion": "1.1.0",
+            "runnable": true,
+            "hubOptional": true
+          }
+        ],
+        "failures": [],
+        "entitlement": [
+          {
+            "appId": "antiphon.layer.hello-world",
+            "outcome": "Authorized",
+            "reasonCode": "ok_version_supported",
+            "remediation": "none"
+          }
+        ]
+      },
+      "rollbackMetadataCount": 0,
+      "persistenceStableHash": "{\"entitlementDecision\":null,\"installState\":[],\"offlineCache\":{\"cacheState\":\"valid\",\"lastValidatedAt\":\"2026-02-13T00:00:00.000Z\",\"maxOfflineDays\":21,\"offlineDaysRemaining\":7},\"schema\":\"antiphon.control-plane-cache\",\"version\":1}"
+    }
+  }
+]

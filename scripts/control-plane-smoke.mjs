@@ -737,6 +737,34 @@ async function run() {
     pathToFileURL(join(process.cwd(), "scripts/layer-app-example-harness.mjs")).href
   );
   await layerAppHarness.runLayerAppExampleHarness();
+  const operatorLoop = await import(
+    pathToFileURL(join(process.cwd(), "scripts/layer-app-install-loop.mjs")).href
+  );
+  await operatorLoop.runAndAssertSnapshot(
+    "operator-loop-single-app",
+    { multi: false, inject: "none" },
+    "apps/layer0-hub/fixtures/control-plane-operator-loop-snapshots.json"
+  );
+  await operatorLoop.runAndAssertSnapshot(
+    "operator-loop-multi-app",
+    { multi: true, inject: "none" },
+    "apps/layer0-hub/fixtures/control-plane-operator-loop-multi-app-snapshots.json"
+  );
+  await operatorLoop.runAndAssertSnapshot(
+    "operator-loop-failure-bad_manifest",
+    { multi: false, inject: "bad_manifest" },
+    "apps/layer0-hub/fixtures/control-plane-operator-loop-failure-snapshots.json"
+  );
+  await operatorLoop.runAndAssertSnapshot(
+    "operator-loop-failure-trust_fail",
+    { multi: false, inject: "trust_fail" },
+    "apps/layer0-hub/fixtures/control-plane-operator-loop-failure-snapshots.json"
+  );
+  await operatorLoop.runAndAssertSnapshot(
+    "operator-loop-failure-partial_install",
+    { multi: false, inject: "partial_install" },
+    "apps/layer0-hub/fixtures/control-plane-operator-loop-failure-snapshots.json"
+  );
 
   const reasonCoverageFixtures = JSON.parse(
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-reason-coverage-snapshots.json"), "utf-8")
