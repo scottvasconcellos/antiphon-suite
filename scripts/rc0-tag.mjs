@@ -23,7 +23,10 @@ function runCapture(command, args) {
 }
 
 function main() {
-  run("npm", ["run", "rc0-release"]);
+  const verifyOnly = process.argv.includes("--verify");
+  if (!verifyOnly) {
+    run("npm", ["run", "rc0-release"]);
+  }
 
   const versionStamp = readVersionStamp();
   const tagName = `layer0-hub-${versionStamp.contractVersion}`;
@@ -32,8 +35,8 @@ function main() {
 
   const tagHead = runCapture("git", ["rev-list", "-n", "1", tagName]);
   if (!tagHead.ok || tagHead.stdout.length === 0) {
-    if (process.argv.includes("--verify")) {
-      fail(`rc0_tag_missing:${tagName}`);
+    if (verifyOnly) {
+      fail("rc0_tag_missing");
     }
     console.log("[rc0-tag] PASS: rc0_tag_missing");
     console.log(`[rc0-tag] run: git tag ${tagName} ${head.stdout}`);
