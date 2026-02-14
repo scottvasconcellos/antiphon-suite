@@ -117,3 +117,20 @@ Run before any “done” call:
   - `pnpm install` PASS
   - `npm run gate` PASS
 - Result: clean-checkout reproducibility confirmed for active control-plane workflow.
+
+## 8) Current Execution Status
+
+- Phase A (de-noise + boundary tightening): in progress, with script and doc consolidation complete.
+- Active runtime remains on control-plane surfaces; frozen legacy/music-domain files remain unstaged and excluded from scope checks.
+- Required validation set is currently stable on working branch:
+  - `npm run smoke`
+  - `npm run gate`
+  - `npm run rc-check`
+  - `node scripts/operator-contract-check.mjs`
+
+## 9) Next Highest-Leverage Arc
+
+Phase B (Authority Realism Hardening), constrained to no new feature scope:
+1. Tighten deterministic failure/remediation mapping for installer recovery edge cases.
+2. Reduce fixture noise by pruning redundant snapshots that do not guard contract boundaries.
+3. Re-run detached-worktree reproducibility once Phase B changes land.
