@@ -4,12 +4,20 @@ Silent control-plane for auth, entitlement, install/update authority, offline tr
 
 ## Quickstart (Operator)
 
+Daily control-plane verification path:
+
 1. `npm install`
 2. `npm run gate`
 3. `npm run demo`
 
 If `npm run demo` fails, run `npm run smoke`.
 If `npm run rc-check` fails, it reports scoped control-plane dirt only; legacy quarantine drift is ignored.
+
+RC finalization path:
+
+1. `npm run rc0-release`
+2. `npm run rc0-tag`
+3. `npm run rc0-finalize`
 
 ## Command Reference
 
@@ -24,6 +32,12 @@ If `npm run rc-check` fails, it reports scoped control-plane dirt only; legacy q
 
 - `npm run rc-check`  
   Scoped clean-state reproducibility preflight (control-plane scope only, required artifacts, node version, scope governance acknowledgement).
+
+- `npm run rc0-release`  
+  Deterministic RC release dry-run manifest build with precondition checks.
+
+- `npm run rc0-finalize`  
+  Deterministic final manifest build; requires RC tag to exist and target HEAD.
 
 - `node scripts/demo-hub.mjs`  
   Hub-oriented human-readable control-plane status flow.
