@@ -75,6 +75,9 @@
             "artifact_rollback_failed",
             "failed_download_step",
             "failed_gateway",
+            "failed_install_non_zero",
+            "failed_install_step",
+            "failed_install_timeout",
             "failed_update_non_zero",
             "failed_update_timeout"
           ],
@@ -88,7 +91,7 @@
               "atomicGuaranteed": false
             }
           ],
-          "digest": "5c892b310c7825a80cf5cc60aea116f7df8dba429a823370db2e6ec73583832f"
+          "digest": "999d570a467e6912ad6923e89ced816b998241d568bfe686b9b733f976643002"
         }
       ]
     }

@@ -259,6 +259,37 @@ export async function buildProofOutput() {
     ok: false,
     reasonCode: "failed_update_non_zero"
   }));
+  const installSnapshot = {
+    ...snapshot,
+    entitlements: snapshot.entitlements.map((entry) =>
+      entry.id === "antiphon.layer.alpha"
+        ? {
+            ...entry,
+            installedVersion: null,
+            installState: "not-installed",
+            updateAvailable: false
+          }
+        : entry
+    )
+  };
+  const installStepFailure = await installUpdateAuthority.runInstallUpdateAuthority(
+    installSnapshot,
+    "install",
+    "antiphon.layer.alpha",
+    async () => ({ ok: false, reasonCode: "failed_install_step" })
+  );
+  const installNonZeroFailure = await installUpdateAuthority.runInstallUpdateAuthority(
+    installSnapshot,
+    "install",
+    "antiphon.layer.alpha",
+    async () => ({ ok: false, reasonCode: "failed_install_non_zero" })
+  );
+  const installTimeoutFailure = await installUpdateAuthority.runInstallUpdateAuthority(
+    installSnapshot,
+    "install",
+    "antiphon.layer.alpha",
+    async () => ({ ok: false, reasonCode: "failed_install_timeout" })
+  );
   const downloadStepFailure = await installUpdateAuthority.runInstallUpdateAuthority(snapshot, "update", "antiphon.layer.alpha", async () => ({
     ok: false,
     reasonCode: "failed_download_step"
@@ -276,6 +307,21 @@ export async function buildProofOutput() {
     trustFailures,
     trustArtifactFailures,
     installBoundaryFailures: [
+      {
+        case: "install_step_failure",
+        reasonCode: installStepFailure.result.reasonCode,
+        lifecycleTo: installStepFailure.result.lifecycle.to
+      },
+      {
+        case: "installer_install_non_zero_exit",
+        reasonCode: installNonZeroFailure.result.reasonCode,
+        lifecycleTo: installNonZeroFailure.result.lifecycle.to
+      },
+      {
+        case: "installer_install_timeout_hung",
+        reasonCode: installTimeoutFailure.result.reasonCode,
+        lifecycleTo: installTimeoutFailure.result.lifecycle.to
+      },
       {
         case: "download_step_failure",
         reasonCode: downloadStepFailure.result.reasonCode,

@@ -58,6 +58,21 @@
       ],
       "installBoundaryFailures": [
         {
+          "case": "install_step_failure",
+          "reasonCode": "failed_install_step",
+          "lifecycleTo": "InstallFailed"
+        },
+        {
+          "case": "installer_install_non_zero_exit",
+          "reasonCode": "failed_install_non_zero",
+          "lifecycleTo": "InstallFailed"
+        },
+        {
+          "case": "installer_install_timeout_hung",
+          "reasonCode": "failed_install_timeout",
+          "lifecycleTo": "InstallFailed"
+        },
+        {
           "case": "download_step_failure",
           "reasonCode": "failed_download_step",
           "lifecycleTo": "UpdateFailed"
