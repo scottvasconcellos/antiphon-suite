@@ -30,6 +30,8 @@
     "proof:long-run-determinism": "node scripts/proof-long-run-determinism.mjs",
     "check:operator-contract": "node scripts/operator-contract-check.mjs",
     "rc0-release": "node scripts/rc0-release-dry-run.mjs",
-    "rc0-tag": "node scripts/rc0-tag.mjs"
+    "rc0-tag": "node scripts/rc0-tag.mjs",
+    "rc0-tag:verify": "node scripts/rc0-tag.mjs --verify",
+    "rc0-finalize": "node scripts/rc0-finalize.mjs"
   }
 }

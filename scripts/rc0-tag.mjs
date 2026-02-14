@@ -32,7 +32,10 @@ function main() {
 
   const tagHead = runCapture("git", ["rev-list", "-n", "1", tagName]);
   if (!tagHead.ok || tagHead.stdout.length === 0) {
-    console.log(`[rc0-tag] PASS: rc0_tag_missing`);
+    if (process.argv.includes("--verify")) {
+      fail(`rc0_tag_missing:${tagName}`);
+    }
+    console.log("[rc0-tag] PASS: rc0_tag_missing");
     console.log(`[rc0-tag] run: git tag ${tagName} ${head.stdout}`);
     return;
   }
