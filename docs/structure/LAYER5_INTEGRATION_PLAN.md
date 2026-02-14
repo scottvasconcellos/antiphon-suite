@@ -20,7 +20,7 @@
 - Wired structure smoke into root `pnpm test` via `scripts/foundation-smoke.mjs`.
 
 ## Batch 6 Progress
-- Added dedicated `pnpm test:structure` script for direct structure-level verification.
+- Added dedicated `node scripts/structure-smoke.mjs` command for direct structure-level verification.
 
 ## Batch 7 Progress
 - Extended structure smoke to execute `HttpHubGateway` endpoint-path verification against a local test server.
@@ -30,7 +30,7 @@
 - Domain contracts documented and enforced at compile-time.
 - Service adapters cover all authority routes.
 - UI modules consume mapped view models only.
-- Integration tests run under `pnpm test` or `pnpm test:structure`.
+- Integration tests run under `pnpm test` or `node scripts/structure-smoke.mjs`.
 - Gateway contract parsing and runtime failure-recovery paths are executable in local smoke verification.
 
 ## Non-Goals In Batch 1
