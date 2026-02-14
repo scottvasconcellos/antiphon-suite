@@ -34,4 +34,7 @@ run("node", ["scripts/proof-trust-install-boundary.mjs"]);
 console.log("[gate] running long-run determinism proof");
 run("node", ["scripts/proof-long-run-determinism.mjs"]);
 
+console.log("[gate] running operator contract check");
+run("node", ["scripts/operator-contract-check.mjs"]);
+
 console.log("[gate] PASS");

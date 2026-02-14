@@ -27,6 +27,7 @@
     "proof:legacy-staged-guard": "node scripts/legacy-staged-guard-proof.mjs",
     "proof:scope-governance": "node scripts/scope-governance-proof.mjs",
     "proof:trust-install-boundary": "node scripts/proof-trust-install-boundary.mjs",
-    "proof:long-run-determinism": "node scripts/proof-long-run-determinism.mjs"
+    "proof:long-run-determinism": "node scripts/proof-long-run-determinism.mjs",
+    "check:operator-contract": "node scripts/operator-contract-check.mjs"
   }
 }

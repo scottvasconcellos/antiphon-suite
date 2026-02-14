@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 
+const OPERATOR_CONTRACT_VERSION = "rc0";
+
 function run(command, args) {
   const result = spawnSync(command, args, { stdio: "inherit", shell: false });
   if (result.status !== 0) {
@@ -221,18 +223,38 @@ export async function buildLongRunSummary() {
   return summary;
 }
 
-export async function runLongRunDeterminismProof() {
+
+export async function buildLongRunOperatorContract() {
+  const summary = await buildLongRunSummary();
+  return {
+    contract_version: OPERATOR_CONTRACT_VERSION,
+    script: "proof-long-run-determinism",
+    iterations: summary.iterations,
+    stable: summary.stable,
+    final_state_hash: summary.finalStateHash,
+    cycle_digest: summary.cycleDigest,
+    reason_signature_digest: hashOf(summary.reasonSignature)
+  };
+}
+
+export async function runLongRunDeterminismProof(options = { contractJson: false }) {
   const summary = await buildLongRunSummary();
   const expected = JSON.parse(
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-long-run-proof-snapshots.json"), "utf-8")
   )[0]?.expected;
 
   assertEqual(summary, expected, "long-run determinism proof mismatch");
+  if (options.contractJson) {
+    const contract = await buildLongRunOperatorContract();
+    console.log(JSON.stringify(contract));
+    return;
+  }
   console.log("[proof:long-run-determinism] PASS");
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  runLongRunDeterminismProof().catch((error) => {
+  const contractJson = process.argv.includes("--contract-json");
+  runLongRunDeterminismProof({ contractJson }).catch((error) => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
   });

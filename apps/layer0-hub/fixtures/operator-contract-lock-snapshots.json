@@ -1,0 +1,91 @@
+[
+  {
+    "name": "operator-contract-surface",
+    "expected": {
+      "contract_version": "rc0",
+      "contracts": [
+        {
+          "contract_version": "rc0",
+          "script": "demo",
+          "chosen_apps": [
+            "antiphon.layer.hello-world",
+            "antiphon.layer.rhythm"
+          ],
+          "entitlement_reason_codes": [
+            "blocked_not_owned",
+            "ok_version_supported"
+          ],
+          "install_reason_codes": [
+            "ok_update_candidate_selected",
+            "ok_update_candidate_selected"
+          ],
+          "trust": {
+            "created": true,
+            "validated": true,
+            "hubOptionalRunnable": true
+          },
+          "proof_marker": "hub-optional-runnable:true",
+          "digest": "3dc34370871109b0c4790307c3ec2c328434a6a39124c4878107d751cd90cec2"
+        },
+        {
+          "contract_version": "rc0",
+          "script": "gate",
+          "step_labels": [
+            "running integration checks",
+            "running long-run determinism proof",
+            "running operator contract check",
+            "running scoped rc-check",
+            "running smoke",
+            "running trust/install boundary proof",
+            "verifying public surface snapshot",
+            "verifying reason coverage snapshot",
+            "verifying staged legacy guard"
+          ],
+          "final_marker": "PASS"
+        },
+        {
+          "contract_version": "rc0",
+          "script": "proof-long-run-determinism",
+          "iterations": 40,
+          "stable": true,
+          "final_state_hash": "066297fc7dedf6e340cf5db57db3e3adb0f8b4b504b9f5edded46682c7b0c638",
+          "cycle_digest": "61880971044c595d745bb95b5e2cf3fdc0255dbb2e7401c6e215b628134c3b4c",
+          "reason_signature_digest": "43d8cc93867eac65a32409e6d297a1f6b92a5907374ab81a2c9396ccf124840f"
+        },
+        {
+          "contract_version": "rc0",
+          "script": "proof-trust-install-boundary",
+          "trust_reason_codes": [
+            "artifact_signature_invalid",
+            "artifact_signature_missing",
+            "invalid_artifact_manifest_json",
+            "invalid_artifact_manifest_shape",
+            "unsupported_artifact_manifest_version"
+          ],
+          "trust_artifact_reason_codes": [
+            "invalid_trust_artifact_json",
+            "invalid_trust_artifact_json",
+            "trust_artifact_clock_skew"
+          ],
+          "install_boundary_reason_codes": [
+            "artifact_partial_apply",
+            "artifact_rollback_failed",
+            "blocked_invalid_transition",
+            "failed_update_timeout"
+          ],
+          "atomic_guarantees": [
+            {
+              "case": "installer_partial_state_detected",
+              "atomicGuaranteed": true
+            },
+            {
+              "case": "rollback_failure",
+              "atomicGuaranteed": false
+            }
+          ],
+          "digest": "ec33fe1e44aff29d50f022efa475010fc90f247822d3a87191e841b4fa0db6ae"
+        }
+      ]
+    }
+  }
+]

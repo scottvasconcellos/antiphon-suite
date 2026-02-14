@@ -2,6 +2,9 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+
+const OPERATOR_CONTRACT_VERSION = "rc0";
 
 function run(command, args) {
   const result = spawnSync(command, args, { stdio: "inherit", shell: false });
@@ -14,6 +17,19 @@ function assertEqual(actual, expected, message) {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     throw new Error(`${message}\nactual=${JSON.stringify(actual)}\nexpected=${JSON.stringify(expected)}`);
   }
+}
+
+
+function stableStringify(value) {
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().map((k) => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function hashOf(value) {
+  return createHash("sha256").update(stableStringify(value)).digest("hex");
 }
 
 function patchImport(filePath, from, to) {
@@ -252,17 +268,39 @@ export async function buildProofOutput() {
   };
 }
 
-export async function runTrustInstallBoundaryProof() {
+
+export async function buildTrustInstallOperatorContract() {
+  const proof = await buildProofOutput();
+  return {
+    contract_version: OPERATOR_CONTRACT_VERSION,
+    script: "proof-trust-install-boundary",
+    trust_reason_codes: proof.trustFailures.map((entry) => entry.reasonCode).sort((a, b) => a.localeCompare(b)),
+    trust_artifact_reason_codes: proof.trustArtifactFailures.map((entry) => entry.reasonCode).sort((a, b) => a.localeCompare(b)),
+    install_boundary_reason_codes: proof.installBoundaryFailures.map((entry) => entry.reasonCode).sort((a, b) => a.localeCompare(b)),
+    atomic_guarantees: proof.installBoundaryFailures
+      .filter((entry) => Object.prototype.hasOwnProperty.call(entry, "atomicGuaranteed"))
+      .map((entry) => ({ case: entry.case, atomicGuaranteed: entry.atomicGuaranteed })),
+    digest: hashOf(proof)
+  };
+}
+
+export async function runTrustInstallBoundaryProof(options = { contractJson: false }) {
   const actual = await buildProofOutput();
   const expected = JSON.parse(
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-trust-install-boundary-proof-snapshots.json"), "utf-8")
   )[0]?.expected;
   assertEqual(actual, expected, "trust/install boundary proof mismatch");
+  if (options.contractJson) {
+    const contract = await buildTrustInstallOperatorContract();
+    console.log(JSON.stringify(contract));
+    return;
+  }
   console.log("[proof:trust-install-boundary] PASS");
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  runTrustInstallBoundaryProof().catch((error) => {
+  const contractJson = process.argv.includes("--contract-json");
+  runTrustInstallBoundaryProof({ contractJson }).catch((error) => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
   });

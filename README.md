@@ -17,7 +17,7 @@ If `npm run rc-check` fails, it reports scoped control-plane dirt only; legacy q
   Deterministic control-plane + foundation checks.
 
 - `npm run gate`  
-  Smoke + public surface lock + reason coverage + scoped rc-check + legacy staged guard + integration checks.
+  Smoke + public surface lock + reason coverage + scoped rc-check + legacy staged guard + integration checks + operator contract check.
 
 - `npm run demo`  
   One-command operator proof: entitlements, install/update actions, trust validation, hub-optional marker.
@@ -54,3 +54,6 @@ Layer apps integrate only through:
 - `repo_scope_not_clean`: control-plane scoped files have uncommitted changes.
 - `legacy_staged_forbidden`: frozen legacy/music-domain files are staged in git index.
 - `scope_config_changed_unacknowledged`: `control-plane.scope.json` changed without matching acknowledgement hash update.
+
+- `node scripts/operator-contract-check.mjs`  
+  Validates rc0 operator contract surface and lock snapshot.
