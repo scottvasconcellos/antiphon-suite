@@ -70,7 +70,7 @@
           "install_boundary_reason_codes": [
             "artifact_partial_apply",
             "artifact_rollback_failed",
-            "blocked_invalid_transition",
+            "failed_update_non_zero",
             "failed_update_timeout"
           ],
           "atomic_guarantees": [
@@ -83,7 +83,7 @@
               "atomicGuaranteed": false
             }
           ],
-          "digest": "ec33fe1e44aff29d50f022efa475010fc90f247822d3a87191e841b4fa0db6ae"
+          "digest": "918357daff4db5bbe0e8791fa3a8f4676e82d42b1c1383391c3d7b3c1752bfcf"
         }
       ]
     }
