@@ -15,7 +15,6 @@
     "gate": "node scripts/gate.mjs",
     "demo:hub": "node scripts/demo-hub.mjs",
     "demo:layer": "node scripts/demo-layer.mjs",
-    "release:check": "node scripts/release-check.mjs",
     "proof:layer-app": "node scripts/proof-layer-app.mjs",
     "loop:layer-app": "node scripts/layer-app-install-loop.mjs",
     "loop:layer-app:multi": "node scripts/layer-app-install-loop.mjs --multi",
