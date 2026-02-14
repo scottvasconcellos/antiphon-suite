@@ -260,7 +260,7 @@ export async function runInstallUpdateAuthorityWithArtifactExecutor(
       ok: true,
       app: {
         ...app,
-        installedVersion: app.version,
+        installedVersion: applied.rollback.manifestVersion.split(":")[0] ?? app.version,
         installState: "installed",
         updateAvailable: action === "install"
       }
