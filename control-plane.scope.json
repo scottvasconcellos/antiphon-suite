@@ -26,6 +26,7 @@
     "apps/layer0-hub/src/domain/musicEngineRegistry.ts",
     "apps/layer0-hub/src/domain/musicIntelligenceEngine.ts",
     "apps/layer0-hub/src/domain/musicTelemetryContracts.ts",
+    "apps/layer0-hub/src/domain/uiMusicProjectionAdapter.ts",
     "apps/layer0-hub/src/domain/ruleBasedMusicIntelligenceEngine.ts",
     "apps/layer0-hub/src/services/musicTelemetryDto.ts",
     "docs/engine"
@@ -39,6 +40,7 @@
     "apps/layer0-hub/src/domain/musicEngineRegistry.ts",
     "apps/layer0-hub/src/domain/musicIntelligenceEngine.ts",
     "apps/layer0-hub/src/domain/musicTelemetryContracts.ts",
+    "apps/layer0-hub/src/domain/uiMusicProjectionAdapter.ts",
     "apps/layer0-hub/src/domain/ruleBasedMusicIntelligenceEngine.ts",
     "apps/layer0-hub/src/services/musicTelemetryDto.ts",
     "docs/engine/*"
