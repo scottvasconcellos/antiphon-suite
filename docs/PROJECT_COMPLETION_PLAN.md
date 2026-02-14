@@ -117,6 +117,10 @@ Run before any “done” call:
   - `pnpm install` PASS
   - `npm run gate` PASS
 - Result: clean-checkout reproducibility confirmed for active control-plane workflow.
+- Detached worktree run completed at commit `9c32eab`:
+  - `pnpm install` PASS
+  - `npm run gate` PASS
+- Result: post-Phase-B hardening reproducibility reconfirmed.
 
 ## 8) Current Execution Status
 
