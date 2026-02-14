@@ -45,15 +45,17 @@ export function runUninstall(snapshot: HubSnapshot, appId: string): UninstallRes
   }
 
   if (app.installState === "installing" || app.updateAvailable) {
+    const reasonCode = "blocked_uninstall_busy";
     return {
       snapshot,
       appId,
       ok: false,
-      reasonCode: "blocked_uninstall_busy",
-      remediation: remediationForReason("blocked_invalid_transition")
+      reasonCode,
+      remediation: remediationForReason(reasonCode)
     };
   }
 
+  const reasonCode = "ok_uninstall_completed";
   return {
     snapshot: {
       ...snapshot,
@@ -72,7 +74,7 @@ export function runUninstall(snapshot: HubSnapshot, appId: string): UninstallRes
     },
     appId,
     ok: true,
-    reasonCode: "ok_uninstall_completed",
-    remediation: remediationForReason("ok_version_supported")
+    reasonCode,
+    remediation: remediationForReason(reasonCode)
   };
 }

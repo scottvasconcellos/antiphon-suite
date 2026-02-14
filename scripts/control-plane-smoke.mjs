@@ -470,6 +470,11 @@ async function run() {
         `Uninstall refusal mismatch: ${fixture.name}`
       );
     }
+    assertEqual(
+      actual.remediation,
+      controlPlaneReasonTaxonomy.remediationForReason(actual.reasonCode),
+      `Uninstall remediation mapping mismatch: ${fixture.name}`
+    );
   }
 
   const layerManifestFixtures = JSON.parse(
@@ -506,6 +511,11 @@ async function run() {
   for (const fixture of updateChannelFixtures) {
     const actual = updateChannelPolicy.selectUpdateByChannelPolicy(fixture.input);
     assertEqual(actual, fixture.expected, `Update channel policy snapshot mismatch: ${fixture.name}`);
+    assertEqual(
+      actual.remediation,
+      controlPlaneReasonTaxonomy.remediationForReason(actual.reasonCode),
+      `Update channel remediation mapping mismatch: ${fixture.name}`
+    );
   }
 
   const updateRollbackFixtures = JSON.parse(
@@ -514,6 +524,11 @@ async function run() {
   for (const fixture of updateRollbackFixtures) {
     const actual = updateRecoveryPolicy.applyUpdateRollback(fixture.app, fixture.options);
     assertEqual(actual, fixture.expected, `Update rollback snapshot mismatch: ${fixture.name}`);
+    assertEqual(
+      actual.remediation,
+      controlPlaneReasonTaxonomy.remediationForReason(actual.reasonCode),
+      `Update rollback remediation mapping mismatch: ${fixture.name}`
+    );
   }
 
   const downloadInstallerFixtures = JSON.parse(

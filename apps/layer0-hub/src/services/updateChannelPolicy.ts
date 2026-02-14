@@ -59,26 +59,29 @@ export function selectUpdateByChannelPolicy(input: UpdatePolicyInput): UpdatePol
   );
   if (allowed.length === 0) {
     if (sorted.length > 0) {
+      const reasonCode = "blocked_channel_policy";
       return {
         appId: input.appId,
         selectedVersion: null,
-        reasonCode: "blocked_channel_policy",
-        remediation: remediationForReason("blocked_no_update_available")
+        reasonCode,
+        remediation: remediationForReason(reasonCode)
       };
     }
+    const reasonCode = "blocked_no_update_available";
     return {
       appId: input.appId,
       selectedVersion: null,
-      reasonCode: "blocked_no_update_available",
-      remediation: remediationForReason("blocked_no_update_available")
+      reasonCode,
+      remediation: remediationForReason(reasonCode)
     };
   }
 
+  const reasonCode = "ok_update_candidate_selected";
   return {
     appId: input.appId,
     selectedVersion: allowed[0].version,
-    reasonCode: "ok_update_candidate_selected",
-    remediation: remediationForReason("ok_version_supported")
+    reasonCode,
+    remediation: remediationForReason(reasonCode)
   };
 }
 

@@ -30,11 +30,12 @@ export function applyUpdateRollback(
   } = {}
 ): UpdateRollbackDecision {
   if (!app.installedVersion) {
+    const reasonCode = "blocked_no_last_known_good";
     return {
       appId: app.id,
       preservedInstalledVersion: null,
-      reasonCode: "blocked_no_last_known_good",
-      remediation: remediationForReason("blocked_no_update_available"),
+      reasonCode,
+      remediation: remediationForReason(reasonCode),
       artifactRecovery: "none"
     };
   }
@@ -69,7 +70,7 @@ export function applyUpdateRollback(
     appId: app.id,
     preservedInstalledVersion: app.installedVersion,
     reasonCode: "ok_update_rollback_applied",
-    remediation: remediationForReason("ok_update_candidate_selected"),
+    remediation: remediationForReason("ok_update_rollback_applied"),
     artifactRecovery: options.artifactDescriptor ? "retain_last_known_good" : "none"
   };
 }
