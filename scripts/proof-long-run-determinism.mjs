@@ -224,7 +224,7 @@ export async function buildLongRunSummary() {
 export async function runLongRunDeterminismProof() {
   const summary = await buildLongRunSummary();
   const expected = JSON.parse(
-    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-long-run-determinism-snapshots.json"), "utf-8")
+    readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/control-plane-long-run-proof-snapshots.json"), "utf-8")
   )[0]?.expected;
 
   assertEqual(summary, expected, "long-run determinism proof mismatch");
