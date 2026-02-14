@@ -28,6 +28,7 @@
     "proof:scope-governance": "node scripts/scope-governance-proof.mjs",
     "proof:trust-install-boundary": "node scripts/proof-trust-install-boundary.mjs",
     "proof:long-run-determinism": "node scripts/proof-long-run-determinism.mjs",
-    "check:operator-contract": "node scripts/operator-contract-check.mjs"
+    "check:operator-contract": "node scripts/operator-contract-check.mjs",
+    "rc0-release": "node scripts/rc0-release-dry-run.mjs"
   }
 }

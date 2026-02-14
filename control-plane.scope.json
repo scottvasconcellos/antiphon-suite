@@ -5,6 +5,7 @@
     "apps/layer-app-rhythm/artifacts",
     "apps/layer0-hub/fixtures/control-plane-*.json",
     "apps/layer0-hub/fixtures/operator-contract-*.json",
+    "apps/layer0-hub/fixtures/rc0-release-*.json",
     "apps/layer0-hub/src/domain",
     "apps/layer0-hub/src/services",
     "control-plane.scope.ack.json",

@@ -1,0 +1,23 @@
+{
+  "contract_version": "rc0",
+  "required_keys": [
+    "commit",
+    "contract_version",
+    "control_plane_scope_ack_sha256",
+    "control_plane_scope_sha256",
+    "files",
+    "manifest_digest",
+    "operator_contract_definition_sha256",
+    "release_kind"
+  ],
+  "allowed_keys": [
+    "commit",
+    "contract_version",
+    "control_plane_scope_ack_sha256",
+    "control_plane_scope_sha256",
+    "files",
+    "manifest_digest",
+    "operator_contract_definition_sha256",
+    "release_kind"
+  ]
+}
