@@ -23,6 +23,7 @@ export type InstallUpdateReasonCode =
   | "failed_update_timeout"
   | "failed_gateway"
   | "artifact_missing_file"
+  | "artifact_app_version_mismatch"
   | "artifact_digest_mismatch"
   | "artifact_partial_apply"
   | "artifact_rollback_failed"
@@ -43,6 +44,7 @@ export type InstallUpdateStepResult =
         | "failed_install_timeout"
         | "failed_update_timeout"
         | "failed_gateway"
+        | "artifact_app_version_mismatch"
         | "artifact_missing_file"
         | "artifact_digest_mismatch"
         | "artifact_partial_apply"
@@ -80,6 +82,7 @@ export const INSTALL_UPDATE_REASON_CODES = [
   "failed_install_timeout",
   "failed_update_timeout",
   "failed_gateway",
+  "artifact_app_version_mismatch",
   "artifact_missing_file",
   "artifact_digest_mismatch",
   "artifact_partial_apply",

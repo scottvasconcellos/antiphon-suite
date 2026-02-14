@@ -31,6 +31,25 @@
     }
   },
   {
+    "name": "artifact-appid-mismatch",
+    "input": {
+      "appId": "antiphon.layer.beta",
+      "manifestRaw": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.alpha\",\n  \"appVersion\": \"2.0.0\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"README.txt\",\n      \"size\": 5,\n      \"sha256\": \"a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1\"\n    }\n  ]\n}",
+      "payloadFiles": {
+        "README.txt": "hello"
+      },
+      "targetDir": "/opt/antiphon/beta",
+      "fileSystem": {
+        "/opt/antiphon/beta/old.txt": "old"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "reasonCode": "artifact_app_version_mismatch",
+      "remediation": "retry_install"
+    }
+  },
+  {
     "name": "artifact-missing-file",
     "input": {
       "appId": "antiphon.layer.alpha",

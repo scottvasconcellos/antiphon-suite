@@ -19,6 +19,7 @@ export type ArtifactApplyReasonCode =
   | "invalid_artifact_manifest_json"
   | "invalid_artifact_manifest_shape"
   | "unsupported_artifact_manifest_version"
+  | "artifact_app_version_mismatch"
   | "artifact_missing_file"
   | "artifact_digest_mismatch"
   | "artifact_partial_apply"
@@ -29,6 +30,7 @@ export const ARTIFACT_INSTALLER_REASON_CODES = [
   "invalid_artifact_manifest_json",
   "invalid_artifact_manifest_shape",
   "unsupported_artifact_manifest_version",
+  "artifact_app_version_mismatch",
   "artifact_missing_file",
   "artifact_digest_mismatch",
   "artifact_partial_apply",
@@ -50,6 +52,7 @@ export type ArtifactApplyResult =
         | "invalid_artifact_manifest_json"
         | "invalid_artifact_manifest_shape"
         | "unsupported_artifact_manifest_version"
+        | "artifact_app_version_mismatch"
         | "artifact_missing_file"
         | "artifact_digest_mismatch"
         | "artifact_partial_apply"
@@ -134,6 +137,21 @@ export function applyArtifactManifest(input: ArtifactApplyInput): ArtifactApplyR
   }
 
   const manifest = parsed.manifest;
+  if (manifest.appId !== input.appId) {
+    return {
+      ok: false,
+      reasonCode: "artifact_app_version_mismatch",
+      remediation: "retry_install",
+      targetFiles: [],
+      rollback: {
+        appId: input.appId,
+        previousTargetHash: serializeTreeHash(collectTargetEntries(input.fileSystem, input.targetDir)),
+        manifestVersion: toManifestVersion(manifest),
+        rollbackPrepared: true
+      },
+      fileSystem: { ...input.fileSystem }
+    };
+  }
   const nextFileSystem: VirtualFileSystem = { ...input.fileSystem };
   const previousTargetEntries = collectTargetEntries(nextFileSystem, input.targetDir);
   const previousTargetHash = serializeTreeHash(previousTargetEntries);
