@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -19,6 +19,53 @@ function assert(condition, message) {
 function assertEqual(actual, expected, message) {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     throw new Error(`${message}\nactual=${JSON.stringify(actual)}\nexpected=${JSON.stringify(expected)}`);
+  }
+}
+
+function listTypeScriptFiles(rootDir) {
+  const out = [];
+  const stack = [rootDir];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    for (const entry of readdirSync(current)) {
+      const fullPath = join(current, entry);
+      const info = statSync(fullPath);
+      if (info.isDirectory()) {
+        stack.push(fullPath);
+        continue;
+      }
+      if (fullPath.endsWith(".ts") || fullPath.endsWith(".tsx")) {
+        out.push(fullPath);
+      }
+    }
+  }
+  return out.sort();
+}
+
+function assertNoLegacyImports() {
+  const scopeConfig = JSON.parse(readFileSync(join(process.cwd(), "control-plane.scope.json"), "utf-8"));
+  const frozenLegacyPaths = (scopeConfig.frozenLegacyDeny ?? [])
+    .filter((value) => value.startsWith("apps/layer0-hub/src/domain/") && value.endsWith(".ts"))
+    .map((value) => value.replace(/^apps\/layer0-hub\/src\/domain\//, "").replace(/\.ts$/, ""));
+
+  const targetFiles = [
+    ...listTypeScriptFiles(join(process.cwd(), "apps/layer0-hub/src/services")),
+    ...listTypeScriptFiles(join(process.cwd(), "apps/layer0-hub/src/domain")).filter(
+      (path) => !frozenLegacyPaths.some((legacy) => path.endsWith(`/apps/layer0-hub/src/domain/${legacy}.ts`))
+    )
+  ];
+
+  for (const filePath of targetFiles) {
+    const source = readFileSync(filePath, "utf-8");
+    const imports = [...source.matchAll(/from\s+["']([^"']+)["']/g)].map((match) => match[1]);
+    for (const specifier of imports) {
+      if (!specifier.startsWith(".")) {
+        continue;
+      }
+      if (frozenLegacyPaths.some((legacy) => specifier.includes(legacy))) {
+        throw new Error(`legacy_import_forbidden:${filePath}:${specifier}`);
+      }
+    }
   }
 }
 
@@ -60,6 +107,7 @@ export async function runIntegrationCheck() {
   const loopSource = readFileSync(join(process.cwd(), "scripts/layer-app-install-loop.mjs"), "utf-8");
   const badImport = /from\s+["'](\.\.\/|\.\/)?apps\/layer0-hub\/src\/(?!services\/publicControlPlane)/.test(loopSource);
   assert(!badImport, "layer-app install loop must not import internal hub modules directly");
+  assertNoLegacyImports();
 
   console.log("[integration-check] PASS");
 }
