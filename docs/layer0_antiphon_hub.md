@@ -1,299 +1,122 @@
 # layer0_antiphon_hub.md
 
-## Point of the App
-Antiphon Hub is a silent entitlement and installation manager that allows music producers, songwriters, and serious musicians to instantly access and own their Antiphon desktop apps without licensing friction.
+## Layer 0 Product Authority (Canonical)
 
----
+Layer 0 defines product truth. Layer 0 does not require runtime code.
 
-## User Outcome
-After installing the Hub, users can:
+## Product Definition
 
-- Log in once and have their ownership recognized automatically  
-- Install owned apps with minimal effort  
-- Trust that the correct versions are installed  
-- Update apps reliably  
-- Switch machines without fear or authorization rituals  
-- Use their apps without persistent internet dependency  
+Antiphon Hub is infrastructure for ownership and distribution safety for Antiphon desktop apps.
 
-The Hub is not a creative environment.  
-It exists to remove obstacles between the user and creation.
+Hub purpose:
+- identity authentication
+- entitlement authority
+- install/update authority
+- offline trust cache
+- launch boundary issuance/verification
 
----
+Hub is not a destination. It should feel silent, fast, trustworthy, and mostly invisible.
+
+## Core User Outcome
+
+After one login, users can:
+- have ownership recognized automatically
+- install owned apps quickly
+- update reliably
+- switch machines without authorization rituals
+- keep using authorized apps offline
 
 ## One-Sentence Truth
-Antiphon Hub helps music producers, songwriters, and serious musicians instantly access and own their Antiphon apps through a frictionless entitlement system that eliminates licenses, product keys, and authorization anxiety.
 
----
+Antiphon Hub removes licensing friction so users can access and keep control of their Antiphon apps with minimal interruption to creative work.
 
-## Product Philosophy
-The Hub must feel:
+## Hard Product Invariants
 
-**Silent → Fast → Trustworthy → Invisible**
+1) Identity-based ownership
+- No product keys, activation codes, authorization slots, or visible device-limit rituals.
 
-It is infrastructure, not a destination.
+2) Offline-resilient entitlement
+- Creative usage must not require persistent internet.
+- Internet is needed only for first authentication, updates, and optional trust refresh.
 
-Users should rarely think about it.
+3) Anti-DRM posture
+- Authorized apps must remain runnable without Hub process presence.
+- Hub enhances trust and install safety; Hub must not gate execution.
 
-If users are “spending time” inside the Hub, scope discipline has failed.
+4) Silent operation
+- Hub must not behave like a storefront or workspace.
+- If users spend time in Hub, scope discipline failed.
 
----
+5) Deterministic authority behavior
+- Same input/state must produce same control-plane decision and reason.
 
-## Primary Outcome
-Operational safety through indisputable ownership and controlled distribution.
+## Scope: Must Exist
 
-## Secondary Outcome
-Reduced cognitive load for both user and company.
+- Authentication spine
+- Entitlement authority
+- Install authority
+- Update channel
+- Offline trust cache
+- Launch boundary
+- Minimal operational telemetry
 
----
+## Scope: Delay Is Acceptable
 
-## Before → After Transformation
+- auto-updates
+- ecosystem discovery
+- machine history UX
+- UI polish
 
-**Before:**  
-Ownership, versions, and installs fragment across emails, downloads, and manual verification, creating entitlement ambiguity and operational risk.
+## Explicitly Out of Scope
 
-**After:**  
-Ownership is automatic, installs are authoritative, and entitlement is never in question.
-
----
-
-## Non-Negotiables
-
-### 1. Frictionless Ownership
-Ownership is identity-based.
-
-The system must not require:
-
-- product keys  
-- activation codes  
-- visible device limits  
-- authorization slots  
-
-If a user is authenticated, ownership is recognized.
-
-This is a permanent philosophical stance.
-
----
-
-### 2. Offline-Resilient Entitlement
-Apps must function without persistent internet.
-
-Internet is required only for:
-
-- initial authentication  
-- updates  
-- optional license refresh  
-
-Creative work must never be blocked by network conditions.
-
----
-
-### 3. Silent Operation
-The Hub must not behave like a storefront or workspace.
-
-It:
-
-- runs quietly  
-- surfaces when needed  
-- avoids interrupting creative flow  
-- avoids promotional behavior  
-
----
-
-### 4. Instant Trust Transfer
-Users must be able to switch machines without anxiety.
-
-No deauthorization rituals.  
-No revocation fear.  
-
-Ownership follows identity.
-
----
-
-### 5. Ecosystem Stability
-Installing through the Hub guarantees:
-
-- correct files  
-- correct versions  
-- entitlement continuity  
-- predictable updates  
-
-No “floating builds.”
-
----
-
-## Kill List (Permanent Scope Boundaries)
-
-The Hub is NOT:
-
-- a storefront  
-- a marketplace  
-- a discovery engine  
-- a third-party platform  
-- a plugin host  
-- a runtime container  
-- a collaborative environment  
-- a cloud storage system  
-
-Apps run as independent native processes.
-
-Antiphon-only distribution.
-
----
+- native in-Hub purchasing for MVP
+- plugin distribution
+- third-party app marketplace
+- creative workspace features
+- runtime container behavior
+- collaborative environment
+- cloud storage behavior
+- behavioral surveillance analytics
 
 ## Commerce Boundary
-Native purchasing is **out of scope for MVP**.
 
-Early versions must use external checkout (e.g., browser-based Stripe flow).
+MVP purchasing is external checkout (for example browser Stripe). Native financial infrastructure is out of scope for MVP.
 
-Rationale:
-
-Building financial infrastructure too early increases operational and compliance risk and distracts from entitlement authority.
-
----
-
-## Telemetry Posture
-Telemetry must be:
-
-- minimal  
-- transparent  
-- operational  
+## Telemetry Boundary
 
 Allowed:
-
-- crash reports  
-- install failures  
-- update success rates  
-- license errors  
-- OS distribution  
+- crash reports
+- install/update failures and success rates
+- entitlement/license error classes
+- OS distribution metrics
 
 Not allowed:
+- behavioral surveillance
+- covert profiling
+- psychological tracking
 
-- behavioral surveillance  
-- psychological tracking  
-- covert profiling  
+## Distribution Boundary
 
-Trust is treated as a long-term asset.
+- Antiphon-only app distribution
+- apps run as independent native processes
+- no floating builds
 
----
+## Failure Signals
 
-## MVP Scope (Ecosystem Safety Layer)
+Design failed if users perceive Hub as:
+- DRM
+- unclear in purpose
+- unnecessary friction
 
-### Must Exist
+## Success Signals
 
-**Authentication Spine**  
-Secure identity login.
+Layer 0 is satisfied when:
+- ownership is indisputable
+- install/update authority is centralized and predictable
+- version chaos is prevented
+- users trust the system without thinking about it
+- creative flow is not interrupted
 
-**Entitlement Authority**  
-System can definitively verify ownership.
+## Strategic Constraint
 
-**Install Authority**  
-Single trusted install path.
-
-**Update Channel**  
-Reliable manual updates.
-
-**Offline License Cache**  
-Apps remain usable without persistent internet.
-
----
-
-### Painful but Acceptable to Delay
-
-- Auto-updates  
-- Explore / ecosystem visibility  
-- Machine history  
-- UI polish  
-
-Utility takes precedence over aesthetics.
-
----
-
-### Explicitly Not Yet
-
-- Native in-Hub purchasing  
-- Plugin distribution  
-- Third-party apps  
-- Behavioral analytics  
-- Advanced uninstall systems (unless technical reality demands them)
-
-Complexity must be pulled by necessity — never by anticipation.
-
----
-
-## Architectural Posture
-
-### Hub Optional, Not Mandatory
-Antiphon apps must be capable of running without the Hub installed.
-
-The Hub enhances ownership and install safety but does not gate execution.
-
-This aligns with the trust-first philosophy and prevents the system from feeling like DRM.
-
----
-
-## Reality Constraints
-
-- Internet required for first authentication  
-- Primary user is creative-first  
-- Day-to-day priority is speed over procedural friction  
-
-The Hub exists to get users back to creating as quickly as possible.
-
----
-
-## Failure Test
-
-If a professional installs the Hub and closes it within five minutes, the likely causes are:
-
-- it feels like DRM  
-- its purpose is unclear  
-- it introduces unnecessary friction  
-
-The product must be designed explicitly to avoid these perceptions.
-
-The Hub should feel like enablement — never permission.
-
----
-
-## Success Criteria
-
-Layer 0 is successful when:
-
-- Ownership is indisputable  
-- Install authority is centralized  
-- Version chaos is prevented  
-- Users trust the system without thinking about it  
-- The Hub does not interrupt creative flow  
-
-If the Hub disappeared and operational safety degraded, it is correctly designed.
-
-If users feel controlled by it, it has failed.
-
----
-
-## Known Risks & Unknowns
-
-### Trust vs Abuse Tension
-A frictionless system increases piracy surface area.
-
-The product must favor user trust while monitoring for large-scale abuse without punitive lockouts.
-
-### Launcher Bloat Risk
-Many ecosystems evolve into heavy launchers.
-
-Strict scope discipline is required to preserve silent utility.
-
-### Premature Infrastructure Risk
-The Hub must remain lean until the Antiphon ecosystem genuinely demands expansion.
-
----
-
-## Strategic Note (Founder-Level Insight)
-
-The true long-term asset is **not the Hub UI.**
-
-It is the entitlement spine.
-
-Protect its simplicity.
-
-Avoid turning it into a platform before the ecosystem earns that complexity.
+The long-term asset is entitlement architecture simplicity, not Hub UI complexity.

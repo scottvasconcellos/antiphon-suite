@@ -1,0 +1,134 @@
+<ANTIPHON_EXECUTION_SOURCE version="2026-02-14" status="ACTIVE" priority="PERMANENT">
+
+  <authority_precedence>
+    <highest>/docs/layer0_antiphon_hub.md</highest>
+    <second>/docs/codex-starter-lean.xml</second>
+    <third>all previous manuals, prompts, and ad-hoc instructions</third>
+    <rule>Any conflict is resolved in favor of layer0_antiphon_hub.md.</rule>
+  </authority_precedence>
+
+  <app_definition>
+    <name>Antiphon Hub</name>
+    <layer>Layer 1 control-plane application (Layer 0 remains conceptual product authority).</layer>
+    <purpose>
+      Silent infrastructure for identity, entitlement, install/update authority, offline trust caching,
+      launch boundary issuance/verification, and deterministic operator flows.
+    </purpose>
+    <non_goals>
+      No storefront. No creative workspace. No plugin host. No runtime container.
+      No music-intelligence domain in Hub runtime paths.
+    </non_goals>
+    <anti_drm_posture>
+      Authorized apps must remain runnable offline without Hub process presence.
+    </anti_drm_posture>
+  </app_definition>
+
+  <ruthless_audit_summary>
+    <overall_verdict>
+      The project is technically strong and reproducible, but currently over-invested in orchestration/check layering
+      relative to remaining product-value gaps.
+    </overall_verdict>
+
+    <over_invested>
+      <item>Check-script overlap and repeated gate chains increase cycle time without equivalent risk reduction.</item>
+      <item>Large fixture surface (60+ files) creates maintenance drag and cognitive load.</item>
+      <item>Legacy music-engine artifacts still create conceptual noise, even when runtime-isolated.</item>
+      <item>Naming debt (“Layer0 hub” path vs Layer 1 reality) adds constant interpretation overhead.</item>
+    </over_invested>
+
+    <under_invested>
+      <item>Authority backend realism (auth edge cases, entitlement lifecycle realism, durable failure handling).</item>
+      <item>Operational runbook simplicity for humans under pressure (one clean path, fewer equivalent commands).</item>
+      <item>Real app lifecycle proving in practical operator terms (install/update/rollback across versions).</item>
+      <item>Codebase simplification pass (dead exports, stale helper functions, legacy-only references in active folders).</item>
+    </under_invested>
+
+    <not_for_show>
+      Existing determinism, scoped clean-state policy, operator contract locks, and RC0 release/finalize flows are valid.
+      They are meaningful infrastructure, not cosmetic ceremony.
+    </not_for_show>
+
+    <bloat_risk>
+      Future work must default to capability delivery and simplification. New meta-governance is forbidden unless tied
+      to a demonstrated production-risk failure.
+    </bloat_risk>
+  </ruthless_audit_summary>
+
+  <layer_map>
+    <layer id="0" name="Product Authority" status="defined">
+      Source-of-truth philosophy and constraints only. No runtime code obligations.
+    </layer>
+    <layer id="1" name="Hub Control-Plane" status="advanced">
+      Implemented core: entitlement decisions, install/update orchestration, offline trust artifacts,
+      launch boundary, scoped reproducibility checks, deterministic proof harnesses.
+    </layer>
+    <layer id="2plus" name="Standalone Layer Apps" status="early">
+      Demonstration harnesses exist; production app feature delivery still ahead.
+    </layer>
+  </layer_map>
+
+  <project_status>
+    <foundation>Strong</foundation>
+    <structure>Strong with simplification debt</structure>
+    <skin>Intentionally minimal (correct for Hub)</skin>
+    <release_posture>RC0 mechanics operational; finalization path is deterministic and tag-verified.</release_posture>
+    <primary_gap>
+      Shift from governance depth to product-value throughput while preserving deterministic guarantees.
+    </primary_gap>
+  </project_status>
+
+  <execution_law>
+    <rules>
+      <rule>Prefer smallest high-value arc that either increases operator product value or removes proven risk.</rule>
+      <rule>No new governance/meta-check tooling unless a real failure occurred and the arc fixes that failure.</rule>
+      <rule>UI/skin changes are out-of-scope unless explicitly required by Layer 0 purpose.</rule>
+      <rule>Keep deterministic outputs: sorted structures, stable hashes, no wall-clock fields in contract artifacts.</rule>
+      <rule>Legacy frozen music-engine files remain frozen and excluded from Layer 1 runtime decisions.</rule>
+    </rules>
+
+    <required_validation_before_done>
+      <cmd>npm run smoke</cmd>
+      <cmd>npm run gate</cmd>
+      <cmd>npm run rc-check</cmd>
+      <cmd>node scripts/operator-contract-check.mjs</cmd>
+      <cmd>plus any proofs already wired into gate</cmd>
+    </required_validation_before_done>
+  </execution_law>
+
+  <finish_strategy id="RC1" reference="/docs/PROJECT_COMPLETION_PLAN.md">
+    <principle>
+      Consolidate first, ship operator-trust outcomes second, then transition Hub to maintenance mode while Layer apps scale.
+    </principle>
+  </finish_strategy>
+
+  <model_routing_recommendation>
+    <default>
+      GPT-5.3-Codex Low for implementation loops. This is the best cost/performance baseline for this repo now.
+    </default>
+    <escalate_medium>
+      Use GPT-5.3-Codex Medium only for architectural refactors spanning multiple boundaries or non-trivial contract redesign.
+    </escalate_medium>
+    <escalate_high>
+      Use High/Extra High only for persistent logic bugs, contradictory evidence between checks, or final release audits.
+    </escalate_high>
+    <avoid>
+      Continuous high-tier use for routine coding; this project now benefits more from disciplined scope than deeper model reasoning.
+    </avoid>
+  </model_routing_recommendation>
+
+  <operator_collaboration_profile>
+    <default_reporting>
+      Minimize interruptions. Report only at meaningful milestones, blocking conditions, or explicit operator requests.
+    </default_reporting>
+    <model_switch_protocol>
+      <rule>Stay on GPT-5.3-Codex Low by default.</rule>
+      <rule>Before any required escalation, stop once and provide: recommended tier, reason, and clear return-to-low point.</rule>
+      <rule>After escalated task completes, explicitly recommend returning to Low.</rule>
+    </model_switch_protocol>
+    <design_handoff_trigger>
+      Stop and request the operator's in-progress design/Figma package only when entering intentional UI/component/branding implementation.
+      Do not request it during control-plane/domain/services hardening phases.
+    </design_handoff_trigger>
+  </operator_collaboration_profile>
+
+</ANTIPHON_EXECUTION_SOURCE>
