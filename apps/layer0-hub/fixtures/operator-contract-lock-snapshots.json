@@ -31,12 +31,14 @@
           "contract_version": "rc0",
           "script": "gate",
           "step_labels": [
+            "control-plane scoped status",
             "running integration checks",
             "running long-run determinism proof",
             "running operator contract check",
             "running scoped rc-check",
             "running smoke",
             "running trust/install boundary proof",
+            "scoped-dirty-count=0",
             "verifying public surface snapshot",
             "verifying reason coverage snapshot",
             "verifying staged legacy guard"
