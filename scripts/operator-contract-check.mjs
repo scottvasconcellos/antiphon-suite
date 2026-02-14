@@ -1,9 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { buildDemoOperatorContract } from "./demo.mjs";
-import { buildTrustInstallOperatorContract } from "./proof-trust-install-boundary.mjs";
-import { buildLongRunOperatorContract } from "./proof-long-run-determinism.mjs";
+import { spawnSync } from "node:child_process";
 
 function fail(message) {
   console.error(`[operator-contract-check] FAIL: operator_contract_violation:${message}`);
@@ -49,10 +47,29 @@ function validateSurface(surface, shape) {
   assert(surface.contract_version === shape.contract_version, `${shape.script}:bad_contract_version`);
 }
 
-export async function buildOperatorContractSurface() {
-  const demo = await buildDemoOperatorContract();
-  const trust = await buildTrustInstallOperatorContract();
-  const longRun = await buildLongRunOperatorContract();
+function runJsonScript(scriptPath) {
+  const result = spawnSync("node", [scriptPath, "--contract-json"], {
+    stdio: "pipe",
+    shell: false,
+    encoding: "utf-8"
+  });
+  if (result.status !== 0) {
+    const stderr = (result.stderr || "").trim();
+    fail(`script_failed:${scriptPath}:${stderr.split(/\r?\n/).slice(-1)[0] ?? "unknown"}`);
+  }
+  const lines = String(result.stdout || "").trim().split(/\r?\n/).filter((line) => line.trim().length > 0);
+  const last = lines[lines.length - 1] ?? "";
+  try {
+    return JSON.parse(last);
+  } catch {
+    fail(`invalid_json_output:${scriptPath}`);
+  }
+}
+
+export function buildOperatorContractSurface() {
+  const demo = runJsonScript("scripts/demo.mjs");
+  const trust = runJsonScript("scripts/proof-trust-install-boundary.mjs");
+  const longRun = runJsonScript("scripts/proof-long-run-determinism.mjs");
   const gate = parseGateContractSurface();
 
   return {
@@ -61,12 +78,12 @@ export async function buildOperatorContractSurface() {
   };
 }
 
-export async function runOperatorContractCheck(options = { updateLock: false }) {
+export function runOperatorContractCheck(options = { updateLock: false }) {
   const definition = JSON.parse(
     readFileSync(join(process.cwd(), "apps/layer0-hub/fixtures/operator-contract-definition.json"), "utf-8")
   );
 
-  const surface = await buildOperatorContractSurface();
+  const surface = buildOperatorContractSurface();
   assert(surface.contract_version === definition.contract_version, "surface:bad_contract_version");
 
   for (const shape of definition.surfaces) {
@@ -93,8 +110,10 @@ export async function runOperatorContractCheck(options = { updateLock: false }) 
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const updateLock = process.argv.includes("--update-lock");
-  runOperatorContractCheck({ updateLock }).catch((error) => {
+  try {
+    runOperatorContractCheck({ updateLock });
+  } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     fail(message);
-  });
+  }
 }
