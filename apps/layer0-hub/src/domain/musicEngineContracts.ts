@@ -17,6 +17,12 @@ export type MusicEnginePlugin = {
   id: string;
   name: string;
   version: string;
+  capabilities: {
+    domainScope: "global" | "arrangement" | "mix" | "master";
+    determinismLevel: "strict";
+    fallbackPriority: number;
+    latencyTier: "fast" | "standard";
+  };
   evaluate(input: MusicIntelligenceInput): MusicIntelligenceOutput;
 };
 
@@ -40,6 +46,9 @@ export type MusicPipelineResult = {
   engineVersion: string;
   selectionSource: "requested" | "default";
   selectionReason: string;
+  selectedEngineId: string;
+  selectedCapabilitySummary: string;
+  matrixSnapshotRef: string;
   projection: UiMusicProjection | null;
 };
 

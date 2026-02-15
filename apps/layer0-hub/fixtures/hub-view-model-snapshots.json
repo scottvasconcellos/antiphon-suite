@@ -26,6 +26,9 @@
       "engineVersion": "1.0.0",
       "selectionSource": "default",
       "selectionReason": "No session: use stub engine.",
+      "selectedEngineId": "stub-music-intelligence-v1",
+      "selectedCapabilitySummary": "global|strict|p100|fast",
+      "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
       "projection": {
         "lane": "authenticate",
         "headline": "Authenticate to continue",
@@ -44,7 +47,32 @@
       "intelligenceEngineName": "Stub Music Intelligence",
       "intelligenceEngineVersion": "1.0.0",
       "intelligenceSelectionSource": "default",
-      "intelligenceSelectionReason": "No session: use stub engine."
+      "intelligenceSelectionReason": "No session: use stub engine.",
+      "selectedCapabilitySummary": "global|strict|p100|fast",
+      "capabilityMatrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "capabilityMatrix": [
+        {
+          "engineId": "minimal-real-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "standard"
+        },
+        {
+          "engineId": "rule-based-music-intelligence-v1",
+          "domainScope": "arrangement",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "fast"
+        },
+        {
+          "engineId": "stub-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 100,
+          "latencyTier": "fast"
+        }
+      ]
     }
   },
   {
@@ -88,7 +116,10 @@
       "engineName": "Minimal Real Music Intelligence",
       "engineVersion": "1.0.0",
       "selectionSource": "default",
-      "selectionReason": "Session present: use minimal real engine.",
+      "selectionReason": "Session present: use deterministic highest-priority eligible real engine.",
+      "selectedEngineId": "minimal-real-music-intelligence-v1",
+      "selectedCapabilitySummary": "global|strict|p10|standard",
+      "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
       "projection": {
         "lane": "install",
         "headline": "Install recommended tools",
@@ -107,7 +138,32 @@
       "intelligenceEngineName": "Minimal Real Music Intelligence",
       "intelligenceEngineVersion": "1.0.0",
       "intelligenceSelectionSource": "default",
-      "intelligenceSelectionReason": "Session present: use minimal real engine."
+      "intelligenceSelectionReason": "Session present: use deterministic highest-priority eligible real engine.",
+      "selectedCapabilitySummary": "global|strict|p10|standard",
+      "capabilityMatrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "capabilityMatrix": [
+        {
+          "engineId": "minimal-real-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "standard"
+        },
+        {
+          "engineId": "rule-based-music-intelligence-v1",
+          "domainScope": "arrangement",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "fast"
+        },
+        {
+          "engineId": "stub-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 100,
+          "latencyTier": "fast"
+        }
+      ]
     }
   },
   {
@@ -142,6 +198,9 @@
       "engineVersion": "1.0.0",
       "selectionSource": "requested",
       "selectionReason": "Requested engine id 'stub-music-intelligence-v1' was found.",
+      "selectedEngineId": "stub-music-intelligence-v1",
+      "selectedCapabilitySummary": "global|strict|p100|fast",
+      "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
       "projection": {
         "lane": "install",
         "headline": "Install recommended tools",
@@ -160,7 +219,32 @@
       "intelligenceEngineName": "Stub Music Intelligence",
       "intelligenceEngineVersion": "1.0.0",
       "intelligenceSelectionSource": "requested",
-      "intelligenceSelectionReason": "Requested engine id 'stub-music-intelligence-v1' was found."
+      "intelligenceSelectionReason": "Requested engine id 'stub-music-intelligence-v1' was found.",
+      "selectedCapabilitySummary": "global|strict|p100|fast",
+      "capabilityMatrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "capabilityMatrix": [
+        {
+          "engineId": "minimal-real-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "standard"
+        },
+        {
+          "engineId": "rule-based-music-intelligence-v1",
+          "domainScope": "arrangement",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "fast"
+        },
+        {
+          "engineId": "stub-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 100,
+          "latencyTier": "fast"
+        }
+      ]
     }
   },
   {
@@ -194,7 +278,32 @@
       "intelligenceEngineName": "none",
       "intelligenceEngineVersion": "0.0.0",
       "intelligenceSelectionSource": "unavailable",
-      "intelligenceSelectionReason": "No selection."
+      "intelligenceSelectionReason": "No selection.",
+      "selectedCapabilitySummary": "none",
+      "capabilityMatrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "capabilityMatrix": [
+        {
+          "engineId": "minimal-real-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "standard"
+        },
+        {
+          "engineId": "rule-based-music-intelligence-v1",
+          "domainScope": "arrangement",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "fast"
+        },
+        {
+          "engineId": "stub-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 100,
+          "latencyTier": "fast"
+        }
+      ]
     }
   }
 ]

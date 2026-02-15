@@ -1,0 +1,23 @@
+[
+  {
+    "engineId": "minimal-real-music-intelligence-v1",
+    "domainScope": "global",
+    "determinismLevel": "strict",
+    "fallbackPriority": 10,
+    "latencyTier": "standard"
+  },
+  {
+    "engineId": "rule-based-music-intelligence-v1",
+    "domainScope": "arrangement",
+    "determinismLevel": "strict",
+    "fallbackPriority": 10,
+    "latencyTier": "fast"
+  },
+  {
+    "engineId": "stub-music-intelligence-v1",
+    "domainScope": "global",
+    "determinismLevel": "strict",
+    "fallbackPriority": 100,
+    "latencyTier": "fast"
+  }
+]

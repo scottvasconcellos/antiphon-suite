@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Figma Bundle Generator</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <main>
+    <div class="card">
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="64" height="64" rx="12" fill="var(--surface)"/>
+          <path d="M20 24h24v2H20V24zm0 6h24v2H20v-2zm0 6h16v2H20v-2z" fill="var(--muted)"/>
+          <path d="M44 42l-6-6 6-6v12z" fill="var(--accent)"/>
+        </svg>
+      </div>
+      <h1>Figma Bundle Generator</h1>
+      <p class="tagline">Drop a Figma export ZIP → get a Cursor-ready bundle.</p>
+      <div id="dropzone" class="dropzone" role="button" tabindex="0">
+        <input type="file" id="file" accept=".zip" hidden />
+        <span id="label">Double-click or drop ZIP here</span>
+        <span id="status" class="status" aria-live="polite"></span>
+      </div>
+      <p class="hint">Vite/React/TSX bundle with package.json, src/, docs. Original ZIP is preserved; output is deterministic.</p>
+    </div>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

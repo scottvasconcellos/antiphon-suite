@@ -38,6 +38,9 @@ export function runMusicPipeline(
         engineVersion: engine.version,
         selectionSource: selection.source,
         selectionReason: selection.reason,
+        selectedEngineId: selection.selectedEngineId,
+        selectedCapabilitySummary: selection.selectedCapabilitySummary,
+        matrixSnapshotRef: selection.matrixSnapshotRef,
         projection: null
       };
     }
@@ -49,6 +52,9 @@ export function runMusicPipeline(
       engineVersion: engine.version,
       selectionSource: selection.source,
       selectionReason: selection.reason,
+      selectedEngineId: selection.selectedEngineId,
+      selectedCapabilitySummary: selection.selectedCapabilitySummary,
+      matrixSnapshotRef: selection.matrixSnapshotRef,
       projection: adapter.toProjection(output)
     };
   } catch (error) {
@@ -60,6 +66,9 @@ export function runMusicPipeline(
       engineVersion: engine.version,
       selectionSource: selection.source,
       selectionReason: selection.reason,
+      selectedEngineId: selection.selectedEngineId,
+      selectedCapabilitySummary: selection.selectedCapabilitySummary,
+      matrixSnapshotRef: selection.matrixSnapshotRef,
       projection: null
     };
   }

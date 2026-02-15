@@ -26,6 +26,12 @@ export const StubMusicIntelligenceEngine: MusicEnginePlugin = {
   id: "stub-music-intelligence-v1",
   name: "Stub Music Intelligence",
   version: "1.0.0",
+  capabilities: {
+    domainScope: "global",
+    determinismLevel: "strict",
+    fallbackPriority: 100,
+    latencyTier: "fast"
+  },
   evaluate(input: MusicIntelligenceInput): MusicIntelligenceOutput {
     return evaluateMusicIntelligence(input);
   }

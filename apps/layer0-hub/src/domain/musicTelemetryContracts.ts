@@ -6,8 +6,11 @@ export type AuthorityMusicTelemetryDto = {
     id: string;
     name: string;
     version: string;
+    selectedEngineId: string;
+    capabilitySummary: string;
     source: "requested" | "default";
     reason: string;
+    matrixSnapshotRef: string;
   };
   decision: {
     status: "ready" | "runtime-error";

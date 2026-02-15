@@ -25,7 +25,10 @@
         "headline": "Authenticate to continue",
         "detail": "Session required to unlock ownership-aware tools.",
         "confidencePct": 92
-      }
+      },
+      "selectedCapabilitySummary": "global|strict|p100|fast",
+      "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "selectedEngineId": "stub-music-intelligence-v1"
     }
   },
   {
@@ -63,13 +66,16 @@
       "engineName": "Minimal Real Music Intelligence",
       "engineVersion": "1.0.0",
       "selectionSource": "default",
-      "selectionReason": "Session present: use minimal real engine.",
+      "selectionReason": "Session present: use deterministic highest-priority eligible real engine.",
       "projection": {
         "lane": "install",
         "headline": "Install recommended tools",
         "detail": "Install owned tools to unlock full production flow.",
         "confidencePct": 82
-      }
+      },
+      "selectedCapabilitySummary": "global|strict|p10|standard",
+      "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "selectedEngineId": "minimal-real-music-intelligence-v1"
     }
   },
   {
@@ -98,7 +104,10 @@
         "headline": "Authenticate to continue",
         "detail": "Session required to unlock ownership-aware tools.",
         "confidencePct": 92
-      }
+      },
+      "selectedCapabilitySummary": "global|strict|p100|fast",
+      "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "selectedEngineId": "stub-music-intelligence-v1"
     }
   }
 ]

@@ -19,8 +19,11 @@
         "id": "stub-music-intelligence-v1",
         "name": "Stub Music Intelligence",
         "version": "1.0.0",
+        "selectedEngineId": "stub-music-intelligence-v1",
+        "capabilitySummary": "global|strict|p100|fast",
         "source": "default",
-        "reason": "No session: use stub engine."
+        "reason": "No session: use stub engine.",
+        "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json"
       },
       "decision": {
         "status": "ready",
@@ -70,8 +73,11 @@
         "id": "minimal-real-music-intelligence-v1",
         "name": "Minimal Real Music Intelligence",
         "version": "1.0.0",
+        "selectedEngineId": "minimal-real-music-intelligence-v1",
+        "capabilitySummary": "global|strict|p10|standard",
         "source": "requested",
-        "reason": "Requested engine id 'minimal-real-music-intelligence-v1' was found."
+        "reason": "Requested engine id 'minimal-real-music-intelligence-v1' was found.",
+        "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json"
       },
       "decision": {
         "status": "ready",
@@ -106,8 +112,50 @@
         "id": "stub-music-intelligence-v1",
         "name": "Stub Music Intelligence",
         "version": "1.0.0",
+        "selectedEngineId": "stub-music-intelligence-v1",
+        "capabilitySummary": "global|strict|p100|fast",
         "source": "default",
-        "reason": "Requested engine id 'unknown.engine.v1' not found; applying deterministic default policy."
+        "reason": "Requested engine id 'unknown.engine.v1' not found; applying deterministic default policy.",
+        "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json"
+      },
+      "decision": {
+        "status": "ready",
+        "lane": "authenticate",
+        "confidencePct": 92
+      },
+      "context": {
+        "hasSession": false,
+        "ownedCount": 0,
+        "installedCount": 0,
+        "offlineDaysRemaining": 21
+      }
+    }
+  },
+  {
+    "name": "ineligible_requested_fallback_telemetry",
+    "snapshot": {
+      "session": null,
+      "entitlements": [],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 21,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "requestedEngineId": "minimal-real-music-intelligence-v1",
+    "expected": {
+      "schemaVersion": "1.0.0",
+      "engine": {
+        "id": "stub-music-intelligence-v1",
+        "name": "Stub Music Intelligence",
+        "version": "1.0.0",
+        "selectedEngineId": "stub-music-intelligence-v1",
+        "capabilitySummary": "global|strict|p100|fast",
+        "source": "default",
+        "reason": "Requested engine id 'minimal-real-music-intelligence-v1' is ineligible for current state; applying deterministic default policy.",
+        "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json"
       },
       "decision": {
         "status": "ready",
