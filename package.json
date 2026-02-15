@@ -6,6 +6,7 @@
     "dev": "pnpm -r --parallel --filter @antiphon/layer0-authority --filter @antiphon/layer0-hub dev",
     "dev:hub": "pnpm --filter @antiphon/layer0-hub dev",
     "dev:authority": "pnpm --filter @antiphon/layer0-authority dev",
+    "dev:handoff": "pnpm --filter @antiphon/layer0-handoff-bundle dev",
     "build": "pnpm --filter @antiphon/layer0-authority build && pnpm --filter @antiphon/layer0-hub build",
     "typecheck": "pnpm --filter @antiphon/layer0-authority typecheck && pnpm --filter @antiphon/layer0-hub typecheck",
     "smoke": "node scripts/control-plane-smoke.mjs && node scripts/foundation-smoke.mjs",
