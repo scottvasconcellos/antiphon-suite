@@ -35,7 +35,7 @@ function inventory(zip) {
     if (lower.endsWith('.tsx') || lower.endsWith('.jsx')) components.push(n);
     else if (lower.endsWith('.css') || lower.endsWith('.scss')) styles.push(n);
     else if (lower.includes('token') || lower.endsWith('-tokens') || lower.includes('variables')) tokens.push(n);
-    else if (/\.(png|jpg|jpeg|gif|svg|woff2?|ttf|ico)$/i.test(n) || n.includes('assets')) assets.push(n);
+    else if (/\.(png|jpg|jpeg|gif|svg|woff2?|ttf|ico)$/i.test(n) || lower.includes('assets')) assets.push(n);
     else if (lower.endsWith('.md')) docs.push(n);
     else other.push(n);
   });
@@ -121,7 +121,11 @@ function buildDiff(manifest, priorFingerprint = null) {
   if (!priorFingerprint) {
     return {
       mode: 'initial',
-      added: manifest.inventory.components.concat(manifest.inventory.styles).concat(manifest.inventory.assets).concat(manifest.inventory.docs),
+      added: manifest.inventory.components
+        .concat(manifest.inventory.styles)
+        .concat(manifest.inventory.tokens || [])
+        .concat(manifest.inventory.assets)
+        .concat(manifest.inventory.docs),
       removed: [],
       changed: [],
     };
