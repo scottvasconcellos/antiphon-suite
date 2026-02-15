@@ -1,0 +1,66 @@
+<ANTIPHON_AUTONOMOUS_EXECUTION_CONSTITUTION version="2026-02-14" status="ACTIVE" priority="PERMANENT">
+
+  <authority>
+    <highest>/docs/layer0_antiphon_hub.md</highest>
+    <second>/docs/codex-starter-lean.xml</second>
+    <rule>If any conflict exists, layer0_antiphon_hub.md wins.</rule>
+  </authority>
+
+  <execution_mode>
+    <mode>continuous_autonomous</mode>
+    <policy>Do not stop for routine updates, routine approvals, or status chatter.</policy>
+    <policy>Proceed until the current task or arc is complete.</policy>
+    <policy>Use smallest deterministic change that increases product value or removes real risk.</policy>
+  </execution_mode>
+
+  <mandatory_stop_conditions>
+    <condition id="1">Layer 0 philosophy is ambiguous for the current implementation choice.</condition>
+    <condition id="2">A model tier switch is required to complete the next step safely.</condition>
+    <condition id="3">Work is entering intentional Figma/design-system implementation and design package is required.</condition>
+    <condition id="4">Emergency condition (data-loss risk, destructive action risk, or security-critical uncertainty).</condition>
+    <condition id="5">Detected architectural drift against Layer 0 invariants that cannot be resolved with a small local fix.</condition>
+  </mandatory_stop_conditions>
+
+  <default_behavior>
+    <rule>Assume operational permission for normal coding, testing, staging, and committing.</rule>
+    <rule>No repeated check-ins between sub-steps.</rule>
+    <rule>Keep Layer 1 control-plane scope strict: auth, entitlement, install/update, offline trust, launch boundary.</rule>
+    <rule>No music-intelligence runtime expansion inside Hub.</rule>
+    <rule>No UI/skin expansion unless explicitly required by Layer 0 outcomes.</rule>
+  </default_behavior>
+
+  <determinism_law>
+    <rule>Same input and state must yield same output.</rule>
+    <rule>Use stable ordering and stable contract shapes.</rule>
+    <rule>No wall-clock fields in contract artifacts unless policy-defined and deterministic.</rule>
+    <rule>Reason codes and remediations must map canonically through taxonomy.</rule>
+  </determinism_law>
+
+  <boundary_law>
+    <rule>Legacy frozen music-domain files remain excluded from active control-plane runtime paths.</rule>
+    <rule>Public service surface remains the integration boundary for layer apps.</rule>
+    <rule>Apps must remain hub-optional after authorization (anti-DRM).</rule>
+  </boundary_law>
+
+  <validation_minimum>
+    <cmd>npm run smoke</cmd>
+    <cmd>npm run gate</cmd>
+    <cmd>npm run rc-check</cmd>
+    <cmd>node scripts/operator-contract-check.mjs</cmd>
+  </validation_minimum>
+
+  <model_routing>
+    <default>GPT-5.3-Codex Low</default>
+    <escalate>
+      <medium>cross-boundary refactor, non-trivial contract redesign</medium>
+      <high>persistent logic bug, contradictory validation signals, release audit</high>
+    </escalate>
+    <return_to_default>After escalated task completion, return to GPT-5.3-Codex Low.</return_to_default>
+  </model_routing>
+
+  <reporting>
+    <rule>Report only at major milestone completion or mandatory stop.</rule>
+    <rule>When reporting, use plain English and include: what changed, where we are, and next step.</rule>
+  </reporting>
+
+</ANTIPHON_AUTONOMOUS_EXECUTION_CONSTITUTION>

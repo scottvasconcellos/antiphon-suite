@@ -1,0 +1,89 @@
+{
+  "contract_version": "rc0",
+  "surfaces": [
+    {
+      "script": "demo",
+      "contract_version": "rc0",
+      "required_keys": [
+        "chosen_apps",
+        "contract_version",
+        "digest",
+        "entitlement_reason_codes",
+        "install_reason_codes",
+        "proof_marker",
+        "script",
+        "trust"
+      ],
+      "allowed_keys": [
+        "chosen_apps",
+        "contract_version",
+        "digest",
+        "entitlement_reason_codes",
+        "install_reason_codes",
+        "proof_marker",
+        "script",
+        "trust"
+      ]
+    },
+    {
+      "script": "gate",
+      "contract_version": "rc0",
+      "required_keys": [
+        "contract_version",
+        "final_marker",
+        "script",
+        "step_labels"
+      ],
+      "allowed_keys": [
+        "contract_version",
+        "final_marker",
+        "script",
+        "step_labels"
+      ]
+    },
+    {
+      "script": "proof-long-run-determinism",
+      "contract_version": "rc0",
+      "required_keys": [
+        "contract_version",
+        "cycle_digest",
+        "final_state_hash",
+        "iterations",
+        "reason_signature_digest",
+        "script",
+        "stable"
+      ],
+      "allowed_keys": [
+        "contract_version",
+        "cycle_digest",
+        "final_state_hash",
+        "iterations",
+        "reason_signature_digest",
+        "script",
+        "stable"
+      ]
+    },
+    {
+      "script": "proof-trust-install-boundary",
+      "contract_version": "rc0",
+      "required_keys": [
+        "atomic_guarantees",
+        "contract_version",
+        "digest",
+        "install_boundary_reason_codes",
+        "script",
+        "trust_artifact_reason_codes",
+        "trust_reason_codes"
+      ],
+      "allowed_keys": [
+        "atomic_guarantees",
+        "contract_version",
+        "digest",
+        "install_boundary_reason_codes",
+        "script",
+        "trust_artifact_reason_codes",
+        "trust_reason_codes"
+      ]
+    }
+  ]
+}

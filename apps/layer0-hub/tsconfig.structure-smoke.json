@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "./.tmp-structure-smoke",
+    "rootDir": "./src"
+  },
+  "include": [
+    "src/domain/types.ts",
+    "src/services/authorityContracts.ts",
+    "src/services/hubRuntime.ts",
+    "src/services/httpHubGateway.ts"
+  ]
+}

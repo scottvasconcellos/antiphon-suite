@@ -1,0 +1,20 @@
+{
+  "schema": "antiphon.artifact-manifest",
+  "version": 1,
+  "appId": "antiphon.layer.rhythm",
+  "appVersion": "1.1.0-beta.1",
+  "channel": "beta",
+  "digestAlgorithm": "sha256",
+  "files": [
+    {
+      "path": "app.txt",
+      "size": 21,
+      "sha256": "033707ba033707ba033707ba033707ba033707ba033707ba033707ba033707ba"
+    }
+  ],
+  "signature": {
+    "keyId": "layer-rhythm-k1",
+    "algorithm": "ed25519",
+    "signature": "b29d5927"
+  }
+}

@@ -1,0 +1,66 @@
+[
+  {
+    "name": "mixed-owned-installed-readiness",
+    "snapshot": {
+      "session": {
+        "userId": "usr_launch",
+        "email": "launch@antiphon.audio",
+        "displayName": "Launch",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [
+        {
+          "id": "antiphon.a-app",
+          "name": "A App",
+          "version": "1.0.0",
+          "installedVersion": "1.0.0",
+          "owned": true,
+          "installState": "installed",
+          "updateAvailable": false
+        },
+        {
+          "id": "antiphon.b-app",
+          "name": "B App",
+          "version": "1.0.0",
+          "installedVersion": null,
+          "owned": true,
+          "installState": "not-installed",
+          "updateAvailable": false
+        },
+        {
+          "id": "antiphon.c-app",
+          "name": "C App",
+          "version": "1.0.0",
+          "installedVersion": null,
+          "owned": false,
+          "installState": "not-installed",
+          "updateAvailable": false
+        }
+      ],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 20,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "expected": [
+      {
+        "appId": "antiphon.a-app",
+        "ready": true,
+        "reason": "token_issued"
+      },
+      {
+        "appId": "antiphon.b-app",
+        "ready": false,
+        "reason": "not_installed"
+      },
+      {
+        "appId": "antiphon.c-app",
+        "ready": false,
+        "reason": "not_owned"
+      }
+    ]
+  }
+]

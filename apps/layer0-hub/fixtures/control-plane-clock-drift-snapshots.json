@@ -1,0 +1,145 @@
+[
+  {
+    "name": "forward-clock-jump-detected",
+    "input": {
+      "nowIso": "2026-02-13T01:00:00.000Z",
+      "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+      "offlineDaysRemaining": 7,
+      "maxClockSkewSeconds": 300,
+      "mixedEntitlementTimestamps": [
+        "2026-02-13T00:00:00.000Z",
+        "2026-02-13T00:03:00.000Z"
+      ],
+      "maxSpreadSeconds": 300
+    },
+    "expected": {
+      "driftDecision": {
+        "outcome": "ClockSkewDetected",
+        "reasonCode": "clock_skew_detected",
+        "remediation": "refresh_online_session"
+      },
+      "mixedDecision": {
+        "reasonCode": "ok_mixed_entitlement_timestamps",
+        "remediation": "none",
+        "spreadSeconds": 180
+      },
+      "reasons": [
+        {
+          "reasonCode": "clock_skew_detected",
+          "remediation": "refresh_online_session"
+        },
+        {
+          "reasonCode": "ok_mixed_entitlement_timestamps",
+          "remediation": "none"
+        }
+      ]
+    }
+  },
+  {
+    "name": "backward-clock-jump-detected",
+    "input": {
+      "nowIso": "2026-02-12T23:00:00.000Z",
+      "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+      "offlineDaysRemaining": 7,
+      "maxClockSkewSeconds": 300,
+      "mixedEntitlementTimestamps": [
+        "2026-02-13T00:00:00.000Z",
+        "2026-02-13T00:02:00.000Z"
+      ],
+      "maxSpreadSeconds": 300
+    },
+    "expected": {
+      "driftDecision": {
+        "outcome": "ClockSkewDetected",
+        "reasonCode": "clock_skew_detected",
+        "remediation": "refresh_online_session"
+      },
+      "mixedDecision": {
+        "reasonCode": "ok_mixed_entitlement_timestamps",
+        "remediation": "none",
+        "spreadSeconds": 120
+      },
+      "reasons": [
+        {
+          "reasonCode": "clock_skew_detected",
+          "remediation": "refresh_online_session"
+        },
+        {
+          "reasonCode": "ok_mixed_entitlement_timestamps",
+          "remediation": "none"
+        }
+      ]
+    }
+  },
+  {
+    "name": "mixed-entitlement-timestamp-skew",
+    "input": {
+      "nowIso": "2026-02-13T00:10:00.000Z",
+      "lastValidatedAt": "2026-02-13T00:09:00.000Z",
+      "offlineDaysRemaining": 2,
+      "maxClockSkewSeconds": 300,
+      "mixedEntitlementTimestamps": [
+        "2026-02-13T00:00:00.000Z",
+        "2026-02-13T00:10:00.000Z"
+      ],
+      "maxSpreadSeconds": 300
+    },
+    "expected": {
+      "driftDecision": {
+        "outcome": "OfflineFresh",
+        "reasonCode": "ok_offline_entitlement_fresh",
+        "remediation": "none"
+      },
+      "mixedDecision": {
+        "reasonCode": "mixed_entitlement_timestamps_skewed",
+        "remediation": "refresh_online_session",
+        "spreadSeconds": 600
+      },
+      "reasons": [
+        {
+          "reasonCode": "ok_offline_entitlement_fresh",
+          "remediation": "none"
+        },
+        {
+          "reasonCode": "mixed_entitlement_timestamps_skewed",
+          "remediation": "refresh_online_session"
+        }
+      ]
+    }
+  },
+  {
+    "name": "expired-offline-entitlement",
+    "input": {
+      "nowIso": "2026-02-13T00:10:00.000Z",
+      "lastValidatedAt": "2026-02-13T00:09:00.000Z",
+      "offlineDaysRemaining": 0,
+      "maxClockSkewSeconds": 300,
+      "mixedEntitlementTimestamps": [
+        "2026-02-13T00:09:00.000Z"
+      ],
+      "maxSpreadSeconds": 300
+    },
+    "expected": {
+      "driftDecision": {
+        "outcome": "OfflineExpired",
+        "reasonCode": "offline_entitlement_expired",
+        "remediation": "refresh_online_session"
+      },
+      "mixedDecision": {
+        "reasonCode": "ok_mixed_entitlement_timestamps",
+        "remediation": "none",
+        "spreadSeconds": 0
+      },
+      "reasons": [
+        {
+          "reasonCode": "offline_entitlement_expired",
+          "remediation": "refresh_online_session"
+        },
+        {
+          "reasonCode": "ok_mixed_entitlement_timestamps",
+          "remediation": "none"
+        }
+      ]
+    }
+  }
+]

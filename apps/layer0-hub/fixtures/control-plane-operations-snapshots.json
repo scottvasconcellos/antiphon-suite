@@ -1,0 +1,67 @@
+[
+  {
+    "name": "stable-desc-time-order-with-id-tiebreak",
+    "snapshot": {
+      "session": null,
+      "entitlements": [],
+      "offlineCache": {
+        "lastValidatedAt": null,
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 0,
+        "cacheState": "empty"
+      },
+      "transactions": [
+        {
+          "id": "tx-b",
+          "appId": "app.b",
+          "appName": "B",
+          "action": "install",
+          "status": "failed",
+          "message": "x",
+          "occurredAt": "2026-02-13T10:00:00.000Z"
+        },
+        {
+          "id": "tx-a",
+          "appId": "app.a",
+          "appName": "A",
+          "action": "update",
+          "status": "succeeded",
+          "message": "x",
+          "occurredAt": "2026-02-13T10:00:00.000Z"
+        },
+        {
+          "id": "tx-c",
+          "appId": "app.c",
+          "appName": "C",
+          "action": "install",
+          "status": "succeeded",
+          "message": "x",
+          "occurredAt": "2026-02-12T10:00:00.000Z"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "id": "tx-a",
+        "appId": "app.a",
+        "action": "update",
+        "status": "succeeded",
+        "occurredAt": "2026-02-13T10:00:00.000Z"
+      },
+      {
+        "id": "tx-b",
+        "appId": "app.b",
+        "action": "install",
+        "status": "failed",
+        "occurredAt": "2026-02-13T10:00:00.000Z"
+      },
+      {
+        "id": "tx-c",
+        "appId": "app.c",
+        "action": "install",
+        "status": "succeeded",
+        "occurredAt": "2026-02-12T10:00:00.000Z"
+      }
+    ]
+  }
+]

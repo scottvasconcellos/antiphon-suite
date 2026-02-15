@@ -1,0 +1,38 @@
+[
+  {
+    "name": "authorized-once-hub-removed-remains-runnable",
+    "seed": {
+      "session": {
+        "userId": "usr_gateproof",
+        "email": "gateproof@antiphon.audio",
+        "displayName": "Gate Proof",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [
+        {
+          "id": "antiphon.gateproof.app",
+          "name": "Gateproof App",
+          "version": "1.0.0",
+          "installedVersion": "1.0.0",
+          "owned": true,
+          "installState": "installed",
+          "updateAvailable": false
+        }
+      ],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 7,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "expected": {
+      "authorizedOnce": true,
+      "hubRemoved": true,
+      "trustArtifactValid": true,
+      "launchTokenRequiredForOfflineRun": false,
+      "offlineRunnableWithoutHub": true
+    }
+  }
+]

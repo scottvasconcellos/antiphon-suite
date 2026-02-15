@@ -1,0 +1,60 @@
+[
+  {
+    "name": "artifact-install-update-and-rollback-flow",
+    "input": {
+      "seed": {
+        "session": {
+          "userId": "usr_art_flow",
+          "email": "flow@antiphon.audio",
+          "displayName": "Flow",
+          "signedInAt": "2026-02-13T00:00:00.000Z"
+        },
+        "entitlements": [
+          {
+            "id": "antiphon.layer.alpha",
+            "name": "Alpha",
+            "version": "2.0.0",
+            "installedVersion": null,
+            "owned": true,
+            "installState": "not-installed",
+            "updateAvailable": false
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 7,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "appId": "antiphon.layer.alpha",
+      "installManifestRaw": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.alpha\",\n  \"appVersion\": \"2.0.0\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"README.txt\",\n      \"size\": 5,\n      \"sha256\": \"a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1\"\n    }\n  ]\n}",
+      "updateManifestRaw": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.alpha\",\n  \"appVersion\": \"2.0.1\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"README.txt\",\n      \"size\": 5,\n      \"sha256\": \"a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1\"\n    }\n  ]\n}",
+      "payloadFiles": {
+        "README.txt": "hello"
+      },
+      "targetDir": "/opt/antiphon/alpha"
+    },
+    "expected": {
+      "install": {
+        "reasonCode": "ok_install_completed",
+        "lifecycleTo": "Installed"
+      },
+      "update": {
+        "reasonCode": "ok_update_completed",
+        "lifecycleTo": "Ready"
+      },
+      "updateFailureRollback": {
+        "reasonCode": "artifact_partial_apply",
+        "rollbackReasonCode": "ok_update_rollback_applied",
+        "rollbackPrepared": true,
+        "finalInstalledVersion": "2.0.0"
+      },
+      "installFailureRollback": {
+        "reasonCode": "artifact_partial_apply",
+        "rollbackPrepared": true
+      }
+    }
+  }
+]

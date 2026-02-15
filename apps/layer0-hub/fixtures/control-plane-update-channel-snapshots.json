@@ -1,0 +1,50 @@
+[
+  {
+    "name": "stable-policy-prefers-highest-stable",
+    "input": {
+      "appId": "antiphon.app",
+      "allowedChannel": "stable",
+      "candidates": [
+        { "appId": "antiphon.app", "channel": "beta", "version": "2.0.0-beta.1" },
+        { "appId": "antiphon.app", "channel": "stable", "version": "1.9.0" },
+        { "appId": "antiphon.app", "channel": "stable", "version": "2.0.0" }
+      ]
+    },
+    "expected": {
+      "appId": "antiphon.app",
+      "selectedVersion": "2.0.0",
+      "reasonCode": "ok_update_candidate_selected",
+      "remediation": "none"
+    }
+  },
+  {
+    "name": "stable-policy-blocks-beta-only",
+    "input": {
+      "appId": "antiphon.app",
+      "allowedChannel": "stable",
+      "candidates": [
+        { "appId": "antiphon.app", "channel": "beta", "version": "2.0.0-beta.1" }
+      ]
+    },
+    "expected": {
+      "appId": "antiphon.app",
+      "selectedVersion": null,
+      "reasonCode": "blocked_channel_policy",
+      "remediation": "none"
+    }
+  },
+  {
+    "name": "no-candidate",
+    "input": {
+      "appId": "antiphon.app",
+      "allowedChannel": "stable",
+      "candidates": []
+    },
+    "expected": {
+      "appId": "antiphon.app",
+      "selectedVersion": null,
+      "reasonCode": "blocked_no_update_available",
+      "remediation": "none"
+    }
+  }
+]

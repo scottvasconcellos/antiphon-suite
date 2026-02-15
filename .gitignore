@@ -1,9 +1,14 @@
 node_modules
 dist
 coverage
+apps/layer0-hub/.tmp-structure-smoke
+apps/layer0-hub/.tmp-engine-smoke
+apps/layer0-hub/.tmp-control-plane-smoke
 .DS_Store
+**/.DS_Store
 .env*
 .npmrc
+design-system/_quarantine/
 *.pem
 *.key
 *.p12

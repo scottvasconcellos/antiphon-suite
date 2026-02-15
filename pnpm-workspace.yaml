@@ -1,5 +1,3 @@
 packages:
+  - "apps/*"
   - "packages/*"
-  - "antiphon-hub-v2"
-  - "shared/*"
-  - "docs"

@@ -1,0 +1,110 @@
+[
+  {
+    "name": "trust-install-boundary-proof",
+    "expected": {
+      "trustFailures": [
+        {
+          "case": "missing_manifest",
+          "reasonCode": "invalid_artifact_manifest_json",
+          "remediation": "rebuild_artifact_manifest"
+        },
+        {
+          "case": "malformed_manifest_shape",
+          "reasonCode": "invalid_artifact_manifest_shape",
+          "remediation": "rebuild_artifact_manifest"
+        },
+        {
+          "case": "unsupported_manifest_version",
+          "reasonCode": "unsupported_artifact_manifest_version",
+          "remediation": "upgrade_or_downgrade_to_supported_version"
+        },
+        {
+          "case": "signature_missing",
+          "reasonCode": "artifact_signature_missing",
+          "remediation": "reissue_artifact_signature"
+        },
+        {
+          "case": "signature_invalid",
+          "reasonCode": "artifact_signature_invalid",
+          "remediation": "reissue_artifact_signature"
+        },
+        {
+          "case": "expected_appid_mismatch",
+          "reasonCode": "artifact_app_version_mismatch",
+          "remediation": "retry_install"
+        },
+        {
+          "case": "expected_version_mismatch",
+          "reasonCode": "artifact_app_version_mismatch",
+          "remediation": "retry_install"
+        }
+      ],
+      "trustArtifactFailures": [
+        {
+          "case": "trust_artifact_missing",
+          "reasonCode": "invalid_trust_artifact_json",
+          "remediation": "rebuild_trust_artifact"
+        },
+        {
+          "case": "trust_artifact_unreadable",
+          "reasonCode": "invalid_trust_artifact_json",
+          "remediation": "rebuild_trust_artifact"
+        },
+        {
+          "case": "trust_artifact_expired_or_skewed",
+          "reasonCode": "trust_artifact_clock_skew",
+          "remediation": "refresh_online_session"
+        }
+      ],
+      "installBoundaryFailures": [
+        {
+          "case": "install_step_failure",
+          "reasonCode": "failed_install_step",
+          "lifecycleTo": "InstallFailed"
+        },
+        {
+          "case": "installer_install_non_zero_exit",
+          "reasonCode": "failed_install_non_zero",
+          "lifecycleTo": "InstallFailed"
+        },
+        {
+          "case": "installer_install_timeout_hung",
+          "reasonCode": "failed_install_timeout",
+          "lifecycleTo": "InstallFailed"
+        },
+        {
+          "case": "download_step_failure",
+          "reasonCode": "failed_download_step",
+          "lifecycleTo": "UpdateFailed"
+        },
+        {
+          "case": "download_gateway_failure",
+          "reasonCode": "failed_gateway",
+          "lifecycleTo": "UpdateFailed"
+        },
+        {
+          "case": "installer_non_zero_exit",
+          "reasonCode": "failed_update_non_zero",
+          "lifecycleTo": "UpdateFailed"
+        },
+        {
+          "case": "installer_timeout_hung",
+          "reasonCode": "failed_update_timeout",
+          "lifecycleTo": "UpdateFailed"
+        },
+        {
+          "case": "installer_partial_state_detected",
+          "reasonCode": "artifact_partial_apply",
+          "atomicGuaranteed": true,
+          "targetUnchanged": true
+        },
+        {
+          "case": "rollback_failure",
+          "reasonCode": "artifact_rollback_failed",
+          "atomicGuaranteed": false,
+          "rollbackAttempted": false
+        }
+      ]
+    }
+  }
+]

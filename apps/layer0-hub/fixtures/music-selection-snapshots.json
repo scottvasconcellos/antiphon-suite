@@ -1,0 +1,76 @@
+[
+  {
+    "name": "default_no_session",
+    "snapshot": {
+      "session": null,
+      "entitlements": [],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 21,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "requestedEngineId": null,
+    "expected": {
+      "engineId": "stub-music-intelligence-v1",
+      "source": "default",
+      "reason": "No session: use stub engine.",
+      "selectedEngineId": "stub-music-intelligence-v1",
+      "selectedCapabilitySummary": "global|strict|p100|fast",
+      "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json"
+    }
+  },
+  {
+    "name": "default_with_session",
+    "snapshot": {
+      "session": {
+        "userId": "usr_1",
+        "email": "producer@antiphon.audio",
+        "displayName": "Producer",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 21,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "requestedEngineId": null,
+    "expected": {
+      "engineId": "minimal-real-music-intelligence-v1",
+      "source": "default",
+      "reason": "Session present: use deterministic highest-priority eligible real engine.",
+      "selectedEngineId": "minimal-real-music-intelligence-v1",
+      "selectedCapabilitySummary": "global|strict|p10|standard",
+      "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json"
+    }
+  },
+  {
+    "name": "requested_unknown_fallback",
+    "snapshot": {
+      "session": null,
+      "entitlements": [],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 21,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "requestedEngineId": "unknown.engine.v1",
+    "expected": {
+      "engineId": "stub-music-intelligence-v1",
+      "source": "default",
+      "reason": "Requested engine id 'unknown.engine.v1' not found; applying deterministic default policy.",
+      "selectedEngineId": "stub-music-intelligence-v1",
+      "selectedCapabilitySummary": "global|strict|p100|fast",
+      "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json"
+    }
+  }
+]

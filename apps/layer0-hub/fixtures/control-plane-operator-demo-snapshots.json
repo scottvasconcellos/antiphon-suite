@@ -1,0 +1,41 @@
+[
+  {
+    "name": "operator-demo-default",
+    "expected": {
+      "chosenApps": [
+        "antiphon.layer.hello-world",
+        "antiphon.layer.rhythm"
+      ],
+      "entitlementOutcomes": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "outcome": "Authorized",
+          "reasonCode": "ok_version_supported"
+        },
+        {
+          "appId": "antiphon.layer.rhythm",
+          "outcome": "Denied",
+          "reasonCode": "blocked_not_owned"
+        }
+      ],
+      "installUpdateActions": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "selectedVersion": "1.1.0",
+          "reasonCode": "ok_update_candidate_selected"
+        },
+        {
+          "appId": "antiphon.layer.rhythm",
+          "selectedVersion": "1.1.0-beta.1",
+          "reasonCode": "ok_update_candidate_selected"
+        }
+      ],
+      "trustArtifact": {
+        "created": true,
+        "validated": true,
+        "hubOptionalRunnable": true
+      },
+      "proofMarker": "hub-optional-runnable:true"
+    }
+  }
+]

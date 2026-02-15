@@ -1,0 +1,53 @@
+[
+  {
+    "name": "long-run-proof",
+    "expected": {
+      "iterations": 40,
+      "stable": true,
+      "finalStateHash": "066297fc7dedf6e340cf5db57db3e3adb0f8b4b504b9f5edded46682c7b0c638",
+      "cycleDigest": "61880971044c595d745bb95b5e2cf3fdc0255dbb2e7401c6e215b628134c3b4c",
+      "reasonSignature": [
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded",
+        "ok_trust_artifact_loaded|trust_artifact_clock_skew|trust_artifact_clock_skew|ok_offline_entitlement_fresh|ok_cache_loaded"
+      ]
+    }
+  }
+]

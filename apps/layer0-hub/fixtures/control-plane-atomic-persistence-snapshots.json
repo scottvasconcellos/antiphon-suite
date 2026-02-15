@@ -1,0 +1,54 @@
+[
+  {
+    "name": "atomic-success",
+    "input": {
+      "state": { "current": "{\"v\":1}", "next": "{\"v\":2}", "temp": null },
+      "mode": "success"
+    },
+    "expected": {
+      "stored": "{\"v\":2}",
+      "temp": null,
+      "reasonCode": "ok_atomic_write",
+      "remediation": "none"
+    }
+  },
+  {
+    "name": "power-loss-before-rename",
+    "input": {
+      "state": { "current": "{\"v\":1}", "next": "{\"v\":2}", "temp": null },
+      "mode": "power_loss_before_rename"
+    },
+    "expected": {
+      "stored": "{\"v\":1}",
+      "temp": "{\"v\":2}",
+      "reasonCode": "atomic_write_power_loss",
+      "remediation": "retry_atomic_write"
+    }
+  },
+  {
+    "name": "concurrent-write",
+    "input": {
+      "state": { "current": "{\"v\":1}", "next": "{\"v\":2}", "temp": "{\"v\":x}" },
+      "mode": "concurrent_write_detected"
+    },
+    "expected": {
+      "stored": "{\"v\":1}",
+      "temp": "{\"v\":x}",
+      "reasonCode": "atomic_write_conflict",
+      "remediation": "retry_atomic_write"
+    }
+  },
+  {
+    "name": "corrupt-temp",
+    "input": {
+      "state": { "current": "{\"v\":1}", "next": "{\"v\":2}", "temp": "{\"v\":x}" },
+      "mode": "corrupted_temp_file"
+    },
+    "expected": {
+      "stored": "{\"v\":1}",
+      "temp": "{corrupt",
+      "reasonCode": "atomic_write_corrupt_temp",
+      "remediation": "rebuild_cache"
+    }
+  }
+]

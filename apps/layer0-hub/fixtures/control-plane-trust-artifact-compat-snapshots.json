@@ -1,0 +1,54 @@
+[
+  {
+    "name": "v1-valid-with-extra-fields",
+    "raw": "{\"schema\":\"antiphon.trust-artifact\",\"version\":1,\"appIds\":[\"b\",\"a\"],\"issuedAt\":\"2026-02-13T00:00:00.000Z\",\"extra\":\"ignored\"}",
+    "expected": {
+      "reasonCode": "ok_trust_artifact_loaded",
+      "remediation": "none",
+      "artifact": {
+        "schema": "antiphon.trust-artifact",
+        "version": 1,
+        "appIds": ["a", "b"],
+        "issuedAt": "2026-02-13T00:00:00.000Z"
+      }
+    }
+  },
+  {
+    "name": "unknown-version",
+    "raw": "{\"schema\":\"antiphon.trust-artifact\",\"version\":2,\"appIds\":[],\"issuedAt\":\"2026-02-13T00:00:00.000Z\"}",
+    "expected": {
+      "reasonCode": "unsupported_trust_artifact_version",
+      "remediation": "upgrade_or_downgrade_to_supported_version",
+      "artifact": null
+    }
+  },
+  {
+    "name": "corrupted-json",
+    "raw": "{broken",
+    "expected": {
+      "reasonCode": "invalid_trust_artifact_json",
+      "remediation": "rebuild_trust_artifact",
+      "artifact": null
+    }
+  },
+  {
+    "name": "partial-shape",
+    "raw": "{\"schema\":\"antiphon.trust-artifact\",\"version\":1}",
+    "expected": {
+      "reasonCode": "invalid_trust_artifact_shape",
+      "remediation": "rebuild_trust_artifact",
+      "artifact": null
+    }
+  },
+  {
+    "name": "clock-skew",
+    "raw": "{\"schema\":\"antiphon.trust-artifact\",\"version\":1,\"appIds\":[\"a\"],\"issuedAt\":\"2010-01-01T00:00:00.000Z\"}",
+    "nowIso": "2026-02-13T00:00:00.000Z",
+    "maxSkewSeconds": 86400,
+    "expected": {
+      "reasonCode": "trust_artifact_clock_skew",
+      "remediation": "refresh_online_session",
+      "artifact": null
+    }
+  }
+]

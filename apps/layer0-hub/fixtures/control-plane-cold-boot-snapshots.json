@@ -1,0 +1,34 @@
+[
+  {
+    "name": "empty-cache-to-authorized-launch-readiness",
+    "seed": {
+      "session": {
+        "userId": "usr_cold",
+        "email": "cold@antiphon.audio",
+        "displayName": "Cold",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [
+        {
+          "id": "antiphon.cold.app",
+          "name": "Cold App",
+          "version": "1.0.0",
+          "installedVersion": "1.0.0",
+          "owned": true,
+          "installState": "installed",
+          "updateAvailable": false
+        }
+      ],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 21,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "expected": {
+      "deterministic": true
+    }
+  }
+]

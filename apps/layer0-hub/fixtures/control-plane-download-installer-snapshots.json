@@ -1,0 +1,57 @@
+[
+  {
+    "name": "deterministic-provider-installer-output",
+    "snapshot": {
+      "session": {
+        "userId": "usr_dl",
+        "email": "dl@antiphon.audio",
+        "displayName": "DL",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [
+        {
+          "id": "antiphon.download.app",
+          "name": "Download App",
+          "version": "1.0.0",
+          "installedVersion": null,
+          "owned": true,
+          "installState": "not-installed",
+          "updateAvailable": false
+        }
+      ],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 21,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "outputs": {
+      "install:antiphon.download.app": {
+        "provider": {
+          "ok": true,
+          "reasonCode": "ok_download_ready",
+          "artifact": {
+            "filePath": "/tmp/antiphon/download-app.pkg",
+            "checksum": "sha256:demo123"
+          }
+        },
+        "installer": {
+          "ok": true,
+          "reasonCode": "ok_install_apply",
+          "app": {
+            "id": "antiphon.download.app",
+            "name": "Download App",
+            "version": "1.0.0",
+            "installedVersion": "1.0.0",
+            "owned": true,
+            "installState": "installed",
+            "updateAvailable": false
+          }
+        }
+      }
+    },
+    "expectedReasonCode": "ok_install_completed"
+  }
+]

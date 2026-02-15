@@ -1,31 +1,34 @@
 {
-  "name": "antiphon-suite",
-  "version": "0.1.0",
+  "name": "antiphon-suite-monorepo",
   "private": true,
+  "packageManager": "pnpm@10.28.2",
   "scripts": {
-    "preinstall": "test -f pnpm-workspace.yaml || (echo 'ERROR: pnpm-workspace.yaml missing' && exit 1)",
-    "build": "pnpm -r build",
-    "test": "pnpm -r test",
-    "dev:hub": "pnpm --filter @antiphon/hub dev",
-    "lint": "echo 'TODO: ESLint'",
-    "format": "echo 'TODO: Prettier'"
-  },
-  "dependencies": {
-    "@vitest/ui": "^4.0.18",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "typescript": "^5.9.3",
-    "vitest": "^1.6.1"
-  },
-  "devDependencies": {
-    "@types/react": "^19.2.13",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^4.7.0",
-    "vite": "^5.4.21"
-  },
-  "pnpm": {
-    "overrides": {
-      "esbuild": ">=0.25.0"
-    }
+    "dev": "pnpm -r --parallel --filter @antiphon/layer0-authority --filter @antiphon/layer0-hub dev",
+    "dev:hub": "pnpm --filter @antiphon/layer0-hub dev",
+    "dev:authority": "pnpm --filter @antiphon/layer0-authority dev",
+    "dev:figma-bundle": "pnpm --filter @antiphon/figma-bundle-generator dev",
+    "build": "pnpm --filter @antiphon/layer0-authority build && pnpm --filter @antiphon/layer0-hub build",
+    "typecheck": "pnpm --filter @antiphon/layer0-authority typecheck && pnpm --filter @antiphon/layer0-hub typecheck",
+    "smoke": "node scripts/control-plane-smoke.mjs && node scripts/foundation-smoke.mjs",
+    "test:control-plane": "node scripts/control-plane-smoke.mjs",
+    "test": "node scripts/foundation-smoke.mjs",
+    "gate": "node scripts/gate.mjs",
+    "demo:hub": "node scripts/demo-hub.mjs",
+    "demo:layer": "node scripts/demo-layer.mjs",
+    "proof:layer-app": "node scripts/proof-layer-app.mjs",
+    "loop:layer-app": "node scripts/layer-app-install-loop.mjs",
+    "loop:layer-app:multi": "node scripts/layer-app-install-loop.mjs --multi",
+    "demo": "node scripts/demo.mjs",
+    "rc-check": "node scripts/rc-check.mjs",
+    "rc-scope-proof": "node scripts/rc-scope-proof.mjs",
+    "proof:legacy-staged-guard": "node scripts/legacy-staged-guard-proof.mjs",
+    "proof:scope-governance": "node scripts/scope-governance-proof.mjs",
+    "proof:trust-install-boundary": "node scripts/proof-trust-install-boundary.mjs",
+    "proof:long-run-determinism": "node scripts/proof-long-run-determinism.mjs",
+    "check:operator-contract": "node scripts/operator-contract-check.mjs",
+    "rc0-release": "node scripts/rc0-release-dry-run.mjs",
+    "rc0-tag": "node scripts/rc0-tag.mjs",
+    "rc0-tag:verify": "node scripts/rc0-tag.mjs --verify",
+    "rc0-finalize": "node scripts/rc0-finalize.mjs"
   }
 }

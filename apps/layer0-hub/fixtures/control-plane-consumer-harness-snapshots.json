@@ -1,0 +1,97 @@
+[
+  {
+    "name": "public-api-consumer-online-and-offline",
+    "input": {
+      "entitlementInput": {
+        "identity": { "authenticated": true },
+        "license": { "owned": true, "revoked": false },
+        "offlineCache": { "cacheState": "valid", "offlineDaysRemaining": 7 }
+      },
+      "installSeed": {
+        "session": {
+          "userId": "usr_consumer",
+          "email": "consumer@antiphon.audio",
+          "displayName": "Consumer",
+          "signedInAt": "2026-02-13T00:00:00.000Z"
+        },
+        "entitlements": [
+          {
+            "id": "antiphon.consumer.app",
+            "name": "Consumer App",
+            "version": "1.0.0",
+            "installedVersion": null,
+            "owned": true,
+            "installState": "not-installed",
+            "updateAvailable": false
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 7,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "installAction": "install",
+      "installAppId": "antiphon.consumer.app",
+      "installStepResult": {
+        "ok": true,
+        "app": {
+          "id": "antiphon.consumer.app",
+          "name": "Consumer App",
+          "version": "1.0.0",
+          "installedVersion": "1.0.0",
+          "owned": true,
+          "installState": "installed",
+          "updateAvailable": false
+        }
+      },
+      "launchClaims": {
+        "appId": "antiphon.consumer.app",
+        "userId": "usr_consumer",
+        "entitlementOutcome": "Authorized",
+        "issuedAt": 1707782400,
+        "expiresAt": 1707786000
+      },
+      "launchSecret": "consumer-secret",
+      "launchVerifyAt": 1707782500,
+      "trustSeed": {
+        "session": {
+          "userId": "usr_consumer",
+          "email": "consumer@antiphon.audio",
+          "displayName": "Consumer",
+          "signedInAt": "2026-02-13T00:00:00.000Z"
+        },
+        "entitlements": [
+          {
+            "id": "antiphon.consumer.app",
+            "name": "Consumer App",
+            "version": "1.0.0",
+            "installedVersion": "1.0.0",
+            "owned": true,
+            "installState": "installed",
+            "updateAvailable": false
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 7,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      }
+    },
+    "expected": {
+      "entitlement": { "outcome": "Authorized", "reason": "owned_active_identity" },
+      "installReason": "ok_install_completed",
+      "launchValid": true,
+      "trustArtifact": {
+        "artifactRestoredAfterRestart": true,
+        "runnableWithoutHub": true,
+        "deterministic": true
+      }
+    }
+  }
+]

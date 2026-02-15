@@ -1,0 +1,76 @@
+[
+  {
+    "name": "real-layer-app-install-update-rollback-proof",
+    "input": {
+      "seed": {
+        "session": {
+          "userId": "usr_layer_real",
+          "email": "real@antiphon.audio",
+          "displayName": "Real",
+          "signedInAt": "2026-02-13T00:00:00.000Z"
+        },
+        "entitlements": [
+          {
+            "id": "antiphon.layer.hello-world",
+            "name": "Hello World",
+            "version": "1.0.0",
+            "installedVersion": null,
+            "owned": true,
+            "installState": "not-installed",
+            "updateAvailable": false
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 7,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "appId": "antiphon.layer.hello-world",
+      "installManifestRaw": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.hello-world\",\n  \"appVersion\": \"1.0.0\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"app.txt\",\n      \"size\": 19,\n      \"sha256\": \"a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666\"\n    }\n  ],\n  \"signature\": {\n    \"keyId\": \"layer-hello-k1\",\n    \"algorithm\": \"ed25519\",\n    \"signature\": \"77933ff1\"\n  }\n}\n",
+      "updateManifestRaw": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.hello-world\",\n  \"appVersion\": \"1.1.0\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"app.txt\",\n      \"size\": 19,\n      \"sha256\": \"48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee\"\n    }\n  ],\n  \"signature\": {\n    \"keyId\": \"layer-hello-k1\",\n    \"algorithm\": \"ed25519\",\n    \"signature\": \"73d381a2\"\n  }\n}\n",
+      "payloadFilesV1": {
+        "app.txt": "hello layer app v1\n"
+      },
+      "payloadFilesV2": {
+        "app.txt": "hello layer app v2\n"
+      },
+      "targetDir": "/opt/antiphon/hello-world",
+      "nowIso": "2026-02-13T00:00:00.000Z"
+    },
+    "expected": {
+      "install": {
+        "reasonCode": "ok_install_completed",
+        "lifecycleTo": "Installed"
+      },
+      "launchAfterInstall": {
+        "ready": true,
+        "status": "issued_verified",
+        "reason": "verified"
+      },
+      "update": {
+        "reasonCode": "ok_update_completed",
+        "lifecycleTo": "Ready"
+      },
+      "launchAfterUpdate": {
+        "ready": true,
+        "status": "issued_verified",
+        "reason": "verified"
+      },
+      "rollback": {
+        "reasonCode": "artifact_partial_apply",
+        "rollbackReasonCode": "ok_update_rollback_applied",
+        "finalInstalledVersion": "1.0.0"
+      },
+      "trustEnvelopeOps": [
+        "entitlementDecision",
+        "installUpdateAuthority",
+        "launchTokenBoundary",
+        "offlineCache"
+      ],
+      "hubOptional": true
+    }
+  }
+]

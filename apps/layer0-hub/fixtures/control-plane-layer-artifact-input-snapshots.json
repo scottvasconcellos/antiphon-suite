@@ -1,0 +1,22 @@
+[
+  {
+    "name": "hello-world-layer-artifact-inputs-stable",
+    "artifactRepo": "apps/layer-app-hello-world/artifacts",
+    "install": {
+      "manifestPath": "apps/layer-app-hello-world/artifacts/v1/manifest.json",
+      "payloadPath": "apps/layer-app-hello-world/artifacts/v1/app.txt"
+    },
+    "update": {
+      "manifestPath": "apps/layer-app-hello-world/artifacts/v2/manifest.json",
+      "payloadPath": "apps/layer-app-hello-world/artifacts/v2/app.txt"
+    },
+    "expected": {
+      "appId": "antiphon.layer.hello-world",
+      "installVersion": "1.0.0",
+      "updateVersion": "1.1.0",
+      "channel": "stable",
+      "installDigest": "a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666",
+      "updateDigest": "48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee"
+    }
+  }
+]

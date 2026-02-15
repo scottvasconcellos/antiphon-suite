@@ -1,0 +1,67 @@
+[
+  {
+    "name": "atomic-success-no-rollback",
+    "input": {
+      "appId": "antiphon.layer.alpha",
+      "manifestRaw": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.alpha\",\n  \"appVersion\": \"2.0.0\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"README.txt\",\n      \"size\": 5,\n      \"sha256\": \"a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1\"\n    }\n  ]\n}",
+      "payloadFiles": { "README.txt": "hello" },
+      "targetDir": "/opt/antiphon/alpha",
+      "fileSystem": { "/opt/antiphon/alpha/old.txt": "old" }
+    },
+    "expected": {
+      "applied": {
+        "ok": true,
+        "reasonCode": "ok_artifact_apply_completed"
+      },
+      "atomicity": {
+        "guaranteed": true,
+        "rollbackAttempted": false,
+        "rollbackSucceeded": true
+      }
+    }
+  },
+  {
+    "name": "partial-apply-rollback-success",
+    "input": {
+      "appId": "antiphon.layer.alpha",
+      "manifestRaw": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.alpha\",\n  \"appVersion\": \"2.0.0\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"README.txt\",\n      \"size\": 5,\n      \"sha256\": \"a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1\"\n    }\n  ]\n}",
+      "payloadFiles": { "README.txt": "hello" },
+      "targetDir": "/opt/antiphon/alpha",
+      "fileSystem": { "/opt/antiphon/alpha/old.txt": "old" },
+      "inject": { "mode": "partial_apply" }
+    },
+    "expected": {
+      "applied": {
+        "ok": false,
+        "reasonCode": "artifact_partial_apply"
+      },
+      "atomicity": {
+        "guaranteed": true,
+        "rollbackAttempted": true,
+        "rollbackSucceeded": true
+      }
+    }
+  },
+  {
+    "name": "rollback-failure-breaks-atomicity",
+    "input": {
+      "appId": "antiphon.layer.alpha",
+      "manifestRaw": "{\n  \"schema\": \"antiphon.artifact-manifest\",\n  \"version\": 1,\n  \"appId\": \"antiphon.layer.alpha\",\n  \"appVersion\": \"2.0.0\",\n  \"channel\": \"stable\",\n  \"digestAlgorithm\": \"sha256\",\n  \"files\": [\n    {\n      \"path\": \"README.txt\",\n      \"size\": 5,\n      \"sha256\": \"a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1a82fb4a1\"\n    }\n  ]\n}",
+      "payloadFiles": { "README.txt": "hello" },
+      "targetDir": "/opt/antiphon/alpha",
+      "fileSystem": { "/opt/antiphon/alpha/old.txt": "old" },
+      "inject": { "mode": "rollback_fail" }
+    },
+    "expected": {
+      "applied": {
+        "ok": false,
+        "reasonCode": "artifact_rollback_failed"
+      },
+      "atomicity": {
+        "guaranteed": false,
+        "rollbackAttempted": false,
+        "rollbackSucceeded": false
+      }
+    }
+  }
+]

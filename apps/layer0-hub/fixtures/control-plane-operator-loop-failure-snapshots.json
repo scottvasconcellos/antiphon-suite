@@ -1,0 +1,178 @@
+[
+  {
+    "name": "operator-loop-failure-bad_manifest",
+    "expected": {
+      "installStoreLayout": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "versions": []
+        }
+      ],
+      "activeSelectionState": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "selectedVersion": "1.1.0",
+          "reasonCode": "ok_update_candidate_selected"
+        }
+      ],
+      "runPlan": {
+        "apps": [
+          {
+            "appId": "antiphon.layer.hello-world",
+            "selectedVersion": "1.1.0",
+            "runnable": false,
+            "hubOptional": true
+          }
+        ],
+        "failures": [
+          {
+            "appId": "antiphon.layer.hello-world",
+            "version": "1.0.0",
+            "reasonCode": "invalid_artifact_manifest_json",
+            "remediation": "rebuild_artifact_manifest"
+          },
+          {
+            "appId": "antiphon.layer.hello-world",
+            "version": "1.1.0",
+            "reasonCode": "invalid_artifact_manifest_json",
+            "remediation": "rebuild_artifact_manifest"
+          }
+        ],
+        "entitlement": [
+          {
+            "appId": "antiphon.layer.hello-world",
+            "outcome": "Authorized",
+            "reasonCode": "ok_version_supported",
+            "remediation": "none"
+          }
+        ]
+      },
+      "rollbackPlan": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "reasonCode": "blocked_no_last_known_good",
+          "finalInstalledVersion": null
+        }
+      ],
+      "rollbackMetadataCount": 2,
+      "persistenceStableHash": "{\"entitlementDecision\":null,\"installState\":[],\"offlineCache\":{\"cacheState\":\"valid\",\"lastValidatedAt\":\"2026-02-13T00:00:00.000Z\",\"maxOfflineDays\":21,\"offlineDaysRemaining\":7},\"rollbackMetadata\":[{\"appId\":\"antiphon.layer.hello-world\",\"manifestVersion\":\"1.0.0\",\"previousTargetHash\":\"n/a\",\"rollbackPrepared\":true},{\"appId\":\"antiphon.layer.hello-world\",\"manifestVersion\":\"1.1.0\",\"previousTargetHash\":\"n/a\",\"rollbackPrepared\":true}],\"schema\":\"antiphon.control-plane-cache\",\"version\":1}"
+    }
+  },
+  {
+    "name": "operator-loop-failure-trust_fail",
+    "expected": {
+      "installStoreLayout": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "versions": []
+        }
+      ],
+      "activeSelectionState": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "selectedVersion": "1.1.0",
+          "reasonCode": "ok_update_candidate_selected"
+        }
+      ],
+      "runPlan": {
+        "apps": [
+          {
+            "appId": "antiphon.layer.hello-world",
+            "selectedVersion": "1.1.0",
+            "runnable": false,
+            "hubOptional": true
+          }
+        ],
+        "failures": [
+          {
+            "appId": "antiphon.layer.hello-world",
+            "version": "1.0.0",
+            "reasonCode": "artifact_signature_invalid",
+            "remediation": "reissue_artifact_signature"
+          },
+          {
+            "appId": "antiphon.layer.hello-world",
+            "version": "1.1.0",
+            "reasonCode": "artifact_signature_invalid",
+            "remediation": "reissue_artifact_signature"
+          }
+        ],
+        "entitlement": [
+          {
+            "appId": "antiphon.layer.hello-world",
+            "outcome": "Authorized",
+            "reasonCode": "ok_version_supported",
+            "remediation": "none"
+          }
+        ]
+      },
+      "rollbackPlan": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "reasonCode": "blocked_no_last_known_good",
+          "finalInstalledVersion": null
+        }
+      ],
+      "rollbackMetadataCount": 2,
+      "persistenceStableHash": "{\"entitlementDecision\":null,\"installState\":[],\"offlineCache\":{\"cacheState\":\"valid\",\"lastValidatedAt\":\"2026-02-13T00:00:00.000Z\",\"maxOfflineDays\":21,\"offlineDaysRemaining\":7},\"rollbackMetadata\":[{\"appId\":\"antiphon.layer.hello-world\",\"manifestVersion\":\"1.0.0\",\"previousTargetHash\":\"n/a\",\"rollbackPrepared\":true},{\"appId\":\"antiphon.layer.hello-world\",\"manifestVersion\":\"1.1.0\",\"previousTargetHash\":\"n/a\",\"rollbackPrepared\":true}],\"schema\":\"antiphon.control-plane-cache\",\"version\":1}"
+    }
+  },
+  {
+    "name": "operator-loop-failure-partial_install",
+    "expected": {
+      "installStoreLayout": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "versions": [
+            {
+              "version": "1.0.0",
+              "digest": "a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666a9b2d666"
+            }
+          ]
+        }
+      ],
+      "activeSelectionState": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "selectedVersion": "1.1.0",
+          "reasonCode": "ok_update_candidate_selected"
+        }
+      ],
+      "runPlan": {
+        "apps": [
+          {
+            "appId": "antiphon.layer.hello-world",
+            "selectedVersion": "1.1.0",
+            "runnable": false,
+            "hubOptional": true
+          }
+        ],
+        "failures": [
+          {
+            "appId": "antiphon.layer.hello-world",
+            "version": "1.1.0",
+            "reasonCode": "artifact_partial_apply",
+            "remediation": "retry_update"
+          }
+        ],
+        "entitlement": [
+          {
+            "appId": "antiphon.layer.hello-world",
+            "outcome": "Authorized",
+            "reasonCode": "ok_version_supported",
+            "remediation": "none"
+          }
+        ]
+      },
+      "rollbackPlan": [
+        {
+          "appId": "antiphon.layer.hello-world",
+          "reasonCode": "blocked_no_last_known_good",
+          "finalInstalledVersion": null
+        }
+      ],
+      "rollbackMetadataCount": 1,
+      "persistenceStableHash": "{\"entitlementDecision\":null,\"installState\":[],\"offlineCache\":{\"cacheState\":\"valid\",\"lastValidatedAt\":\"2026-02-13T00:00:00.000Z\",\"maxOfflineDays\":21,\"offlineDaysRemaining\":7},\"rollbackMetadata\":[{\"appId\":\"antiphon.layer.hello-world\",\"manifestVersion\":\"1.1.0\",\"previousTargetHash\":\"n/a\",\"rollbackPrepared\":true}],\"schema\":\"antiphon.control-plane-cache\",\"version\":1}"
+    }
+  }
+]

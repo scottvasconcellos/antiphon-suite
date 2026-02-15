@@ -1,0 +1,36 @@
+[
+  {
+    "name": "trust-artifact-survives-restart-and-enables-hub-optional-run",
+    "seed": {
+      "session": {
+        "userId": "usr_artifact",
+        "email": "artifact@antiphon.audio",
+        "displayName": "Artifact",
+        "signedInAt": "2026-02-13T00:00:00.000Z"
+      },
+      "entitlements": [
+        {
+          "id": "antiphon.artifact.app",
+          "name": "Artifact App",
+          "version": "1.0.0",
+          "installedVersion": "1.0.0",
+          "owned": true,
+          "installState": "installed",
+          "updateAvailable": false
+        }
+      ],
+      "offlineCache": {
+        "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+        "maxOfflineDays": 21,
+        "offlineDaysRemaining": 7,
+        "cacheState": "valid"
+      },
+      "transactions": []
+    },
+    "expected": {
+      "artifactRestoredAfterRestart": true,
+      "runnableWithoutHub": true,
+      "deterministic": true
+    }
+  }
+]

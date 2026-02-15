@@ -1,0 +1,20 @@
+{
+  "schema": "antiphon.artifact-manifest",
+  "version": 1,
+  "appId": "antiphon.layer.hello-world",
+  "appVersion": "1.1.0",
+  "channel": "stable",
+  "digestAlgorithm": "sha256",
+  "files": [
+    {
+      "path": "app.txt",
+      "size": 19,
+      "sha256": "48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee48ab81ee"
+    }
+  ],
+  "signature": {
+    "keyId": "layer-hello-k1",
+    "algorithm": "ed25519",
+    "signature": "73d381a2"
+  }
+}

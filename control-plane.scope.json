@@ -1,0 +1,48 @@
+{
+  "include": [
+    "CHANGELOG.md",
+    "README.md",
+    "RELEASE_NOTES_RC0.md",
+    "apps/layer-app-hello-world/artifacts",
+    "apps/layer-app-rhythm/artifacts",
+    "apps/layer0-hub/fixtures/control-plane-*.json",
+    "apps/layer0-hub/fixtures/operator-contract-*.json",
+    "apps/layer0-hub/fixtures/rc0-release-*.json",
+    "apps/layer0-hub/fixtures/version.json",
+    "apps/layer0-hub/src/domain",
+    "apps/layer0-hub/src/services",
+    "control-plane.scope.ack.json",
+    "control-plane.scope.json",
+    "package.json",
+    "scripts"
+  ],
+  "exclude": [
+    "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+    "apps/layer0-hub/fixtures/hub-view-model-snapshots.json",
+    "apps/layer0-hub/fixtures/music-*.json",
+    "apps/layer0-hub/src/domain/hubMusicOrchestrator.ts",
+    "apps/layer0-hub/src/domain/minimalRealMusicIntelligenceEngine.ts",
+    "apps/layer0-hub/src/domain/musicEngineContracts.ts",
+    "apps/layer0-hub/src/domain/musicEngineRegistry.ts",
+    "apps/layer0-hub/src/domain/musicIntelligenceEngine.ts",
+    "apps/layer0-hub/src/domain/musicTelemetryContracts.ts",
+    "apps/layer0-hub/src/domain/uiMusicProjectionAdapter.ts",
+    "apps/layer0-hub/src/domain/ruleBasedMusicIntelligenceEngine.ts",
+    "apps/layer0-hub/src/services/musicTelemetryDto.ts",
+    "docs/engine"
+  ],
+  "frozenLegacyDeny": [
+    "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+    "apps/layer0-hub/fixtures/music-*.json",
+    "apps/layer0-hub/src/domain/hubMusicOrchestrator.ts",
+    "apps/layer0-hub/src/domain/minimalRealMusicIntelligenceEngine.ts",
+    "apps/layer0-hub/src/domain/musicEngineContracts.ts",
+    "apps/layer0-hub/src/domain/musicEngineRegistry.ts",
+    "apps/layer0-hub/src/domain/musicIntelligenceEngine.ts",
+    "apps/layer0-hub/src/domain/musicTelemetryContracts.ts",
+    "apps/layer0-hub/src/domain/uiMusicProjectionAdapter.ts",
+    "apps/layer0-hub/src/domain/ruleBasedMusicIntelligenceEngine.ts",
+    "apps/layer0-hub/src/services/musicTelemetryDto.ts",
+    "docs/engine/*"
+  ]
+}

@@ -1,0 +1,115 @@
+[
+  {
+    "name": "install-success-owned-app",
+    "input": {
+      "action": "install",
+      "appId": "antiphon.a-app",
+      "snapshot": {
+        "session": null,
+        "entitlements": [
+          {
+            "id": "antiphon.a-app",
+            "name": "A App",
+            "version": "1.0.0",
+            "installedVersion": null,
+            "owned": true,
+            "installState": "not-installed",
+            "updateAvailable": false
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 20,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "stepResult": {
+        "ok": true,
+        "app": {
+          "id": "antiphon.a-app",
+          "name": "A App",
+          "version": "1.0.0",
+          "installedVersion": "1.0.0",
+          "owned": true,
+          "installState": "installed",
+          "updateAvailable": false
+        }
+      }
+    },
+    "expectedReasonCode": "ok_install_completed",
+    "expectedOk": true,
+    "expectedLifecycleTo": "Installed"
+  },
+  {
+    "name": "update-blocked-when-not-installed",
+    "input": {
+      "action": "update",
+      "appId": "antiphon.a-app",
+      "snapshot": {
+        "session": null,
+        "entitlements": [
+          {
+            "id": "antiphon.a-app",
+            "name": "A App",
+            "version": "1.0.0",
+            "installedVersion": null,
+            "owned": true,
+            "installState": "not-installed",
+            "updateAvailable": true
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 20,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "stepResult": {
+        "ok": false,
+        "reasonCode": "failed_update_step"
+      }
+    },
+    "expectedReasonCode": "blocked_not_installed",
+    "expectedOk": false,
+    "expectedLifecycleTo": "NotInstalled"
+  },
+  {
+    "name": "update-failed-step-has-deterministic-reason",
+    "input": {
+      "action": "update",
+      "appId": "antiphon.a-app",
+      "snapshot": {
+        "session": null,
+        "entitlements": [
+          {
+            "id": "antiphon.a-app",
+            "name": "A App",
+            "version": "1.0.0",
+            "installedVersion": "1.0.0",
+            "owned": true,
+            "installState": "installed",
+            "updateAvailable": true
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 20,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "stepResult": {
+        "ok": false,
+        "reasonCode": "failed_update_step"
+      }
+    },
+    "expectedReasonCode": "failed_update_step",
+    "expectedOk": false,
+    "expectedLifecycleTo": "UpdateFailed"
+  }
+]

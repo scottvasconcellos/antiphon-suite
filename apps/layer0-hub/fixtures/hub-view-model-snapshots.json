@@ -1,0 +1,309 @@
+[
+  {
+    "name": "ready_stub_selected_default",
+    "hubState": {
+      "snapshot": {
+        "session": null,
+        "entitlements": [],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 21,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "ready",
+        "message": "ok"
+      }
+    },
+    "intelligence": {
+      "status": "ready",
+      "message": "Engine stub-music-intelligence-v1 evaluated.",
+      "engineId": "stub-music-intelligence-v1",
+      "engineName": "Stub Music Intelligence",
+      "engineVersion": "1.0.0",
+      "selectionSource": "default",
+      "selectionReason": "No session: use stub engine.",
+      "selectedEngineId": "stub-music-intelligence-v1",
+      "selectedCapabilitySummary": "global|strict|p100|fast",
+      "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "projection": {
+        "lane": "authenticate",
+        "headline": "Authenticate to continue",
+        "detail": "Session required to unlock ownership-aware tools.",
+        "confidencePct": 92
+      }
+    },
+    "expected": {
+      "statusLine": "Signed out: offline cache remains available for existing installs.",
+      "installedCount": 0,
+      "ownedCount": 0,
+      "pendingUpdates": 0,
+      "intelligenceHeadline": "Authenticate to continue",
+      "intelligenceDetail": "Session required to unlock ownership-aware tools.",
+      "intelligenceEngineId": "stub-music-intelligence-v1",
+      "intelligenceEngineName": "Stub Music Intelligence",
+      "intelligenceEngineVersion": "1.0.0",
+      "intelligenceSelectionSource": "default",
+      "intelligenceSelectionReason": "No session: use stub engine.",
+      "selectedCapabilitySummary": "global|strict|p100|fast",
+      "capabilityMatrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "capabilityMatrix": [
+        {
+          "engineId": "minimal-real-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "standard"
+        },
+        {
+          "engineId": "rule-based-music-intelligence-v1",
+          "domainScope": "arrangement",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "fast"
+        },
+        {
+          "engineId": "stub-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 100,
+          "latencyTier": "fast"
+        }
+      ]
+    }
+  },
+  {
+    "name": "ready_real_selected_default",
+    "hubState": {
+      "snapshot": {
+        "session": {
+          "userId": "usr_1",
+          "email": "producer@antiphon.audio",
+          "displayName": "Producer",
+          "signedInAt": "2026-02-13T00:00:00.000Z"
+        },
+        "entitlements": [
+          {
+            "id": "app.1",
+            "name": "App One",
+            "version": "1.0.0",
+            "installedVersion": null,
+            "owned": true,
+            "installState": "not-installed",
+            "updateAvailable": false
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 21,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "ready",
+        "message": "ok"
+      }
+    },
+    "intelligence": {
+      "status": "ready",
+      "message": "Engine minimal-real-music-intelligence-v1 evaluated.",
+      "engineId": "minimal-real-music-intelligence-v1",
+      "engineName": "Minimal Real Music Intelligence",
+      "engineVersion": "1.0.0",
+      "selectionSource": "default",
+      "selectionReason": "Session present: use deterministic highest-priority eligible real engine.",
+      "selectedEngineId": "minimal-real-music-intelligence-v1",
+      "selectedCapabilitySummary": "global|strict|p10|standard",
+      "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "projection": {
+        "lane": "install",
+        "headline": "Install recommended tools",
+        "detail": "Install owned tools to unlock full production flow.",
+        "confidencePct": 82
+      }
+    },
+    "expected": {
+      "statusLine": "Signed in: ownership state synced and ready for install authority actions.",
+      "installedCount": 0,
+      "ownedCount": 1,
+      "pendingUpdates": 0,
+      "intelligenceHeadline": "Install recommended tools",
+      "intelligenceDetail": "Install owned tools to unlock full production flow.",
+      "intelligenceEngineId": "minimal-real-music-intelligence-v1",
+      "intelligenceEngineName": "Minimal Real Music Intelligence",
+      "intelligenceEngineVersion": "1.0.0",
+      "intelligenceSelectionSource": "default",
+      "intelligenceSelectionReason": "Session present: use deterministic highest-priority eligible real engine.",
+      "selectedCapabilitySummary": "global|strict|p10|standard",
+      "capabilityMatrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "capabilityMatrix": [
+        {
+          "engineId": "minimal-real-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "standard"
+        },
+        {
+          "engineId": "rule-based-music-intelligence-v1",
+          "domainScope": "arrangement",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "fast"
+        },
+        {
+          "engineId": "stub-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 100,
+          "latencyTier": "fast"
+        }
+      ]
+    }
+  },
+  {
+    "name": "ready_stub_selected_requested",
+    "hubState": {
+      "snapshot": {
+        "session": {
+          "userId": "usr_2",
+          "email": "producer@antiphon.audio",
+          "displayName": "Producer",
+          "signedInAt": "2026-02-13T00:00:00.000Z"
+        },
+        "entitlements": [],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 21,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "ready",
+        "message": "ok"
+      }
+    },
+    "intelligence": {
+      "status": "ready",
+      "message": "Engine stub-music-intelligence-v1 evaluated.",
+      "engineId": "stub-music-intelligence-v1",
+      "engineName": "Stub Music Intelligence",
+      "engineVersion": "1.0.0",
+      "selectionSource": "requested",
+      "selectionReason": "Requested engine id 'stub-music-intelligence-v1' was found.",
+      "selectedEngineId": "stub-music-intelligence-v1",
+      "selectedCapabilitySummary": "global|strict|p100|fast",
+      "matrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "projection": {
+        "lane": "install",
+        "headline": "Install recommended tools",
+        "detail": "No owned tools detected yet. Start by installing your first app.",
+        "confidencePct": 80
+      }
+    },
+    "expected": {
+      "statusLine": "Signed in: ownership state synced and ready for install authority actions.",
+      "installedCount": 0,
+      "ownedCount": 0,
+      "pendingUpdates": 0,
+      "intelligenceHeadline": "Install recommended tools",
+      "intelligenceDetail": "No owned tools detected yet. Start by installing your first app.",
+      "intelligenceEngineId": "stub-music-intelligence-v1",
+      "intelligenceEngineName": "Stub Music Intelligence",
+      "intelligenceEngineVersion": "1.0.0",
+      "intelligenceSelectionSource": "requested",
+      "intelligenceSelectionReason": "Requested engine id 'stub-music-intelligence-v1' was found.",
+      "selectedCapabilitySummary": "global|strict|p100|fast",
+      "capabilityMatrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "capabilityMatrix": [
+        {
+          "engineId": "minimal-real-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "standard"
+        },
+        {
+          "engineId": "rule-based-music-intelligence-v1",
+          "domainScope": "arrangement",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "fast"
+        },
+        {
+          "engineId": "stub-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 100,
+          "latencyTier": "fast"
+        }
+      ]
+    }
+  },
+  {
+    "name": "runtime_error_fallback",
+    "hubState": {
+      "snapshot": {
+        "session": null,
+        "entitlements": [],
+        "offlineCache": {
+          "lastValidatedAt": null,
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 0,
+          "cacheState": "empty"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "runtime-error",
+        "message": "Authority unreachable"
+      }
+    },
+    "intelligence": null,
+    "expected": {
+      "statusLine": "Authority unreachable",
+      "installedCount": 0,
+      "ownedCount": 0,
+      "pendingUpdates": 0,
+      "intelligenceHeadline": "Music Intelligence offline",
+      "intelligenceDetail": "Unavailable while runtime is in error state.",
+      "intelligenceEngineId": "none",
+      "intelligenceEngineName": "none",
+      "intelligenceEngineVersion": "0.0.0",
+      "intelligenceSelectionSource": "unavailable",
+      "intelligenceSelectionReason": "No selection.",
+      "selectedCapabilitySummary": "none",
+      "capabilityMatrixSnapshotRef": "apps/layer0-hub/fixtures/engine-capability-matrix-snapshots.json",
+      "capabilityMatrix": [
+        {
+          "engineId": "minimal-real-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "standard"
+        },
+        {
+          "engineId": "rule-based-music-intelligence-v1",
+          "domainScope": "arrangement",
+          "determinismLevel": "strict",
+          "fallbackPriority": 10,
+          "latencyTier": "fast"
+        },
+        {
+          "engineId": "stub-music-intelligence-v1",
+          "domainScope": "global",
+          "determinismLevel": "strict",
+          "fallbackPriority": 100,
+          "latencyTier": "fast"
+        }
+      ]
+    }
+  }
+]

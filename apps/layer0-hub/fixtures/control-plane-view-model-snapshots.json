@@ -1,0 +1,227 @@
+[
+  {
+    "name": "authorized-session-ready",
+    "hubState": {
+      "snapshot": {
+        "session": {
+          "userId": "usr_1",
+          "email": "producer@antiphon.audio",
+          "displayName": "Producer",
+          "signedInAt": "2026-02-13T00:00:00.000Z"
+        },
+        "entitlements": [
+          {
+            "id": "antiphon.a-app",
+            "name": "A App",
+            "version": "1.0.0",
+            "installedVersion": "1.0.0",
+            "owned": true,
+            "installState": "installed",
+            "updateAvailable": false
+          }
+        ],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 20,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "ready",
+        "message": "Hub connected to entitlement authority.",
+        "code": "ok_bootstrap_synced"
+      }
+    },
+    "expected": {
+      "entitlement": {
+        "outcome": "Authorized",
+        "reason": "owned_active_identity"
+      },
+      "installUpdate": {
+        "state": "ready",
+        "reasonCode": "ok_bootstrap_synced"
+      },
+      "launchToken": {
+        "ready": true,
+        "status": "issued_verified",
+        "reason": "verified"
+      },
+      "persistedCache": {
+        "schema": "antiphon.control-plane-cache",
+        "version": 1,
+        "restorable": true
+      },
+      "launchReadiness": [
+        {
+          "appId": "antiphon.a-app",
+          "ready": true,
+          "reason": "token_issued"
+        }
+      ],
+      "trustEnvelope": [
+        {
+          "operation": "entitlementDecision",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 25,
+          "failureBudgetPct": 0.1
+        },
+        {
+          "operation": "installUpdateAuthority",
+          "latencyTier": "short",
+          "latencyBudgetMs": 300,
+          "failureBudgetPct": 1
+        },
+        {
+          "operation": "launchTokenBoundary",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 25,
+          "failureBudgetPct": 0.1
+        },
+        {
+          "operation": "offlineCache",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 15,
+          "failureBudgetPct": 0.1
+        }
+      ]
+    }
+  },
+  {
+    "name": "offline-authorized-runtime-error",
+    "hubState": {
+      "snapshot": {
+        "session": null,
+        "entitlements": [],
+        "offlineCache": {
+          "lastValidatedAt": "2026-02-13T00:00:00.000Z",
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 10,
+          "cacheState": "valid"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "runtime-error",
+        "message": "Update authority blocked (failed_gateway).",
+        "code": "failed_gateway"
+      }
+    },
+    "expected": {
+      "entitlement": {
+        "outcome": "OfflineAuthorized",
+        "reason": "offline_cache_valid"
+      },
+      "installUpdate": {
+        "state": "blocked",
+        "reasonCode": "failed_gateway"
+      },
+      "launchToken": {
+        "ready": true,
+        "status": "issued_verified",
+        "reason": "verified"
+      },
+      "persistedCache": {
+        "schema": "antiphon.control-plane-cache",
+        "version": 1,
+        "restorable": true
+      },
+      "launchReadiness": [],
+      "trustEnvelope": [
+        {
+          "operation": "entitlementDecision",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 25,
+          "failureBudgetPct": 0.1
+        },
+        {
+          "operation": "installUpdateAuthority",
+          "latencyTier": "short",
+          "latencyBudgetMs": 300,
+          "failureBudgetPct": 1
+        },
+        {
+          "operation": "launchTokenBoundary",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 25,
+          "failureBudgetPct": 0.1
+        },
+        {
+          "operation": "offlineCache",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 15,
+          "failureBudgetPct": 0.1
+        }
+      ]
+    }
+  },
+  {
+    "name": "offline-denied-no-cache",
+    "hubState": {
+      "snapshot": {
+        "session": null,
+        "entitlements": [],
+        "offlineCache": {
+          "lastValidatedAt": null,
+          "maxOfflineDays": 21,
+          "offlineDaysRemaining": 0,
+          "cacheState": "empty"
+        },
+        "transactions": []
+      },
+      "status": {
+        "mode": "ready",
+        "message": "Signed out",
+        "code": "ok_signed_out"
+      }
+    },
+    "expected": {
+      "entitlement": {
+        "outcome": "OfflineDenied",
+        "reason": "offline_cache_invalid"
+      },
+      "installUpdate": {
+        "state": "ready",
+        "reasonCode": "ok_signed_out"
+      },
+      "launchToken": {
+        "ready": false,
+        "status": "not_issued",
+        "reason": "offline_cache_invalid"
+      },
+      "persistedCache": {
+        "schema": "antiphon.control-plane-cache",
+        "version": 1,
+        "restorable": true
+      },
+      "launchReadiness": [],
+      "trustEnvelope": [
+        {
+          "operation": "entitlementDecision",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 25,
+          "failureBudgetPct": 0.1
+        },
+        {
+          "operation": "installUpdateAuthority",
+          "latencyTier": "short",
+          "latencyBudgetMs": 300,
+          "failureBudgetPct": 1
+        },
+        {
+          "operation": "launchTokenBoundary",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 25,
+          "failureBudgetPct": 0.1
+        },
+        {
+          "operation": "offlineCache",
+          "latencyTier": "instant",
+          "latencyBudgetMs": 15,
+          "failureBudgetPct": 0.1
+        }
+      ]
+    }
+  }
+]

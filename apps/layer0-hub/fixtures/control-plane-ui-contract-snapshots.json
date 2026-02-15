@@ -1,0 +1,67 @@
+[
+  {
+    "name": "minimal-control-plane-lines",
+    "hubVm": {
+      "statusLine": "Signed in",
+      "installedCount": 1,
+      "ownedCount": 1,
+      "pendingUpdates": 0
+    },
+    "controlPlaneVm": {
+      "entitlement": {
+        "outcome": "Authorized",
+        "reason": "owned_active_identity"
+      },
+      "installUpdate": {
+        "state": "ready",
+        "reasonCode": "ok_install_completed"
+      },
+      "launchToken": {
+        "ready": true,
+        "status": "issued_verified",
+        "reason": "verified"
+      },
+      "persistedCache": {
+        "schema": "antiphon.control-plane-cache",
+        "version": 1,
+        "restorable": true
+      },
+      "launchReadiness": [
+        {
+          "appId": "antiphon.app",
+          "ready": true,
+          "reason": "token_issued"
+        }
+      ]
+    },
+    "opsVm": [
+      {
+        "id": "tx-1",
+        "appId": "antiphon.app",
+        "action": "install",
+        "status": "succeeded",
+        "occurredAt": "2026-02-13T00:00:00.000Z"
+      }
+    ],
+    "expected": {
+      "statusLine": "Signed in",
+      "identityLine": "Identity: Present",
+      "entitlementLine": "Entitlement: antiphon.app=Allowed:owned_active_identity",
+      "installUpdateLine": "Install/Update: antiphon.app=Installed:ok_install_completed",
+      "launchTokenLine": "Launch token: issued_verified (verified)",
+      "cacheLine": "Cache schema: antiphon.control-plane-cache@v1 restorable=true",
+      "launchReadinessLine": "Launch readiness: antiphon.app=Runnable:token_issued",
+      "recentOpsLine": "Recent ops: tx-1:succeeded"
+    },
+    "expectedKeysSorted": [
+      "cacheLine",
+      "entitlementLine",
+      "identityLine",
+      "installUpdateLine",
+      "launchReadinessLine",
+      "launchTokenLine",
+      "recentOpsLine",
+      "statusLine"
+    ]
+  }
+]
