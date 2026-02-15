@@ -34,7 +34,8 @@ async function processFile(file) {
   try {
     const blob = await buildHandoffBundle(file);
     const baseName = file.name.replace(/\.zip$/i, '');
-    const outName = `Figma-Bundle-${baseName}-${Date.now()}.zip`;
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const outName = `DesignSystem-${baseName}-${dateStr}.zip`;
     downloadBlob(blob, outName);
     setStatus('Downloaded ' + outName, 'success');
     label.textContent = 'Drop another ZIP or click to choose';

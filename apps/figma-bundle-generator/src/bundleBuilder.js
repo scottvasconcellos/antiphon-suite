@@ -1,5 +1,5 @@
 /**
- * Builds the Handoff Bundle from a Figma export ZIP per layer0_figma_cursor_handoff spec.
+ * Builds a Design system bundle from a Figma export ZIP.
  * Non-destructive, deterministic, authoritative fidelity.
  */
 
@@ -135,10 +135,10 @@ function buildDiff(manifest, priorFingerprint = null) {
   };
 }
 
-const CURSOR_PLAYBOOK = `# Cursor playbook — Design system handoff
+const CURSOR_PLAYBOOK = `# Cursor playbook — Design system bundle
 
 ## What this bundle is
-This is an **Antiphon Layer 0 Handoff Bundle**. It contains a Figma-exported design system (Vite/React/TSX) as a single source of truth for the monorepo. Cursor should use it to keep all apps on the latest brand skin.
+This is a **Design system bundle**. It contains a Figma-exported design system (Vite/React/TSX) as a single source of truth. Cursor should use it to keep the repo on the latest brand skin.
 
 ## Authoritative payload
 - **Components**: \`MANIFEST/manifest.json\` → \`inventory.components\` (paths inside the original export).
@@ -150,18 +150,18 @@ This is an **Antiphon Layer 0 Handoff Bundle**. It contains a Figma-exported des
 The actual file contents are in the **INPUT** copy of the export (extract INPUT/source.zip or use the extracted copy if present). Do not modify TSX/CSS/assets; apply them as-is.
 
 ## How to apply (supersede prior)
-1. Identify the design-system target in the repo (e.g. \`packages/design-system\` or app-specific \`src/design\`).
+1. Determine where the design system belongs in **this** repo (e.g. a shared package, an app-specific folder, or create one). Each project is different; apply the payload there.
 2. Replace the active design system with the contents of this bundle's export (from INPUT). Last import wins; there is only one active version.
 3. Update imports in consuming apps so they point to the single design system location. Remove any duplicate or legacy copies to avoid residue/conflicts.
 4. Do not rewrite or "fix" exported code; preserve fidelity.
 
 ## Rollback
-Prior inputs and fingerprints may be in \`history/\` for inspection only. To roll back, re-apply a prior Handoff Bundle.
+Prior inputs and fingerprints may be in \`history/\` for inspection only. To roll back, re-apply a prior Design system bundle.
 `;
 
-const START_HERE = `# Layer 0 Handoff Bundle — Start here
+const START_HERE = `# Design system bundle — Start here
 
-This folder is a **Cursor-ingestible Handoff Bundle** produced from a Figma design system export.
+This folder is a **Cursor-ingestible Design system bundle** produced from a Figma design system export.
 
 ## What to do
 1. Open your monorepo in Cursor.
@@ -181,14 +181,14 @@ See \`CURSOR/FIRST_TIME_SETUP.md\` if you need to configure Cursor to look for t
 
 const FIRST_TIME_SETUP = `# First-time setup for Cursor
 
-1. Add a project convention so Cursor knows to look for Handoff Bundles: e.g. place this repo's \`.cursor/rules\` or docs to reference \`CURSOR/playbook.md\` when a Handoff Bundle is present.
+1. Add a project convention so Cursor knows to look for Design system bundles: e.g. place this repo's \`.cursor/rules\` or docs to reference \`CURSOR/playbook.md\` when a Design system bundle is present.
 2. Alternatively, create a Cursor task (e.g. "Ingest Design System Bundle") that runs the steps in \`playbook.md\`.
 3. After setup, future bundles are promptless: drop bundle → run task or follow playbook.
 `;
 
 /**
  * @param {File} file - The Figma export ZIP file
- * @returns {Promise<Blob>} - The Handoff Bundle as a ZIP Blob
+ * @returns {Promise<Blob>} - The Design system bundle as a ZIP Blob
  */
 export async function buildHandoffBundle(file) {
   const zipName = file.name || 'figma-export.zip';
