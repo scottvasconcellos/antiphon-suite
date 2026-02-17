@@ -132,7 +132,8 @@ Run before any “done” call:
 
 ## 9) Next Highest-Leverage Arc
 
-Phase B (Authority Realism Hardening), constrained to no new feature scope:
-1. Tighten deterministic failure/remediation mapping for installer recovery edge cases.
-2. Reduce fixture noise by pruning redundant snapshots that do not guard contract boundaries.
-3. Re-run detached-worktree reproducibility once Phase B changes land.
+Phase B (Authority Realism Hardening): **in progress**.
+- Added `docs/OPERATOR_FAILURE_REMEDIATION.md` — operator-facing failure→remediation reference.
+- Failure matrix and taxonomy already cover download/install/update failures with deterministic outcomes.
+- Persistence atomic modes (power loss, conflict, corrupt temp) and long-run determinism proof cover restart/interruption.
+- Fixture pruning deferred; no redundant snapshots removed without explicit contract-boundary analysis.
