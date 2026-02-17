@@ -134,6 +134,7 @@ Run before any “done” call:
 
 Phase B (Authority Realism Hardening): **done**.
 Phase C (Operator Flow Compression): **done**.
+Phase D (RC1 Finalization): **done**.
 - One daily command: `npm install && npm run gate`
 - One finalize path: `npm run rc0-release && npm run rc0-tag && npm run rc0-finalize`
 - README tightened to shortest reliable runbook; failure codes link to OPERATOR_FAILURE_REMEDIATION.md.
