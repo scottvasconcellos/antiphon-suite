@@ -45,7 +45,7 @@ In **Terminal 2** (new window/tab, same repo folder):
 cd apps/layer0-hub && pnpm dev
 ```
 
-Open http://localhost:5173. Sign in with Google or email+password. You should see the app catalog after sign-in.
+Open http://localhost:5173 (or the port Vite prints). Sign in with Google or email+password. You should see the app catalog after sign-in.
 
 ---
 

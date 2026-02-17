@@ -4,6 +4,8 @@ How to run the Antiphon Hub and entitlement authority, and how to troubleshoot c
 
 ## Quick start
 
+All commands below are from the **monorepo root** (the folder that contains `apps/`, `docs/`, `package.json`).
+
 ### Run Hub in stub mode (no authority)
 
 ```bash
@@ -48,7 +50,7 @@ When Firebase is configured, the Hub shows **Google**, **Apple**, and **Email+pa
 | Variable | App | Default | Description |
 |----------|-----|---------|-------------|
 | `VITE_ANTIPHON_ENGINE_MODE` | Hub | — | `stub` = use stub engine (no authority). Omit for real engine. |
-| `VITE_ANTIPHON_API_URL` | Hub | — | Authority base URL (e.g. `http://localhost:8799`). Required when not in stub mode. |
+| `VITE_ANTIPHON_API_URL` | Hub | — | Authority base URL (e.g. `http://localhost:8787`). Required when not in stub mode. |
 | `VITE_FIREBASE_API_KEY` | Hub | — | Firebase web API key (from Firebase Console). Optional; if set with auth domain and project ID, Hub shows Firebase sign-in. |
 | `VITE_FIREBASE_AUTH_DOMAIN` | Hub | — | Firebase auth domain (e.g. `antiphon-sso.firebaseapp.com`). |
 | `VITE_FIREBASE_PROJECT_ID` | Hub | — | Firebase project ID (e.g. `antiphon-sso`). |

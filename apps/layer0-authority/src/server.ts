@@ -3,7 +3,7 @@ import express, { type Request, type Response } from "express";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { verifyFirebaseIdToken } from "./firebaseAuth";
+import { verifyFirebaseIdToken } from "./firebaseAuth.js";
 
 type InstallState = "not-installed" | "installing" | "installed" | "error";
 
