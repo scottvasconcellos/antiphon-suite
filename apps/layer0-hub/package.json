@@ -8,7 +8,8 @@
     "build": "pnpm exec tsc -p tsconfig.json && pnpm exec vite build",
     "preview": "vite preview",
     "typecheck": "pnpm exec tsc -p tsconfig.json --noEmit",
-    "test:foundation:artifacts": "pnpm exec tsx tests/foundation-artifact.test.ts"
+    "test:foundation:artifacts": "pnpm exec tsx tests/foundation-artifact.test.ts",
+    "test:foundation:persistence-restart": "pnpm exec tsx tests/persistence-restart-interruption.test.ts"
   },
   "dependencies": {
     "firebase": "^12.9.0",
@@ -19,6 +20,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.1.0",
+    "tsx": "^4.19.2",
     "typescript": "^5.9.3",
     "vite": "^7.2.1"
   }
