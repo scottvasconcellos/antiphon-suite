@@ -34,6 +34,11 @@ Previously authorized apps remain runnable offline without Hub process presence.
 
 Layer apps integrate via `apps/layer0-hub/src/services/publicControlPlane.ts`.
 
+## Support
+
+- **Hub runbook** — `docs/HUB_RUNBOOK.md` — How to run Hub + authority, env vars, common failures.
+- **Layer-app spec** — `docs/LAYER_APP_COMPATIBILITY_SPEC.md` — Artifact manifest format, entitlement mapping, launch boundary.
+
 ## Failure Codes
 
 See `docs/OPERATOR_FAILURE_REMEDIATION.md` for failure→remediation mapping.

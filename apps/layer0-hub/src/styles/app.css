@@ -60,6 +60,10 @@ h1 {
   font-size: var(--font-size-heading);
 }
 
+.status-section {
+  margin-top: 24px;
+}
+
 .status-line {
   margin: 14px 2px 20px;
   color: var(--color-text-secondary);
