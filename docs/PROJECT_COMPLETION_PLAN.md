@@ -132,8 +132,8 @@ Run before any “done” call:
 
 ## 9) Next Highest-Leverage Arc
 
-Phase B (Authority Realism Hardening): **in progress**.
-- Added `docs/OPERATOR_FAILURE_REMEDIATION.md` — operator-facing failure→remediation reference.
-- Failure matrix and taxonomy already cover download/install/update failures with deterministic outcomes.
-- Persistence atomic modes (power loss, conflict, corrupt temp) and long-run determinism proof cover restart/interruption.
-- Fixture pruning deferred; no redundant snapshots removed without explicit contract-boundary analysis.
+Phase B (Authority Realism Hardening): **done**.
+Phase C (Operator Flow Compression): **done**.
+- One daily command: `npm install && npm run gate`
+- One finalize path: `npm run rc0-release && npm run rc0-tag && npm run rc0-finalize`
+- README tightened to shortest reliable runbook; failure codes link to OPERATOR_FAILURE_REMEDIATION.md.

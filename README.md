@@ -2,72 +2,42 @@
 
 Silent control-plane for auth, entitlement, install/update authority, offline trust, and launch boundaries.
 
-## Quickstart (Operator)
+## Operator Runbook
 
-Daily control-plane verification path:
+**Daily verify (one command):**
+```bash
+npm install && npm run gate
+```
 
-1. `npm install`
-2. `npm run gate`
-3. `npm run demo`
+**RC finalize (when releasing):**
+```bash
+npm run rc0-release && npm run rc0-tag && npm run rc0-finalize
+```
 
-If `npm run demo` fails, run `npm run smoke`.
-If `npm run rc-check` fails, it reports scoped control-plane dirt only; legacy quarantine drift is ignored.
+`gate` runs smoke, public-surface lock, reason-coverage, rc-check, legacy guard, integration checks (including demo), proofs, and operator-contract check. If gate passes, you are good.
 
-RC finalization path:
+If gate fails: run `npm run smoke` to isolate; if `rc-check` fails, commit or stash scoped changes (legacy quarantine drift is ignored).
 
-1. `npm run rc0-release`
-2. `npm run rc0-tag`
-3. `npm run rc0-finalize`
+## Reference
 
-## Command Reference
-
-- `npm run smoke`  
-  Deterministic control-plane + foundation checks.
-
-- `npm run gate`  
-  Smoke + public surface lock + reason coverage + scoped rc-check + legacy staged guard + integration checks + operator contract check.
-
-- `npm run demo`  
-  One-command operator proof: entitlements, install/update actions, trust validation, hub-optional marker.
-
-- `npm run rc-check`  
-  Scoped clean-state reproducibility preflight (control-plane scope only, required artifacts, node version, scope governance acknowledgement).
-
-- `npm run rc0-release`  
-  Deterministic RC release dry-run manifest build with precondition checks.
-
-- `npm run rc0-finalize`  
-  Deterministic final manifest build; requires RC tag to exist and target HEAD.
-
-- `node scripts/demo-hub.mjs`  
-  Hub-oriented human-readable control-plane status flow.
-
-- `node scripts/demo-layer.mjs`  
-  Headless layer-app consumer projection proof.
-
-- `node scripts/proof-layer-app.mjs`  
-  End-to-end real layer-app artifact pipeline proof (install -> update -> rollback -> hub-optional).
-
-- `node scripts/proof-trust-install-boundary.mjs`  
-  Deterministic trust + installer boundary failure semantics proof.
-- `node scripts/proof-long-run-determinism.mjs`  
-  Restart + clock-drift + repeated-cycle determinism proof (snapshot-locked).
+- `npm run gate` — Full validation (smoke + lock checks + proofs)
+- `npm run smoke` — Build, typecheck, control-plane + foundation smoke
+- `npm run demo` — Human-readable entitlement/install/trust proof (also run by gate)
+- `npm run rc-check` — Scoped clean-state preflight; required before RC finalize
+- `npm run rc0-release` — Dry-run manifest; `rc0-tag` — create tag; `rc0-finalize` — final manifest (tag must target HEAD)
 
 ## Hub-Optional
 
 Previously authorized apps remain runnable offline without Hub process presence.
 
-## Public API Surface
+## Public API
 
-Layer apps integrate only through:
-`apps/layer0-hub/src/services/publicControlPlane.ts`
-
+Layer apps integrate via `apps/layer0-hub/src/services/publicControlPlane.ts`.
 
 ## Failure Codes
 
-- `repo_scope_not_clean`: control-plane scoped files have uncommitted changes.
-- `legacy_staged_forbidden`: frozen legacy/music-domain files are staged in git index.
-- `scope_config_changed_unacknowledged`: `control-plane.scope.json` changed without matching acknowledgement hash update.
+See `docs/OPERATOR_FAILURE_REMEDIATION.md` for failure→remediation mapping.
 
-- `node scripts/operator-contract-check.mjs`  
-  Validates rc0 operator contract surface and lock snapshot.
+- `repo_scope_not_clean`: uncommitted scoped changes; commit or stash
+- `legacy_staged_forbidden`: frozen music-domain files staged; unstage
+- `scope_config_changed_unacknowledged`: update `control-plane.scope.ack.json` after scope change
