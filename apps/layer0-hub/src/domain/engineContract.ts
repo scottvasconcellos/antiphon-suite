@@ -9,5 +9,6 @@ export type HubEngineContract = {
   installApp(appId: string): Promise<HubState>;
   applyUpdate(appId: string): Promise<HubState>;
   syncTransactions(): Promise<HubState>;
+  getLaunchToken(appId: string): Promise<string | null>;
   reset(): HubState;
 };

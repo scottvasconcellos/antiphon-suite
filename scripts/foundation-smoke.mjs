@@ -94,9 +94,18 @@ async function run() {
   runStep("pnpm", ["typecheck"]);
   runStep("node", ["scripts/control-plane-smoke.mjs"]);
   runStep("node", ["scripts/structure-smoke.mjs"]);
+  runStep("pnpm", ["--filter", "@antiphon/layer0-hub", "exec", "tsx", "tests/persistence-restart-interruption.test.ts"]);
   verifyHubBuildOutput();
 
   const port = 8799;
+  // Authority is file-state only; ensure no session so unauthenticated GET /entitlements returns 401.
+  const stateForSmoke = JSON.parse(initialState);
+  const smokeState = {
+    ...stateForSmoke,
+    session: null
+  };
+  writeFileSync(authorityStatePath, JSON.stringify(smokeState, null, 2) + "\n", "utf-8");
+
   const child = spawn("node", ["dist/server.js"], {
     stdio: "inherit",
     cwd: join(process.cwd(), "apps/layer0-authority"),

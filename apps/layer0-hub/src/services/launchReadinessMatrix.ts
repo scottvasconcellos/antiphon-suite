@@ -11,13 +11,8 @@ export type LaunchReadinessEntry = {
   reason: "token_issued" | "not_owned" | "not_installed";
 };
 
-function deterministicEpoch(snapshot: HubSnapshot): number {
-  const source = snapshot.offlineCache.lastValidatedAt ?? snapshot.session?.signedInAt ?? "2026-02-13T00:00:00.000Z";
-  return toEpochSeconds(source);
-}
-
 export function toLaunchReadinessMatrix(snapshot: HubSnapshot): LaunchReadinessEntry[] {
-  const issuedAt = deterministicEpoch(snapshot);
+  const issuedAt = toEpochSeconds(new Date().toISOString());
   return [...snapshot.entitlements]
     .sort((a, b) => a.id.localeCompare(b.id))
     .map((app) => {

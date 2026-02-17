@@ -41,7 +41,7 @@ Open http://localhost:5173. Hub fetches entitlements from the authority. Sign in
 
 When Firebase is configured, the Hub shows **Google**, **Apple**, and **Email+password** sign-in. The Hub sends the Firebase ID token to the Authority; the Authority verifies it (project `antiphon-sso`) and creates a session. When Firebase is not configured, the Hub shows **email-only** sign-in (Authority `POST /auth/session`); stub mode also uses email-only.
 
-- **Hub**: Set Firebase web app config via env (see table below). Do not commit secrets; use `.env` and `.env.example` with placeholders.
+- **Hub**: Set Firebase web app config via env (see table below). Copy `.env.example` to `.env` and fill in locally. Never commit `.env` (it is gitignored).
 - **Authority**: Set `FIREBASE_PROJECT_ID=antiphon-sso` so `POST /auth/firebase` can verify tokens. No service account required (verification uses Google public keys).
 - **Firebase Console**: Enable Google, Apple, and Email/Password under Authentication → Sign-in method. Add authorized domains (e.g. `localhost`) for redirects.
 
@@ -80,6 +80,35 @@ For full failure→remediation mapping, see `docs/OPERATOR_FAILURE_REMEDIATION.m
 ## Layer apps
 
 To ship a new layer app or understand artifact format, see `docs/LAYER_APP_COMPATIBILITY_SPEC.md`.
+
+### Installed apps location
+
+When you install a layer app via the Hub UI, artifacts are installed to disk at:
+
+```
+~/.antiphon/apps/<appId>/<version>/
+```
+
+For example:
+- `~/.antiphon/apps/antiphon.layer.hello-world/1.0.0/`
+- `~/.antiphon/apps/antiphon.layer.rhythm/1.1.0-beta.1/`
+
+Each installation directory contains:
+- `manifest.json` — The artifact manifest
+- Payload files (e.g. `app.txt`) — The actual app files
+
+You can override the base directory by setting `ANTIPHON_APPS_DIR` environment variable.
+
+### Launch tokens
+
+When an app is installed and owned, you can generate a launch token via the **Launch** button in the Hub UI. The token is a JWT that includes:
+- `appId` — The app identifier
+- `userId` — The user who installed the app
+- `entitlementOutcome` — "Authorized" or "OfflineAuthorized"
+- `issuedAt` — Token issuance timestamp (epoch seconds)
+- `expiresAt` — Token expiration (1 hour TTL)
+
+The token is copied to your clipboard when you click Launch. Layer apps can verify this token to confirm they are authorized to run. Tokens remain valid even after signing out (hub-optional behavior).
 
 ## Gate and smoke
 

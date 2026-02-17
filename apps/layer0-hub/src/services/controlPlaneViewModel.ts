@@ -32,11 +32,6 @@ export type ControlPlaneViewModel = {
   trustEnvelope: TrustEnvelopeView[];
 };
 
-function toDeterministicEpoch(snapshot: HubSnapshot): number {
-  const source = snapshot.offlineCache.lastValidatedAt ?? snapshot.session?.signedInAt ?? "2026-02-13T00:00:00.000Z";
-  return toEpochSeconds(source);
-}
-
 function toInstallUpdateProjection(status: HubState["status"]): ControlPlaneViewModel["installUpdate"] {
   return {
     state: status.mode === "runtime-error" ? "blocked" : "ready",
@@ -53,7 +48,7 @@ function toLaunchTokenProjection(snapshot: HubSnapshot, entitlement: ControlPlan
     };
   }
 
-  const issuedAt = toDeterministicEpoch(snapshot);
+  const issuedAt = toEpochSeconds(new Date().toISOString());
   const claims = {
     appId: "antiphon.hub",
     userId: snapshot.session?.userId ?? "offline-user",

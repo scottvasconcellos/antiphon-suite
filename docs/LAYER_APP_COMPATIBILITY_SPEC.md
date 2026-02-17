@@ -89,6 +89,39 @@ See `apps/layer0-hub/src/services/installUpdateAuthority.ts` for the full taxono
 - `ok_install_completed`
 - `ok_update_completed`
 
+### Demo layer apps: version and lifecycle semantics
+
+For the demo layer apps shipped in this repo:
+
+- `apps/layer-app-hello-world/artifacts/`
+  - `v1/manifest.json` → `appVersion: 1.0.0`
+  - `v2/manifest.json` → `appVersion: 1.1.0`
+- `apps/layer-app-rhythm/artifacts/`
+  - `v1/manifest.json` → `appVersion: 1.0.0`
+  - `v2/manifest.json` → `appVersion: 1.1.0-beta.1`
+
+The entitlement authority (`apps/layer0-authority`) advertises the **latest distributable version** for each demo app:
+
+- `antiphon.layer.hello-world` → `version: "1.1.0"`, `installedVersion: null`, `updateAvailable: false`
+- `antiphon.layer.rhythm` → `version: "1.1.0-beta.1"`, `installedVersion: null`, `updateAvailable: false`
+
+This means:
+
+- A **fresh install** of a demo app installs the authority’s `version`:
+  - Hello World → `1.1.0` (artifact directory `v2/`)
+  - Rhythm → `1.1.0-beta.1` (artifact directory `v2/`)
+- Earlier artifacts (`1.0.0` in `v1/` for each app) are kept as **reference fixtures** and for internal scenario tests; they are not currently exposed as a “first install then update” path in the live entitlement data.
+- The `updateAvailable` flag for these demo apps is `false` after install, so the Hub does not currently offer a user-visible update flow for them. Future real apps can model a full `1.0.0 → 1.1.0` lifecycle by:
+  - Advertising `version: "1.0.0"`, `installedVersion: null`, `updateAvailable: false` initially.
+  - Flipping to `version: "1.1.0"`, `installedVersion: "1.0.0"`, `updateAvailable: true` when the update is available.
+
+Version strings map to artifact directories by convention:
+
+- `1.0.0` → `v1/`
+- `1.1.0` and `1.1.0-beta.1` → `v2/`
+
+The Hub’s artifact fetcher performs this mapping when resolving which manifest and payload files to read from disk for a given entitlement `version`.
+
 ## 3. Launch Boundary
 
 ### Hub-optional behavior

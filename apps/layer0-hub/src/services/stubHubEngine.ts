@@ -2,6 +2,8 @@ import { type HubEngineContract } from "../domain/engineContract";
 import { DEFAULT_HUB_SNAPSHOT } from "../domain/defaults";
 import { applyHubEvent } from "../domain/hubEngineCore";
 import { type EntitledApp, type HubSnapshot, type HubState } from "../domain/types";
+import { issueLaunchToken } from "../domain/launchTokenBoundary";
+import { toEpochSeconds } from "./timeControl";
 
 const STUB_APPS: EntitledApp[] = [
   {
@@ -101,6 +103,30 @@ export class StubHubEngine implements HubEngineContract {
     const next = applyHubEvent(this.snapshot, { type: "TRANSACTIONS_SYNCED", transactions: [] });
     this.snapshot = next.snapshot;
     return next;
+  }
+
+  async getLaunchToken(appId: string): Promise<string | null> {
+    const app = this.snapshot.entitlements.find((a) => a.id === appId);
+    if (!app || !app.owned || !app.installedVersion) {
+      return null;
+    }
+
+    const TOKEN_SECRET = "antiphon.layer1.launch";
+    const TOKEN_TTL_SECONDS = 3600;
+    const issuedAt = toEpochSeconds(new Date().toISOString());
+
+    const token = issueLaunchToken(
+      {
+        appId: app.id,
+        userId: this.snapshot.session?.userId ?? "offline-user",
+        entitlementOutcome: this.snapshot.session ? "Authorized" : "OfflineAuthorized",
+        issuedAt,
+        expiresAt: issuedAt + TOKEN_TTL_SECONDS
+      },
+      TOKEN_SECRET
+    );
+
+    return token;
   }
 
   reset(): HubState {

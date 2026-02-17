@@ -30,6 +30,36 @@ If gate fails: run `npm run smoke` to isolate; if `rc-check` fails, commit or st
 
 Previously authorized apps remain runnable offline without Hub process presence.
 
+## Foundation guarantees (Phase 5)
+
+At the current milestone, the Layer 1 control-plane guarantees the following for the demo layer apps:
+
+- **On-disk installs**
+  - Artifacts for `antiphon.layer.hello-world` and `antiphon.layer.rhythm` are installed to
+    `~/.antiphon/apps/<appId>/<version>/` (or `ANTIPHON_APPS_DIR`) using an atomic
+    `target.tmp → target` rename.
+  - The install path is derived from the entitlement authority’s `version` field and the
+    app’s canonical `appId` (see `docs/LAYER_APP_COMPATIBILITY_SPEC.md` for mapping details).
+- **Manifest and payload validation**
+  - Artifact manifests are parsed and validated via `parseArtifactManifest`.
+  - `appId` and `appVersion` in the manifest must match the install request.
+  - Each payload file must match the manifest’s declared digest and byte size before the
+    install is committed to disk.
+- **Launch tokens**
+  - Launch tokens are deterministic, signed tokens that encode appId, userId, entitlement
+    outcome, and issued/expiry times. They are already exercised by the control-plane smoke
+    harness (`scripts/control-plane-smoke.mjs`).
+
+To re-verify the new real-disk installation path introduced in Phase 5, run:
+
+```bash
+node scripts/phase5-foundation-e2e.mjs
+```
+
+This script delegates to the foundation artifact test in `apps/layer0-hub/tests/foundation-artifact.test.ts`,
+which fetches real artifacts from `apps/layer-app-*/artifacts/` and installs them to a
+temporary apps directory on disk.
+
 ## Public API
 
 Layer apps integrate via `apps/layer0-hub/src/services/publicControlPlane.ts`.

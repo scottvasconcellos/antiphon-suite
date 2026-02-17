@@ -6,13 +6,13 @@
 
 ## 1. Paste your Firebase config into the Hub (1 minute)
 
-Open **`apps/layer0-hub/.env`**. Replace the three `REPLACE_ME` lines with the real values from your Firebase web app config:
+Copy **`apps/layer0-hub/.env.example`** to **`apps/layer0-hub/.env`** (if you don’t already have a local `.env`). Then set these from your Firebase web app config:
 
 - `VITE_FIREBASE_API_KEY` → your `apiKey`
 - `VITE_FIREBASE_MESSAGING_SENDER_ID` → your `messagingSenderId`
 - `VITE_FIREBASE_APP_ID` → your `appId`
 
-(The other Firebase vars are already set for `antiphon-sso`.)
+Uncomment and fill in the other Firebase vars as needed. **Never commit `.env`** — it is gitignored; only `.env.example` (with placeholders) is in the repo.
 
 ---
 
@@ -32,7 +32,7 @@ Under **Authentication → Settings → Authorized domains**, ensure **localhost
 
 **Open Terminal and go to the monorepo first** (the folder that contains `apps/`, `docs/`, `package.json`). For example:
 ```bash
-cd "/Users/scottvasconcellos/Documents/My Apps/Antiphon-Suite/antiphon-suite-monorepo"
+cd /path/to/antiphon-suite-monorepo
 ```
 
 Then, in **Terminal 1:**

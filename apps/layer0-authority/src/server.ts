@@ -1,8 +1,11 @@
+import { config } from "dotenv";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+const __dirname = dirname(fileURLToPath(import.meta.url));
+config({ path: join(__dirname, "../.env") });
 import cors from "cors";
 import express, { type Request, type Response } from "express";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { verifyFirebaseIdToken } from "./firebaseAuth.js";
 
 type InstallState = "not-installed" | "installing" | "installed" | "error";
@@ -50,7 +53,6 @@ type AuthorityState = {
 
 const OFFLINE_MAX_DAYS = 21;
 const MAX_TRANSACTIONS = 50;
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const statePath = join(__dirname, "../data/state.json");
 
 function nowIso(): string {

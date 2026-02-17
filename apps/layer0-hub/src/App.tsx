@@ -65,6 +65,35 @@ export default function App() {
     []
   );
 
+  const handleLaunch = useCallback(
+    async (appId: string) => {
+      if (!built.engine) return;
+      try {
+        const token = await built.engine.getLaunchToken(appId);
+        if (!token) {
+          alert("Failed to get launch token. Make sure the app is installed and you are signed in.");
+          return;
+        }
+
+        // For Phase 5, copy token to clipboard and show instructions
+        // In a real implementation, this would launch the layer app with the token
+        try {
+          await navigator.clipboard.writeText(token);
+          const app = hubState.snapshot.entitlements.find((a) => a.id === appId);
+          const appName = app?.name || appId;
+          alert(`Launch token copied to clipboard for ${appName}.\n\nToken: ${token.substring(0, 50)}...\n\nThe layer app can read this token from the clipboard or from ~/.antiphon/apps/${appId}/${app?.installedVersion}/launch-token.txt`);
+        } catch {
+          // Fallback: show token in alert
+          alert(`Launch token for ${appId}:\n\n${token}\n\nCopy this token to launch the app.`);
+        }
+      } catch (error) {
+        console.error("Launch failed:", error);
+        alert("Failed to generate launch token.");
+      }
+    },
+    [hubState]
+  );
+
   const uiContract = toControlPlaneUiContract(
     toHubViewModel(hubState),
     toControlPlaneViewModel(hubState),
@@ -115,6 +144,7 @@ export default function App() {
             entitlements={hubState.snapshot.entitlements}
             onInstall={handleInstall}
             onUpdate={handleUpdate}
+            onLaunch={handleLaunch}
             engineReady={engineReady}
             busyAppId={busyAppId}
           />

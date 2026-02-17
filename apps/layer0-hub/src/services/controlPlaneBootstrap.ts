@@ -15,6 +15,19 @@ export function resolveBootstrapFailure(snapshot: HubSnapshot, errorMessage: str
     };
   }
 
+  // If bootstrap failed with "Authentication required" (401), that's expected before sign-in
+  // The Authority is reachable, user just needs to sign in
+  if (errorMessage.includes("Authentication required") || errorMessage.includes("401")) {
+    return {
+      snapshot,
+      status: {
+        mode: "ready",
+        message: "Ready. Sign in to view entitlements.",
+        code: "ok_bootstrap_requires_auth"
+      }
+    };
+  }
+
   return {
     snapshot,
     status: {
