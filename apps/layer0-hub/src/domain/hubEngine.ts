@@ -53,6 +53,25 @@ export class HubEngine implements HubEngineContract {
     return { ...next, snapshot: this.store.save(next.snapshot) };
   }
 
+  async signInWithFirebase(idToken: string): Promise<HubState> {
+    const current = this.store.load();
+    const session = await this.gateway.signInWithFirebase(idToken);
+    const [entitlements, offlineCache, transactions] = await Promise.all([
+      this.gateway.fetchEntitlements(),
+      this.gateway.refreshEntitlements(),
+      this.gateway.fetchTransactions()
+    ]);
+
+    const next = applyHubEvent(current, {
+      type: "SIGNED_IN",
+      session,
+      entitlements,
+      offlineCache,
+      transactions
+    });
+    return { ...next, snapshot: this.store.save(next.snapshot) };
+  }
+
   async signOut(): Promise<HubState> {
     const current = this.store.load();
     await this.gateway.signOut();

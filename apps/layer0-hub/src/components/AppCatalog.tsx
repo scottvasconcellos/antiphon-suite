@@ -52,7 +52,11 @@ type AppCatalogItemProps = {
 
 function AppCatalogItem({ app, onInstall, onUpdate, engineReady, busy, anyBusy }: AppCatalogItemProps) {
   const canInstall = app.owned && !app.installedVersion && app.installState !== "installing";
-  const canUpdate = app.owned && app.updateAvailable && app.installState !== "installing";
+  const canUpdate =
+    app.owned &&
+    app.installedVersion != null &&
+    app.updateAvailable &&
+    app.installState !== "installing";
   const disabled = !engineReady || anyBusy;
 
   return (

@@ -14,6 +14,8 @@
   --color-accent-primary-hover: #3b82f6;
   --color-accent-success: #22c55e;
   --color-accent-warning: #f59e0b;
+  --color-text-danger: #f87171;
+  --color-text-link: #60a5fa;
   --font-ui: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
   --font-size-display: 2rem;

@@ -22,16 +22,26 @@ cd apps/layer0-authority
 pnpm dev
 ```
 
-Authority listens on http://localhost:8799 (or `PORT`).
+Authority listens on http://localhost:8787 (or set `PORT`).
 
 **Terminal 2 — Hub (UI)**
 
 ```bash
 cd apps/layer0-hub
-VITE_ANTIPHON_API_URL=http://localhost:8799 pnpm dev
+VITE_ANTIPHON_API_URL=http://localhost:8787 pnpm dev
 ```
 
 Open http://localhost:5173. Hub fetches entitlements from the authority. Sign in with a valid email (e.g. `producer@antiphon.audio`) to see owned apps and run install/update.
+
+## Auth (Firebase)
+
+**Short version:** See **`docs/PHASE4_TLDR.md`** for a 3-step checklist (paste config, enable sign-in methods, run).
+
+When Firebase is configured, the Hub shows **Google**, **Apple**, and **Email+password** sign-in. The Hub sends the Firebase ID token to the Authority; the Authority verifies it (project `antiphon-sso`) and creates a session. When Firebase is not configured, the Hub shows **email-only** sign-in (Authority `POST /auth/session`); stub mode also uses email-only.
+
+- **Hub**: Set Firebase web app config via env (see table below). Do not commit secrets; use `.env` and `.env.example` with placeholders.
+- **Authority**: Set `FIREBASE_PROJECT_ID=antiphon-sso` so `POST /auth/firebase` can verify tokens. No service account required (verification uses Google public keys).
+- **Firebase Console**: Enable Google, Apple, and Email/Password under Authentication → Sign-in method. Add authorized domains (e.g. `localhost`) for redirects.
 
 ## Environment variables
 
@@ -39,10 +49,16 @@ Open http://localhost:5173. Hub fetches entitlements from the authority. Sign in
 |----------|-----|---------|-------------|
 | `VITE_ANTIPHON_ENGINE_MODE` | Hub | — | `stub` = use stub engine (no authority). Omit for real engine. |
 | `VITE_ANTIPHON_API_URL` | Hub | — | Authority base URL (e.g. `http://localhost:8799`). Required when not in stub mode. |
-| `PORT` | Authority | 8799 | Authority server port. |
+| `VITE_FIREBASE_API_KEY` | Hub | — | Firebase web API key (from Firebase Console). Optional; if set with auth domain and project ID, Hub shows Firebase sign-in. |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Hub | — | Firebase auth domain (e.g. `antiphon-sso.firebaseapp.com`). |
+| `VITE_FIREBASE_PROJECT_ID` | Hub | — | Firebase project ID (e.g. `antiphon-sso`). |
+| `VITE_FIREBASE_*` | Hub | — | Optional: `STORAGE_BUCKET`, `MESSAGING_SENDER_ID`, `APP_ID`, `MEASUREMENT_ID`. Or use a single `VITE_FIREBASE_CONFIG` JSON string. |
+| `FIREBASE_PROJECT_ID` | Authority | — | Firebase project ID for ID token verification (e.g. `antiphon-sso`). When set, `POST /auth/firebase` is enabled. |
+| `PORT` | Authority | 8787 | Authority server port. |
 
 ## Hub UI overview
 
+- **Sign in** — When not signed in: Firebase (Google, Apple, Email+password) or email-only form. When signed in: identity and Sign out in the hero; app catalog below.
 - **App catalog** — Owned apps with Install/Update buttons.
 - **Status section** — Cache schema, identity, entitlement, launch readiness, recent ops, status line.
 

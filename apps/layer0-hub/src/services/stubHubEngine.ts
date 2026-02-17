@@ -53,6 +53,10 @@ export class StubHubEngine implements HubEngineContract {
     return next;
   }
 
+  async signInWithFirebase(_idToken: string): Promise<HubState> {
+    return this.signIn("stub@firebase.local");
+  }
+
   async signOut(): Promise<HubState> {
     const next = applyHubEvent(this.snapshot, { type: "SIGNED_OUT" });
     this.snapshot = next.snapshot;

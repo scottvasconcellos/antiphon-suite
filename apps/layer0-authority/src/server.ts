@@ -3,6 +3,7 @@ import express, { type Request, type Response } from "express";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { verifyFirebaseIdToken } from "./firebaseAuth";
 
 type InstallState = "not-installed" | "installing" | "installed" | "error";
 
@@ -195,6 +196,49 @@ app.delete("/auth/session", (_req: Request, res: Response) => {
     session: null
   });
   res.json({ ok: true, session: next.session });
+});
+
+const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID;
+
+app.post("/auth/firebase", async (req: Request, res: Response) => {
+  const idToken = typeof req.body?.idToken === "string" ? req.body.idToken.trim() : "";
+  if (!idToken) {
+    res.status(400).json({ message: "idToken is required." });
+    return;
+  }
+  if (!FIREBASE_PROJECT_ID) {
+    res.status(503).json({ message: "Firebase auth not configured (FIREBASE_PROJECT_ID)." });
+    return;
+  }
+  try {
+    const payload = await verifyFirebaseIdToken(FIREBASE_PROJECT_ID, idToken);
+    const email = (payload.email ?? "").toString().trim().toLowerCase();
+    const name = typeof payload.name === "string" ? payload.name.trim() : null;
+    const displayName =
+      name && name.length > 0 ? name : (email ? toDisplayName(email) : "Antiphon User");
+    const state = readState();
+    const session: HubSession = {
+      userId: payload.sub ?? `usr_${Math.random().toString(36).slice(2, 10)}`,
+      email: email || "firebase-user@antiphon.audio",
+      displayName,
+      signedInAt: nowIso()
+    };
+    const next = writeState({
+      ...state,
+      session,
+      offlineCache: {
+        ...state.offlineCache,
+        lastValidatedAt: nowIso(),
+        maxOfflineDays: OFFLINE_MAX_DAYS,
+        offlineDaysRemaining: OFFLINE_MAX_DAYS,
+        cacheState: "valid"
+      }
+    });
+    res.json(next.session);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Invalid token.";
+    res.status(401).json({ message: `Firebase token verification failed: ${message}` });
+  }
 });
 
 app.get("/entitlements", (_req: Request, res: Response) => {

@@ -63,6 +63,18 @@ export class HttpHubGateway implements HubGateway {
     }
   }
 
+  async signInWithFirebase(idToken: string): Promise<HubSession> {
+    try {
+      const payload = await requestJson<unknown>(`${this.apiBaseUrl}/auth/firebase`, {
+        method: "POST",
+        body: JSON.stringify({ idToken })
+      });
+      return parseSession(payload);
+    } catch (error) {
+      throw new Error(`Firebase sign-in failed: ${normalizeApiError(error)}`);
+    }
+  }
+
   async signOut(): Promise<void> {
     try {
       await requestJson<{ ok: boolean }>(`${this.apiBaseUrl}/auth/session`, { method: "DELETE" });

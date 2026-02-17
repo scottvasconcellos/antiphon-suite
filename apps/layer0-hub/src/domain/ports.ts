@@ -2,6 +2,7 @@ import { type HubSnapshot, type HubSession, type OfflineCacheState, type Entitle
 
 export type HubGateway = {
   signIn(email: string): Promise<HubSession>;
+  signInWithFirebase(idToken: string): Promise<HubSession>;
   signOut(): Promise<void>;
   fetchEntitlements(): Promise<EntitledApp[]>;
   refreshEntitlements(): Promise<OfflineCacheState>;
