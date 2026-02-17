@@ -50,6 +50,15 @@
       "owned": true,
       "installState": "installed",
       "updateAvailable": false
+    },
+    {
+      "id": "antiphon.layer.chord-scale-helper",
+      "name": "Chord Scale Helper",
+      "version": "1.0.0",
+      "installedVersion": null,
+      "owned": true,
+      "installState": "not-installed",
+      "updateAvailable": false
     }
   ],
   "offlineCache": {

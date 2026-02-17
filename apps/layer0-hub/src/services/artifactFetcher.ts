@@ -4,7 +4,8 @@
  * Phase 5 demo mapping:
  * - appId → artifact root:
  *   - "antiphon.layer.hello-world" → apps/layer-app-hello-world/artifacts/
- *   - "antiphon.layer.rhythm"      → apps/layer-app-rhythm/artifacts/
+ *   - "antiphon.layer.rhythm"            → apps/layer-app-rhythm/artifacts/
+ *   - "antiphon.layer.chord-scale-helper" → apps/layer-app-chord-scale-helper/artifacts/
  * - version → version directory:
  *   - "1.0.0"           → v1/
  *   - "1.1.0" or "1.1." → v2/ (including 1.1.0-beta.1)
@@ -31,6 +32,9 @@ function appIdToDirectory(appId: string): string {
   }
   if (appId === "antiphon.layer.rhythm") {
     return "layer-app-rhythm";
+  }
+  if (appId === "antiphon.layer.chord-scale-helper") {
+    return "layer-app-chord-scale-helper";
   }
   throw new Error(`Unknown appId: ${appId}`);
 }

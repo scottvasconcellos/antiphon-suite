@@ -98,9 +98,10 @@ function readState(): AuthorityState {
 }
 
 function writeState(state: AuthorityState): AuthorityState {
+  // Transactions are newest-first; keep the newest MAX_TRANSACTIONS (same as appendTransaction).
   const hydrated = {
     ...state,
-    transactions: state.transactions.slice(-MAX_TRANSACTIONS),
+    transactions: (state.transactions ?? []).slice(0, MAX_TRANSACTIONS),
     offlineCache: hydrateOfflineCache(state.offlineCache)
   };
   writeFileSync(statePath, `${JSON.stringify(hydrated, null, 2)}\n`, "utf-8");

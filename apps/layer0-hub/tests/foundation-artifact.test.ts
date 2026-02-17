@@ -39,6 +39,20 @@ async function run() {
       assert(content.includes("rhythm app"), "Installed rhythm payload should look like the artifact content");
     }
 
+    // Happy path: chord-scale-helper v1
+    {
+      const result = fetchArtifactFromFilesystem("antiphon.layer.chord-scale-helper", "1.0.0");
+      assert(result.ok, "Expected fetchArtifactFromFilesystem to succeed for chord-scale-helper 1.0.0");
+
+      const install = installArtifactToDisk("antiphon.layer.chord-scale-helper", "1.0.0", result.manifestRaw, result.payloadFiles);
+      assert(install.ok, `Expected installArtifactToDisk to succeed, got ${JSON.stringify(install)}`);
+
+      const appTxt = join(install.installedPath, "app.txt");
+      assert(existsSync(appTxt), "Expected app.txt to exist after install for chord-scale-helper");
+      const content = readFileSync(appTxt, "utf-8");
+      assert(content.includes("chord scale helper"), "Installed chord-scale-helper payload should look like the artifact content");
+    }
+
     // Failure: digest mismatch on first file
     {
       const result = fetchArtifactFromFilesystem("antiphon.layer.hello-world", "1.1.0");

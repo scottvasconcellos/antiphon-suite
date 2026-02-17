@@ -7,6 +7,7 @@ import { toControlPlaneOperations } from "./services/controlPlaneOperationsViewM
 import { toControlPlaneUiContract } from "./services/controlPlaneUiContract";
 import { AppCatalog } from "./components/AppCatalog";
 import { SignInView } from "./components/SignInView";
+import { Button } from "@antiphon/design-system/components";
 
 const built = buildHubEngine();
 
@@ -120,13 +121,13 @@ export default function App() {
         <p className="eyebrow">Antiphon Hub</p>
         <h1>Layer 1 Control-Plane</h1>
         {session && (
-          <div className="button-row" style={{ alignItems: "center", marginTop: 12 }}>
-            <span className="note-text" style={{ marginRight: 8 }}>
+          <div className="button-row hero-session-row">
+            <span className="note-text note-text-inline">
               Signed in as {session.email}
             </span>
-            <button type="button" className="btn btn-small" onClick={handleSignOut}>
+            <Button variant="secondary" size="compact" onClick={handleSignOut}>
               Sign out
-            </button>
+            </Button>
           </div>
         )}
       </header>

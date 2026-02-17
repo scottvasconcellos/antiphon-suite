@@ -2,6 +2,19 @@
 
 How to run the Antiphon Hub and entitlement authority, and how to troubleshoot common failures.
 
+## How to open the Hub app (view now)
+
+**Fastest (stub mode, no backend):**
+
+1. From the monorepo root: `cd apps/layer0-hub && VITE_ANTIPHON_ENGINE_MODE=stub pnpm dev`
+2. In your browser open **http://localhost:5173**
+
+**With Authority (full stack, real entitlements):**
+
+1. Terminal 1: `cd apps/layer0-authority && pnpm dev` (API on http://localhost:8787)
+2. Terminal 2: `cd apps/layer0-hub && VITE_ANTIPHON_API_URL=http://localhost:8787 pnpm dev`
+3. In your browser open **http://localhost:5173**
+
 ## Quick start
 
 All commands below are from the **monorepo root** (the folder that contains `apps/`, `docs/`, `package.json`).

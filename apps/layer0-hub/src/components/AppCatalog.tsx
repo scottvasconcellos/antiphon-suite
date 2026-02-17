@@ -1,5 +1,6 @@
 import { type EntitledApp } from "../domain/types";
 import { SectionCard } from "./SectionCard";
+import { Button } from "@antiphon/design-system/components";
 
 type AppCatalogProps = {
   entitlements: EntitledApp[];
@@ -76,34 +77,34 @@ function AppCatalogItem({ app, onInstall, onUpdate, onLaunch, engineReady, busy,
       </div>
       <div className="item-actions">
         {canInstall && (
-          <button
-            type="button"
-            className="btn btn-primary btn-small"
+          <Button
+            variant="primary"
+            size="compact"
             onClick={() => onInstall(app.id)}
             disabled={disabled}
           >
             {busy ? "Installing…" : "Install"}
-          </button>
+          </Button>
         )}
         {canUpdate && (
-          <button
-            type="button"
-            className="btn btn-primary btn-small"
+          <Button
+            variant="primary"
+            size="compact"
             onClick={() => onUpdate(app.id)}
             disabled={disabled}
           >
             {busy ? "Updating…" : "Update"}
-          </button>
+          </Button>
         )}
         {canLaunch && (
-          <button
-            type="button"
-            className="btn btn-primary btn-small"
+          <Button
+            variant="primary"
+            size="compact"
             onClick={() => onLaunch(app.id)}
             disabled={disabled}
           >
             Launch
-          </button>
+          </Button>
         )}
         {app.installedVersion && !app.updateAvailable && !canLaunch && (
           <span className="pill pill-owned">Up to date</span>
