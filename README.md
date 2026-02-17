@@ -30,6 +30,10 @@ If gate fails: run `npm run smoke` to isolate; if `rc-check` fails, commit or st
 
 Previously authorized apps remain runnable offline without Hub process presence.
 
+## Phase D scope
+
+Hub is **maintenance-focused** for RC1; major innovation shifts to Layer apps. This repo remains the silent control-plane for auth, entitlements, install/update, and launch boundaries.
+
 ## Foundation guarantees (Phase 5)
 
 At the current milestone, the Layer 1 control-plane guarantees the following for the demo layer apps:

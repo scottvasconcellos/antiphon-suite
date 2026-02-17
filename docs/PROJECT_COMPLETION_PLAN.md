@@ -121,6 +121,10 @@ Run before any “done” call:
   - `pnpm install` PASS
   - `npm run gate` PASS
 - Result: post-Phase-B hardening reproducibility reconfirmed.
+- Detached worktree run completed at commit `1201a13`:
+  - `pnpm install` PASS
+  - `npm run gate` PASS
+- Result: post–foundation-smoke 401 fix and gate-clean reproducibility confirmed.
 
 ## 8) Current Execution Status
 
