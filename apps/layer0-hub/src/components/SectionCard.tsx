@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import { Card, CardHeader } from "@antiphon/design-system/components";
 
 type SectionCardProps = {
   title: string;
@@ -8,12 +9,9 @@ type SectionCardProps = {
 
 export function SectionCard({ title, subtitle, children }: SectionCardProps) {
   return (
-    <section className="section-card">
-      <header className="section-header">
-        <h2>{title}</h2>
-        <p>{subtitle}</p>
-      </header>
+    <Card variant="raised" padding="default">
+      <CardHeader title={title} subtitle={subtitle} />
       <div className="section-content">{children}</div>
-    </section>
+    </Card>
   );
 }

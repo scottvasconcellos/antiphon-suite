@@ -7,6 +7,7 @@ import {
   createAccountWithEmail,
   getIdToken
 } from "../services/firebaseAuth";
+import { Button, Input, Card, CardHeader } from "@antiphon/design-system/components";
 
 type SignInViewProps = {
   onSignInWithFirebase: (idToken: string) => Promise<void>;
@@ -134,123 +135,104 @@ export function SignInView({
 
   if (useFirebase) {
     return (
-      <section className="section-card sign-in-section" aria-label="Sign in">
-        <h2 className="section-header" style={{ margin: "0 0 12px" }}>
-          Sign in
-        </h2>
-        <p className="note-text" style={{ marginBottom: 16 }}>
-          Use Google, Apple, or email to connect to the entitlement authority.
-        </p>
-        {error && (
-          <p className="note-text" style={{ color: "var(--color-text-danger)", marginBottom: 12 }} role="alert">
-            {error}
-          </p>
-        )}
-        <div className="button-row" style={{ flexWrap: "wrap", gap: 10, marginBottom: 16 }}>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleGoogle}
-            disabled={!engineReady || busy}
-          >
-            {busy ? "Signing in…" : "Sign in with Google"}
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleApple}
-            disabled={!engineReady || busy}
-          >
-            {busy ? "Signing in…" : "Sign in with Apple"}
-          </button>
-        </div>
-        <div style={{ borderTop: "1px solid var(--color-border-subtle)", paddingTop: 16 }}>
-          <label className="field-label" htmlFor="signin-email">
-            Email
-          </label>
-          <input
-            id="signin-email"
-            type="email"
-            className="text-input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            disabled={busy}
-            autoComplete="email"
-            style={{ marginBottom: 10, marginTop: 4 }}
-          />
-          <label className="field-label" htmlFor="signin-password">
-            Password
-          </label>
-          <input
-            id="signin-password"
-            type="password"
-            className="text-input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            disabled={busy}
-            autoComplete={isCreateAccount ? "new-password" : "current-password"}
-            style={{ marginBottom: 12, marginTop: 4 }}
-          />
-          <div className="button-row" style={{ gap: 8, marginBottom: 8 }}>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleEmailPassword}
+      <section aria-label="Sign in">
+        <Card variant="raised" padding="default">
+          <CardHeader title="Sign in" subtitle="Use Google, Apple, or email to connect to the entitlement authority." />
+          {error && (
+            <p className="note-text error-message" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="button-row button-row-wrap">
+            <Button
+              variant="primary"
+              onClick={handleGoogle}
               disabled={!engineReady || busy}
             >
-              {busy ? "Signing in…" : isCreateAccount ? "Create account" : "Sign in with email"}
-            </button>
+              {busy ? "Signing in…" : "Sign in with Google"}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleApple}
+              disabled={!engineReady || busy}
+            >
+              {busy ? "Signing in…" : "Sign in with Apple"}
+            </Button>
           </div>
-          <button
-            type="button"
-            className="btn"
-            style={{ background: "transparent", border: "none", color: "var(--color-text-link)", cursor: "pointer", padding: 4 }}
-            onClick={() => setIsCreateAccount((v) => !v)}
-            disabled={busy}
-          >
-            {isCreateAccount ? "Already have an account? Sign in" : "Create an account"}
-          </button>
-        </div>
+          <div className="sign-in-divider">
+            <Input
+              id="signin-email"
+              type="email"
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              disabled={busy}
+              autoComplete="email"
+              className="mb-2.5"
+            />
+            <Input
+              id="signin-password"
+              type="password"
+              label="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              disabled={busy}
+              autoComplete={isCreateAccount ? "new-password" : "current-password"}
+              className="mb-3"
+            />
+            <div className="button-row">
+              <Button
+                variant="primary"
+                onClick={handleEmailPassword}
+                disabled={!engineReady || busy}
+              >
+                {busy ? "Signing in…" : isCreateAccount ? "Create account" : "Sign in with email"}
+              </Button>
+            </div>
+            <Button
+              variant="link"
+              onClick={() => setIsCreateAccount((v) => !v)}
+              disabled={busy}
+              className="p-1"
+            >
+              {isCreateAccount ? "Already have an account? Sign in" : "Create an account"}
+            </Button>
+          </div>
+        </Card>
       </section>
     );
   }
 
   return (
-    <section className="section-card sign-in-section" aria-label="Sign in">
-      <h2 className="section-header" style={{ margin: "0 0 12px" }}>
-        Sign in
-      </h2>
-      <p className="note-text" style={{ marginBottom: 12 }}>
-        Sign in with your email (stub or authority session).
-      </p>
-      {error && (
-        <p className="note-text" style={{ color: "var(--color-text-danger)", marginBottom: 12 }} role="alert">
-          {error}
-        </p>
-      )}
-      <form onSubmit={handleEmailOnlySubmit}>
-        <label className="field-label" htmlFor="signin-email-only">
-          Email
-        </label>
-        <input
-          id="signin-email-only"
-          type="email"
-          className="text-input"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          disabled={busy}
-          autoComplete="email"
-          style={{ marginBottom: 10, marginTop: 4 }}
-        />
-        <div className="button-row">
-          <button type="submit" className="btn btn-primary" disabled={!engineReady || busy}>
-            {busy ? "Signing in…" : "Sign in"}
-          </button>
-        </div>
-      </form>
+    <section aria-label="Sign in">
+      <Card variant="raised" padding="default">
+        <CardHeader title="Sign in" subtitle="Sign in with your email (stub or authority session)." />
+        {error && (
+          <p className="note-text error-message" role="alert">
+            {error}
+          </p>
+        )}
+        <form onSubmit={handleEmailOnlySubmit}>
+          <Input
+            id="signin-email-only"
+            type="email"
+            label="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            disabled={busy}
+            autoComplete="email"
+            className="mb-2.5"
+          />
+          <div className="button-row">
+            <Button type="submit" variant="primary" disabled={!engineReady || busy}>
+              {busy ? "Signing in…" : "Sign in"}
+            </Button>
+          </div>
+        </form>
+      </Card>
     </section>
   );
 }

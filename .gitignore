@@ -16,3 +16,5 @@ design-system/_quarantine/
 secrets*.json
 credentials*.json
 release
+.cursor
+**/storybook-static

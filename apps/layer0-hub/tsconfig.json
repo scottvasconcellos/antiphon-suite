@@ -3,7 +3,11 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "types": ["vite/client"],
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@antiphon/design-system/components": ["./src/design-system-shim.d.ts"]
+    }
   },
   "include": ["src", "vite.config.ts"]
 }

@@ -1,35 +1,17 @@
+/* 
+ * DEPRECATED: Design tokens are now provided by @antiphon/design-system
+ * 
+ * This file is kept for backward compatibility but all tokens should come from
+ * the design system package. Any app-specific customizations should be added
+ * to app.css instead.
+ * 
+ * Design system tokens are imported via: @antiphon/design-system/styles
+ * All CSS variables (--color-*, --radius-*, --shadow-*, etc.) come from design-system.
+ */
+
 :root {
-  --color-bg-page: #0a0a0b;
-  --color-bg-app-shell: #111113;
-  --color-bg-surface: #18181b;
-  --color-bg-surface-elevated: #1f1f23;
-  --color-bg-inset: #0d0d0f;
-  --color-text-primary: #e8e8ea;
-  --color-text-secondary: #a1a1a8;
-  --color-text-muted: #6b6b72;
-  --color-border-subtle: #28282d;
-  --color-border-strong: #38383f;
-  --color-border-focus: #60a5fa;
-  --color-accent-primary: #60a5fa;
-  --color-accent-primary-hover: #3b82f6;
-  --color-accent-success: #22c55e;
-  --color-accent-warning: #f59e0b;
-  --color-text-danger: #f87171;
-  --color-text-link: #60a5fa;
-  --font-ui: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
-  --font-size-display: 2rem;
-  --font-size-heading: 1.1rem;
-  --font-size-body: 0.95rem;
-  --font-size-micro: 0.76rem;
-  --line-height-tight: 1.2;
-  --line-height-normal: 1.5;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04);
-  --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.5);
-  --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* App-specific customizations only - all standard tokens come from design system */
+  /* If you need to override design system tokens, do it here with caution */
 }
 
 * {
@@ -45,7 +27,9 @@ body,
 }
 
 body {
-  font-family: var(--font-ui);
+  /* Using design system font tokens */
+  font-family: var(--font-ui, ui-sans-serif, system-ui, sans-serif);
+  /* App-specific background gradient - design system provides base color */
   background: radial-gradient(circle at 20% -10%, rgba(96, 165, 250, 0.12), transparent 45%), var(--color-bg-page);
   color: var(--color-text-primary);
 }
