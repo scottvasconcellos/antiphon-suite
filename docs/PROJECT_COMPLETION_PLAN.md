@@ -124,13 +124,11 @@ Run before any “done” call:
 
 ## 8) Current Execution Status
 
-- Phase A (de-noise + boundary tightening): in progress, with script and doc consolidation complete.
-- Active runtime remains on control-plane surfaces; frozen legacy/music-domain files remain unstaged and excluded from scope checks.
-- Required validation set is currently stable on working branch:
-  - `npm run smoke`
-  - `npm run gate`
-  - `npm run rc-check`
-  - `node scripts/operator-contract-check.mjs`
+- Phase A (de-noise + boundary tightening): **done** for legacy coupling and boundary docs.
+  - Verified: No runtime dependency from active control-plane path into frozen legacy modules (hubEngine, services, publicControlPlane do not import hubMusicOrchestrator, musicEngineRegistry, etc.).
+  - Legacy quarantine README updated with explicit frozen path list.
+  - Required validation set stable: smoke, gate, rc-check, operator-contract-check.
+- Active runtime remains on control-plane surfaces; frozen legacy/music-domain files remain excluded from scope checks.
 
 ## 9) Next Highest-Leverage Arc
 
