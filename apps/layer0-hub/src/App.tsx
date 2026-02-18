@@ -1,26 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 import { type HubState } from "./domain/types";
 import { buildHubEngine } from "./services/buildHubEngine";
-import { toControlPlaneUiContract } from "./services/controlPlaneUiContract";
-import { toHubViewModel } from "./services/hubViewModel";
-import { toControlPlaneViewModel } from "./services/controlPlaneViewModel";
-import { toControlPlaneOperations } from "./services/controlPlaneOperationsViewModel";
 import { AppCatalog } from "./components/AppCatalog";
 import { SignInView } from "./components/SignInView";
 import { SettingsView } from "./components/SettingsView";
 import { LicensesView } from "./components/LicensesView";
-import { Button } from "@antiphon/design-system/components";
+import { SupportView } from "./components/SupportView";
+import { AddSerialView } from "./components/AddSerialView";
+import { UpdatesView } from "./components/UpdatesView";
 
 const built = buildHubEngine();
 
-type View = "apps" | "licenses" | "settings";
+type View = "library" | "updates" | "licenses" | "add-serial" | "support" | "preferences";
 
 export default function App() {
   const [hubState, setHubState] = useState<HubState>(built.initialState);
   const [busyAppId, setBusyAppId] = useState<string | null>(null);
-  const [view, setView] = useState<View>("apps");
-  const [statusCollapsed, setStatusCollapsed] = useState(true);
-
+  const [view, setView] = useState<View>("library");
   useEffect(() => {
     if (!built.engine) return;
     void built.engine.bootstrap().then(setHubState);
@@ -91,12 +87,6 @@ export default function App() {
     [hubState]
   );
 
-  const uiContract = toControlPlaneUiContract(
-    toHubViewModel(hubState),
-    toControlPlaneViewModel(hubState),
-    toControlPlaneOperations(hubState.snapshot)
-  );
-
   const engineReady = built.engine !== null && hubState.status.mode === "ready";
   const session = hubState.snapshot.session;
 
@@ -107,16 +97,24 @@ export default function App() {
         <div className="hub-brand">
           {/* Logo: add public/logo.svg or public/logo.png and use <img src="/logo.svg" alt="Antiphon" className="hub-logo" /> instead of the fallback (see docs/DESIGN_PRINCIPLES.md). */}
           <div className="hub-logo-fallback" aria-hidden="true" />
-          <span className="hub-wordmark">ANTIPHON HUB</span>
+          <span className="hub-wordmark">ANTIPHON MANAGER</span>
         </div>
         <nav className="hub-nav">
           <button
             type="button"
-            className={`hub-nav-link ${view === "apps" ? "hub-nav-link-active" : ""}`}
-            onClick={() => setView("apps")}
-            aria-current={view === "apps" ? "page" : undefined}
+            className={`hub-nav-link ${view === "library" ? "hub-nav-link-active" : ""}`}
+            onClick={() => setView("library")}
+            aria-current={view === "library" ? "page" : undefined}
           >
-            Apps
+            Library
+          </button>
+          <button
+            type="button"
+            className={`hub-nav-link ${view === "updates" ? "hub-nav-link-active" : ""}`}
+            onClick={() => setView("updates")}
+            aria-current={view === "updates" ? "page" : undefined}
+          >
+            Updates
           </button>
           <button
             type="button"
@@ -128,37 +126,81 @@ export default function App() {
           </button>
           <button
             type="button"
-            className={`hub-nav-link ${view === "settings" ? "hub-nav-link-active" : ""}`}
-            onClick={() => setView("settings")}
-            aria-current={view === "settings" ? "page" : undefined}
+            className={`hub-nav-link ${view === "add-serial" ? "hub-nav-link-active" : ""}`}
+            onClick={() => setView("add-serial")}
+            aria-current={view === "add-serial" ? "page" : undefined}
           >
-            Settings
+            Add Serial
+          </button>
+          <button
+            type="button"
+            className={`hub-nav-link ${view === "support" ? "hub-nav-link-active" : ""}`}
+            onClick={() => setView("support")}
+            aria-current={view === "support" ? "page" : undefined}
+          >
+            Support
+          </button>
+          <button
+            type="button"
+            className={`hub-nav-link ${view === "preferences" ? "hub-nav-link-active" : ""}`}
+            onClick={() => setView("preferences")}
+            aria-current={view === "preferences" ? "page" : undefined}
+          >
+            Preferences
           </button>
         </nav>
         <div className="hub-topbar-right">
-          <span className="hub-pill hub-pill-beta">Beta</span>
-          <span className="hub-pill">{hubState.status.mode === "ready" ? "Connected" : hubState.status.code}</span>
-          {session && (
-            <Button variant="secondary" size="compact" onClick={handleSignOut}>
-              Sign out
-            </Button>
-          )}
+          <a
+            href={import.meta.env.VITE_SHOP_URL || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hub-link-button"
+          >
+            Go to Shop
+          </a>
         </div>
       </header>
 
       <main className="hub-main">
         {!session ? (
-          view === "settings" ? (
-            <section className="hub-section" aria-label="Settings">
-              <h2 className="section-title">Settings</h2>
-              <SettingsView session={null} />
+          view === "library" ? (
+            <section className="hub-section hub-signin-wrapper" aria-label="Sign in">
+              <div className="hub-signin">
+                <SignInView
+                  onSignInWithFirebase={handleSignInWithFirebase}
+                  onSignInWithEmail={handleSignInWithEmail}
+                  engineReady={engineReady}
+                />
+              </div>
+            </section>
+          ) : view === "preferences" ? (
+            <section className="hub-section" aria-label="Preferences">
+              <h2 className="section-title">Preferences</h2>
+              <SettingsView session={null} onSignOut={handleSignOut} />
               <p className="note-text settings-signin-cta">
                 Sign in to see account, licenses, and billing.
               </p>
             </section>
+          ) : view === "support" ? (
+            <section className="hub-section" aria-label="Support">
+              <SupportView />
+            </section>
+          ) : view === "add-serial" ? (
+            <section className="hub-section" aria-label="Add Serial">
+              <AddSerialView />
+            </section>
           ) : view === "licenses" ? (
             <section className="hub-section" aria-label="Licenses">
               <LicensesView entitlements={hubState.snapshot.entitlements} session={null} />
+            </section>
+          ) : view === "updates" ? (
+            <section className="hub-section" aria-label="Updates">
+              <UpdatesView
+                entitlements={hubState.snapshot.entitlements}
+                onUpdate={handleUpdate}
+                engineReady={engineReady}
+                busyAppId={busyAppId}
+              />
             </section>
           ) : (
             <section className="hub-section hub-signin-wrapper" aria-label="Sign in">
@@ -171,8 +213,8 @@ export default function App() {
               </div>
             </section>
           )
-        ) : view === "apps" ? (
-          <section className="hub-section" aria-label="App catalog">
+        ) : view === "library" ? (
+          <section className="hub-section" aria-label="Library">
             <AppCatalog
               entitlements={hubState.snapshot.entitlements}
               onInstall={handleInstall}
@@ -182,35 +224,45 @@ export default function App() {
               busyAppId={busyAppId}
             />
           </section>
+        ) : view === "updates" ? (
+          <section className="hub-section" aria-label="Updates">
+            <UpdatesView
+              entitlements={hubState.snapshot.entitlements}
+              onUpdate={handleUpdate}
+              engineReady={engineReady}
+              busyAppId={busyAppId}
+            />
+          </section>
         ) : view === "licenses" ? (
           <section className="hub-section" aria-label="Licenses">
             <LicensesView entitlements={hubState.snapshot.entitlements} session={session} />
           </section>
+        ) : view === "add-serial" ? (
+          <section className="hub-section" aria-label="Add Serial">
+            <AddSerialView />
+          </section>
+        ) : view === "support" ? (
+          <section className="hub-section" aria-label="Support">
+            <SupportView />
+          </section>
         ) : (
-          <section className="hub-section" aria-label="Settings">
-            <h2 className="section-title">Settings</h2>
-            <SettingsView session={session} />
+          <section className="hub-section" aria-label="Preferences">
+            <h2 className="section-title">Preferences</h2>
+            <SettingsView session={session} onSignOut={handleSignOut} />
           </section>
         )}
 
-        {/* Collapsible status footer — minimal by default */}
-        <footer className="hub-footer">
-          <button
-            type="button"
-            className="hub-footer-toggle"
-            onClick={() => setStatusCollapsed((v) => !v)}
-            aria-expanded={!statusCollapsed}
-          >
-            {statusCollapsed ? "Show status" : "Hide status"}
-          </button>
-          {!statusCollapsed && (
-            <div className="hub-status-lines">
-              <p>{uiContract.cacheLine}</p>
-              <p>{uiContract.identityLine}</p>
-              <p>{uiContract.entitlementLine}</p>
-              <p>{uiContract.statusLine}</p>
+        {/* Footer: Antiphon Studios branding — no internal status shown to users */}
+        <footer className="hub-footer hub-footer-branding">
+          <div className="hub-footer-content">
+            <div className="hub-footer-brand">
+              <div className="hub-logo-fallback hub-logo-small" aria-hidden="true" />
+              <span>Antiphon Studios</span>
             </div>
-          )}
+            <p className="hub-footer-legal">
+              © {new Date().getFullYear()} Antiphon Studios. All rights reserved.
+            </p>
+          </div>
         </footer>
       </main>
     </div>

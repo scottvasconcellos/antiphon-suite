@@ -19,3 +19,8 @@ export {
 export { getTimeSignatureFromMidiMeta, type MidiTimeSignatureMeta } from './midiTimeSignature.js';
 export { getChordFromPitchClassSet, type ChordFromPCSet } from './chordFromPitchClassSet.js';
 export { buildScaleMapForExport, type ScaleMapEntry } from './midiExport.js';
+export {
+  analyzeProgressionFromSymbols,
+  keyToString,
+  type AnalysisResult,
+} from './analyzeProgression.js';
