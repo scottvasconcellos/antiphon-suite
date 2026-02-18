@@ -72,6 +72,7 @@ Layer apps integrate via `apps/layer0-hub/src/services/publicControlPlane.ts`.
 
 - **Hub runbook** — `docs/HUB_RUNBOOK.md` — How to run Hub + authority, env vars, common failures.
 - **Layer-app spec** — `docs/LAYER_APP_COMPATIBILITY_SPEC.md` — Artifact manifest format, entitlement mapping, launch boundary.
+- **Design principles** — `docs/DESIGN_PRINCIPLES.md` — Layout, hierarchy, typography, and logo placement so UIs stay visually consistent; central reference for agents and developers.
 
 ## Failure Codes
 

@@ -1,0 +1,17 @@
+/**
+ * Design System Styles
+ * Main entry point for design system CSS
+ * 
+ * Import this file in your app to get all design tokens and utilities
+ */
+
+/* Import global styles with design tokens first */
+@import "./globals.css";
+
+/* Import utility classes */
+@import "./utilities.css";
+
+/* Import Tailwind CSS base and utilities */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

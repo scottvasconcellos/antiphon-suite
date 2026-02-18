@@ -1,0 +1,257 @@
+/* ============================================
+   ANTIPHON DESIGN SYSTEM
+   Premium Audio Software Interface
+   ============================================ */
+
+/* --- COLOR TOKENS --- */
+:root {
+  /* Background Tiers */
+  --color-bg-page: #0a0a0b;
+  --color-bg-app-shell: #111113;
+  --color-bg-surface: #18181b;
+  --color-bg-surface-elevated: #1f1f23;
+  --color-bg-inset: #0d0d0f;
+  --color-bg-disabled: #141416;
+  --color-bg-scrim: rgba(0, 0, 0, 0.85);
+
+  /* Text Tokens */
+  --color-text-primary: #e8e8ea;
+  --color-text-secondary: #a1a1a8;
+  --color-text-muted: #6b6b72;
+  --color-text-disabled: #43434a;
+  --color-text-inverse: #0a0a0b;
+  --color-text-success: #4ade80;
+  --color-text-warning: #fbbf24;
+  --color-text-danger: #f87171;
+  --color-text-accent: #60a5fa;
+  --color-text-link: #60a5fa;
+
+  /* Border Tokens */
+  --color-border-subtle: #28282d;
+  --color-border-strong: #38383f;
+  --color-border-focus: #60a5fa;
+  --color-border-error: #f87171;
+  --color-border-accent: #60a5fa;
+
+  /* State Overlays (used with backdrop filters or semi-transparent layers) */
+  --color-overlay-hover: rgba(255, 255, 255, 0.05);
+  --color-overlay-active: rgba(255, 255, 255, 0.08);
+  --color-overlay-selected: rgba(96, 165, 250, 0.12);
+  --color-overlay-focus: rgba(96, 165, 250, 0.15);
+  --color-overlay-dragged: rgba(96, 165, 250, 0.2);
+  --color-overlay-recording: rgba(239, 68, 68, 0.15);
+  --color-overlay-armed: rgba(251, 191, 36, 0.12);
+
+  /* Accent Colors (use sparingly) */
+  --color-accent-primary: #60a5fa;
+  --color-accent-primary-hover: #3b82f6;
+  --color-accent-primary-active: #2563eb;
+  --color-accent-success: #22c55e;
+  --color-accent-warning: #f59e0b;
+  --color-accent-danger: #ef4444;
+
+  /* --- SPACING SCALE --- */
+  --spacing-xs: 0.25rem;    /* 4px */
+  --spacing-sm: 0.5rem;     /* 8px */
+  --spacing-md: 0.75rem;    /* 12px */
+  --spacing-lg: 1rem;       /* 16px */
+  --spacing-xl: 1.5rem;     /* 24px */
+  --spacing-2xl: 2rem;      /* 32px */
+  --spacing-3xl: 3rem;      /* 48px */
+
+  /* --- RADIUS & SHAPE --- */
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-full: 9999px;
+
+  /* --- ELEVATION & SHADOWS --- */
+  /* Flat: no shadow (default) */
+  /* Raised: subtle elevation for cards/modals */
+  --shadow-raised: 
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.03);
+  
+  /* Overlay: for modals/dropdowns */
+  --shadow-overlay: 
+    0 10px 25px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+
+  /* Inset: for pressed/input controls */
+  --shadow-inset: 
+    inset 0 1px 3px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+
+  /* Bevel (hardware depth) */
+  --shadow-bevel: 
+    0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 1px 1px rgba(0, 0, 0, 0.4);
+
+  /* --- TYPOGRAPHY --- */
+  /* Font Families */
+  --font-display: ui-sans-serif, system-ui, sans-serif;
+  --font-ui: ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Monaco, "Cascadia Code", monospace;
+
+  /* Type Scale Sizes */
+  --font-size-display-lg: 3.5rem;    /* 56px - hero headlines */
+  --font-size-display-md: 2.5rem;    /* 40px - page titles */
+  --font-size-display-sm: 2rem;      /* 32px - section headers */
+  --font-size-heading-lg: 1.5rem;    /* 24px - card titles */
+  --font-size-heading-md: 1.25rem;   /* 20px - subsections */
+  --font-size-heading-sm: 1rem;      /* 16px - group labels */
+  --font-size-body-lg: 1rem;         /* 16px - primary body */
+  --font-size-body-md: 0.875rem;     /* 14px - default UI */
+  --font-size-body-sm: 0.8125rem;    /* 13px - secondary UI */
+  --font-size-caption: 0.75rem;      /* 12px - captions */
+  --font-size-micro: 0.6875rem;      /* 11px - hardware labels */
+  --font-size-code: 0.8125rem;       /* 13px - telemetry */
+
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+
+  /* Letter Spacing */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* --- TRANSITIONS --- */
+  --transition-fast: 100ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Damped easing for hardware feel */
+  --transition-damped: 200ms cubic-bezier(0.6, 0, 0.1, 1);
+}
+
+
+/* --- BASE STYLES --- */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body-md);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background: var(--color-bg-page);
+}
+
+/* --- TYPOGRAPHY DEFAULTS --- */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+h1 {
+  font-size: var(--font-size-display-md);
+}
+
+h2 {
+  font-size: var(--font-size-display-sm);
+}
+
+h3 {
+  font-size: var(--font-size-heading-lg);
+}
+
+h4 {
+  font-size: var(--font-size-heading-md);
+}
+
+h5 {
+  font-size: var(--font-size-heading-sm);
+}
+
+h6 {
+  font-size: var(--font-size-body-lg);
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--color-text-link);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-accent-primary-hover);
+}
+
+code, pre {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-code);
+}
+
+/* --- UTILITY CLASSES --- */
+.hardware-label {
+  font-size: var(--font-size-micro);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.telemetry {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-code);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-secondary);
+}
+
+.display {
+  font-size: var(--font-size-display-lg);
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* --- FOCUS STYLES --- */
+*:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* --- SCROLLBAR STYLING --- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-inset);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* --- SELECTION --- */
+::selection {
+  background: var(--color-overlay-selected);
+  color: var(--color-text-primary);
+}

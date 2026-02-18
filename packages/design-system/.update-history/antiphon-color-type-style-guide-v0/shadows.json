@@ -1,0 +1,11 @@
+{
+  "source": "Premium Dark-Mode Design System (Copy) (1).zip:src/index.css",
+  "tokenPrefix": "--shadow-",
+  "count": 4,
+  "tokens": {
+    "bevel": "0 1px 0 #ffffff0d, inset 0 1px 1px #0006",
+    "inset": "inset 0 1px 3px #0009, inset 0 0 0 1px #0000004d",
+    "overlay": "0 10px 25px #0009, 0 0 0 1px #ffffff0d",
+    "raised": "0 1px 2px #00000080, 0 0 0 1px #ffffff08"
+  }
+}

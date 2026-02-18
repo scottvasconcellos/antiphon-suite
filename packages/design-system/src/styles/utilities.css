@@ -1,0 +1,29 @@
+/**
+ * Utility Classes
+ * Hardware-inspired utility classes for consistent styling
+ */
+
+/* Hardware Label - For control group labels, section headers */
+.hardware-label {
+  font-size: var(--font-size-micro);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+/* Telemetry - For numeric readouts, meters, technical displays */
+.telemetry {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-code);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-secondary);
+}
+
+/* Display - For hero headlines and large marketing text */
+.display {
+  font-size: var(--font-size-display-lg);
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--tracking-tight);
+}

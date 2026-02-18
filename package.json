@@ -7,6 +7,8 @@
     "dev:hub": "pnpm --filter @antiphon/layer0-hub dev",
     "dev:authority": "pnpm --filter @antiphon/layer0-authority dev",
     "dev:figma-bundle": "pnpm --filter @antiphon/figma-bundle-generator dev",
+    "storybook": "pnpm --filter @antiphon/design-system storybook",
+    "dev:storybook": "pnpm --filter @antiphon/design-system storybook",
     "build": "pnpm --filter @antiphon/layer0-authority build && pnpm --filter @antiphon/layer0-hub build",
     "typecheck": "pnpm --filter @antiphon/layer0-authority typecheck && pnpm --filter @antiphon/layer0-hub typecheck",
     "smoke": "node scripts/control-plane-smoke.mjs && node scripts/foundation-smoke.mjs",

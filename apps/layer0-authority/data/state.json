@@ -3,16 +3,16 @@
     "userId": "hHdNeoxFQDbMeG5LVwB3oqagTh72",
     "email": "vasconcellosscott@gmail.com",
     "displayName": "Scott Vasconcellos",
-    "signedInAt": "2026-02-17T19:36:50.661Z"
+    "signedInAt": "2026-02-17T23:48:02.747Z"
   },
   "entitlements": [
     {
       "id": "hub-synth",
       "name": "Antiphon Synth",
       "version": "3.2.0",
-      "installedVersion": null,
+      "installedVersion": "3.2.0",
       "owned": true,
-      "installState": "not-installed",
+      "installState": "installed",
       "updateAvailable": false
     },
     {
@@ -55,19 +55,37 @@
       "id": "antiphon.layer.chord-scale-helper",
       "name": "Chord Scale Helper",
       "version": "1.0.0",
-      "installedVersion": null,
+      "installedVersion": "1.0.0",
       "owned": true,
-      "installState": "not-installed",
+      "installState": "installed",
       "updateAvailable": false
     }
   ],
   "offlineCache": {
-    "lastValidatedAt": "2026-02-17T19:36:50.665Z",
+    "lastValidatedAt": "2026-02-17T23:48:02.751Z",
     "maxOfflineDays": 21,
     "offlineDaysRemaining": 21,
     "cacheState": "valid"
   },
   "transactions": [
+    {
+      "id": "tx_7e17lkzi",
+      "appId": "hub-synth",
+      "appName": "Antiphon Synth",
+      "action": "install",
+      "status": "succeeded",
+      "message": "Installed 3.2.0.",
+      "occurredAt": "2026-02-18T02:08:58.161Z"
+    },
+    {
+      "id": "tx_ja5j3w4r",
+      "appId": "antiphon.layer.chord-scale-helper",
+      "appName": "Chord Scale Helper",
+      "action": "install",
+      "status": "succeeded",
+      "message": "Installed 1.0.0.",
+      "occurredAt": "2026-02-17T23:48:04.565Z"
+    },
     {
       "id": "tx_3rcasics",
       "appId": "hub-delay",

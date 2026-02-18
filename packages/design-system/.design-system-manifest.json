@@ -1,0 +1,26 @@
+{
+  "version": "0.1.0",
+  "sourceZipHash": "initial-import",
+  "lastUpdated": "2026-02-17T19:36:50.665Z",
+  "fingerprint": {
+    "components": [],
+    "icons": ["src/icons/IconLibrary.tsx"],
+    "tokens": [
+      "src/tokens/colors.ts",
+      "src/tokens/typography.ts",
+      "src/tokens/spacing.ts",
+      "src/tokens/radius.ts",
+      "src/tokens/shadows.ts",
+      "src/tokens/index.ts"
+    ],
+    "styles": [
+      "src/styles/globals.css",
+      "src/styles/utilities.css",
+      "src/styles/index.css"
+    ],
+    "guidelines": ["src/guidelines/Guidelines.md"],
+    "assets": ["src/assets/logo.png"]
+  },
+  "fileHashes": {},
+  "note": "Initial import from Figma export. File hashes will be populated on first update."
+}

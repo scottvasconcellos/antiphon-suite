@@ -1,0 +1,20 @@
+{
+  "schema": "antiphon.artifact-manifest",
+  "version": 1,
+  "appId": "antiphon.layer.chord-scale-helper",
+  "appVersion": "1.0.0",
+  "channel": "stable",
+  "digestAlgorithm": "sha256",
+  "files": [
+    {
+      "path": "app.txt",
+      "size": 22,
+      "sha256": "3204ae103204ae103204ae103204ae103204ae103204ae103204ae103204ae10"
+    }
+  ],
+  "signature": {
+    "keyId": "layer-chord-scale-helper-k1",
+    "algorithm": "ed25519",
+    "signature": "placeholder"
+  }
+}
