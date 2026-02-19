@@ -2,6 +2,8 @@
 
 Use this when you’re in the browser or terminal. Do the **browser steps** first; I can run the **terminal** parts for you when you’re ready.
 
+**See also:** [DESKTOP_INSTALL_INSTRUCTIONS.md](DESKTOP_INSTALL_INSTRUCTIONS.md) (customer copy) · [PACKAGING_AND_DESKTOP.md](PACKAGING_AND_DESKTOP.md) (current state).
+
 ---
 
 ## Recommendation: Windows code signing (cheap vs free)
@@ -120,17 +122,9 @@ Add these as **repository secrets** (Settings → Secrets and variables → Acti
 
 ---
 
-### B3. Enable Windows build in GitHub
+### B3. Release job
 
-1. Go to **https://github.com/scottvasconcellos/antiphon-suite/settings/variables/actions**
-2. If **`ENABLE_WINDOWS_BUILD`** exists, set its value to **`true`**.
-3. If it doesn’t exist: **New repository variable** → Name: `ENABLE_WINDOWS_BUILD`, Value: `true` → Save.
-
----
-
-### B4. Release job (include Windows artifacts)
-
-I can update the workflow so the **release** job also downloads the Windows artifact and attaches it to the GitHub Release. Say “add Windows to the release job” when you’re ready.
+The workflow already runs both Mac and Windows on every `v*` tag and attaches both installers to the GitHub Release. No change needed.
 
 ---
 
@@ -147,7 +141,7 @@ git push origin v0.1.0
 
 ---
 
-## Quick reference — secret and variable names
+## Quick reference — secret names
 
 **Apple (4 secrets):**  
 `APPLE_ID` · `APPLE_APP_SPECIFIC_PASSWORD` · `APPLE_TEAM_ID` · `APPLE_SIGNING_IDENTITY`
@@ -155,12 +149,8 @@ git push origin v0.1.0
 **Windows with Azure (7 secrets):**  
 `AZURE_TENANT_ID` · `AZURE_CLIENT_ID` · `AZURE_CLIENT_SECRET` · `AZURE_CODE_SIGNING_ACCOUNT_NAME` · `AZURE_CERT_PROFILE_NAME` · `AZURE_PUBLISHER_NAME` · `AZURE_ENDPOINT`
 
-**Variable (not secret):**  
-`ENABLE_WINDOWS_BUILD` = `true` to run the Windows job.
-
 ---
 
 When you’re ready, say:
 - **“Run the signing identity command”** — I’ll run `security find-identity -v -p codesigning` and tell you what to copy.
 - **“Tag and push release”** — I’ll create and push a release tag.
-- **“Add Windows to the release job”** — I’ll update the workflow so releases include Windows installers.

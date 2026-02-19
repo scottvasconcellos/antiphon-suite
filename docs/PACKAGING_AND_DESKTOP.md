@@ -4,9 +4,9 @@ This doc outlines how to get the Hub to ship as a native desktop app with instal
 
 ## Current state
 
-- **Hub** is a Vite + React web app. It builds to static assets (`apps/layer0-hub/dist/`) and is typically run in a browser or served by a static host.
+- **Hub** is a Vite + React web app wrapped in **Electron** for desktop. It builds to static assets (`apps/layer0-hub/dist/`) and is packaged as .app/.dmg (Mac) and NSIS .exe (Windows) via electron-builder.
 - **Authority** is a Node server (entitlements, auth). It is separate from the Hub; the Hub talks to it via configurable URLs.
-- There is **no desktop shell yet**: no .app bundle, .dmg, or .exe. To get “borderless window”, “launch at login”, and “helper icon”, the Hub needs to run inside a **desktop runtime**.
+- **Desktop shell:** Electron in place: borderless window, tray, launch-at-login, close-to-tray, auto-updater. Builds run with or without signing; notarization skipped when Apple secrets missing. See [DESKTOP_INSTALL_INSTRUCTIONS.md](DESKTOP_INSTALL_INSTRUCTIONS.md) for customer copy and the "why we don't pay for certs" message.
 
 ## Two installer paths
 
@@ -42,7 +42,7 @@ This doc outlines how to get the Hub to ship as a native desktop app with instal
 
 - **Ship:** Foundation smoke (build, typecheck, control-plane, structure, Hub test, Authority contracts) is the current “debug for the whole app” run; it passed and is the baseline for a green build.
 - **.dmg and .exe** are **two different processes** (Mac vs Windows) but can share one **desktop wrapper** (Electron or Tauri) and one **packaging pipeline** (e.g. electron-builder with targets `dmg` and `nsis`/`exe`).
-- **Next steps:** (1) Add an Electron or Tauri shell around the Hub (and optionally a bundled Authority or config to point to a hosted one). (2) Implement borderless window + in-window buttons. (3) Add launch-at-login + helper (Mac) and startup + tray (Windows). (4) Add auto-update + in-app toggle. (5) Wire build to produce .app/.dmg and .exe and run foundation smoke (and any new desktop tests) before each release.
+- **Done:** Electron shell, borderless window, tray, launch-at-login, close-to-tray, auto-update toggle, DMG with custom background and First-run.txt, Windows First-run-Windows.txt, release workflow (Mac + Windows on `v*` tag). **You still:** add Apple secrets when you want notarized Mac builds; add Windows cert (or Azure) when you want signed Windows; paste [DESKTOP_INSTALL_INSTRUCTIONS.md](DESKTOP_INSTALL_INSTRUCTIONS.md) onto the purchase page and into the download email.
 
 ## Update feed (electron-updater)
 

@@ -1,6 +1,8 @@
 # Desktop release — what you do in the browser
 
-Everything that can be automated in this repo is done (workflow, notarize script, entitlements, `build:mac`/`build:win`, repo variable `ENABLE_WINDOWS_BUILD=false`). The steps below are the **only** ones you must do yourself (in the browser and one terminal command).
+**Canonical docs:** [DESKTOP_INSTALL_INSTRUCTIONS.md](DESKTOP_INSTALL_INSTRUCTIONS.md) (customer copy + what you still do) · [PACKAGING_AND_DESKTOP.md](PACKAGING_AND_DESKTOP.md) (current state).
+
+Everything that can be automated is done: workflow builds **both** Mac and Windows on every `v*` tag and publishes both to the GitHub Release. The steps below are only for when you add **signing** (Apple/Windows secrets).
 
 ---
 
@@ -45,21 +47,20 @@ After you have created and installed your **Developer ID Application** certifica
 
 ## 4. Trigger a release
 
-After the four secrets are set:
+With or without signing secrets, tag and push:
 
 ```bash
 git tag -a v0.1.0 -m "Release v0.1.0"
 git push origin v0.1.0
 ```
 
-The workflow runs on any `v*` tag: it builds, signs, notarizes, and creates a GitHub Release with macOS artifacts.
+The workflow runs on any `v*` tag: it builds **Mac and Windows** and creates a GitHub Release with both installers. If Apple secrets are missing, Mac build still succeeds (notarization skipped). If Windows cert is missing, Windows build still produces an unsigned installer.
 
 ---
 
-## 5. (Later) Windows build
+## 5. (Later) Windows code signing
 
-When you have a Windows code-signing certificate:
+When you have a Windows code-signing certificate (or Azure Trusted Signing):
 
-1. Add secrets: `CSC_LINK` (base64 of your `.p12` file), `CSC_KEY_PASSWORD` (password for the `.p12`).
-2. In GitHub: Settings → Secrets and variables → **Variables** → set **`ENABLE_WINDOWS_BUILD`** to **`true`**.
-3. In `.github/workflows/release-desktop.yml`, change `needs: [build-mac]` to `needs: [build-mac, build-win]` in the `release` job and add a step to download and publish the Windows artifact.
+1. Add secrets: `CSC_LINK` + `CSC_KEY_PASSWORD`, or the Azure secrets (see [DESKTOP_RELEASE_STEP_BY_STEP.md](DESKTOP_RELEASE_STEP_BY_STEP.md)).
+2. No repo variable needed — the Windows job already runs on every `v*` tag.

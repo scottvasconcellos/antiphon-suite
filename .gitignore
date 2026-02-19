@@ -17,6 +17,11 @@ secrets*.json
 credentials*.json
 release
 .cursor
+.cursor/debug.log
+**/debug.log
 **/storybook-static
 # Hub (and other apps) copy from assets/brand at build/dev; don't commit the copy
 apps/layer0-hub/public/brand
+
+# Generated file map (machine-specific paths)
+docs/REPO_FILE_MAP.md

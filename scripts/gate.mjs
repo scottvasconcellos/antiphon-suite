@@ -20,7 +20,7 @@ if (scopedDirtyPaths.length === 0) {
 }
 
 console.log("[gate] running smoke");
-run("npm", ["run", "smoke"]);
+run("pnpm", ["run", "smoke"]);
 
 console.log("[gate] verifying public surface snapshot");
 run("node", ["scripts/verify-public-surface.mjs"]);
@@ -29,7 +29,7 @@ console.log("[gate] verifying reason coverage snapshot");
 run("node", ["scripts/verify-reason-coverage.mjs"]);
 
 console.log("[gate] running scoped rc-check");
-run("npm", ["run", "rc-check"]);
+run("pnpm", ["run", "rc-check"]);
 
 console.log("[gate] verifying staged legacy guard");
 run("node", ["scripts/legacy-staged-guard.mjs"]);
