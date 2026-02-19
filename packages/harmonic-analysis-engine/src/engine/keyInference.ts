@@ -137,9 +137,15 @@ export function inferKey(segments: number[][], options?: InferKeyOptions): Key {
         // Tonic prevalence: first chord root repeated strongly favors that key (e.g. K081 inversions in C)
         const tonicCount = roots.filter((r) => (r - root + 12) % 12 === 0).length;
         if (tonicCount >= 2) {
-          const prevalenceBonus = Math.min(0.18, (tonicCount - 1) * 0.06);
+          const prevalenceBonus = Math.min(0.25, (tonicCount - 1) * 0.08); // Increased from 0.18/0.06 to 0.25/0.08
           scoreMaj += prevalenceBonus;
           scoreMin += prevalenceBonus;
+        }
+        // Additional boost when first chord is repeated at the end (strong bookending)
+        if (lastRoot !== null && firstRoot === lastRoot && roots.length >= 4) {
+          const bookendBonus = 0.12; // Strong signal that first chord is the key center
+          scoreMaj += bookendBonus;
+          scoreMin += bookendBonus;
         }
       }
       if (lastRoot !== null && (lastRoot - root + 12) % 12 === 0) {

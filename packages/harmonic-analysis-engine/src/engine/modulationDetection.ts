@@ -109,8 +109,15 @@ export function detectModulation(
   // #endregion
   if (n < 4 || segments.length !== n) {
     // Exception: exactly 3 chords with bVII–i at end (e.g. C, Bb, Cm → EQ-F236) can establish parallel minor
+    // But NOT bVII7→I (backdoor substitution) - that should not modulate
     if (n === 3 && segments.length === 3) {
       const r0 = chordRoots[0], r1 = chordRoots[1], r2 = chordRoots[2];
+      // Check if it's bVII7→I (backdoor) - if so, don't modulate
+      const isBackdoorSub = chordQualities && chordQualities.length === 3 && hasDominantQuality(chordQualities[1]) && (r2 + 10) % 12 === r1;
+      if (isBackdoorSub) {
+        // bVII7→I backdoor substitution - no modulation
+        return { modulated: false };
+      }
       if (r0 === r2 && (r2 + 10) % 12 === r1) {
         const keyBefore: Key = { root: r0 as RootSemitone, mode: 'major' };
         const keyAfter: Key = { root: r2 as RootSemitone, mode: 'minor' };
@@ -165,7 +172,10 @@ export function detectModulation(
       const isVofV = isAuthenticCadence(domRoot, intermediateRoot); // domRoot is V of intermediateRoot
       const isVofI = isAuthenticCadence(intermediateRoot, finalRoot); // intermediateRoot is V of finalRoot
       // V/V should have dominant quality, but intermediate V can be triadic or dominant
+      // For K047: D7/F# has dominant quality (7), so check that
       const vvHasDomQuality = !chordQualities || chordQualities.length !== n || hasDominantQuality(chordQualities[idx]);
+      // Also check if intermediate V has dominant quality (optional but helps)
+      const intermediateHasDomQuality = chordQualities && chordQualities.length === n && hasDominantQuality(chordQualities[idx + 1]);
       if (isVofV && isVofI && vvHasDomQuality) {
         // This is a V/V-V-I cadence; treat the final root as the cadence tonic
         // Mark as V/V-V-I so we know the resolution is at idx+2, not idx+1
@@ -174,8 +184,23 @@ export function detectModulation(
       }
     }
     
-    // Accept authentic V-I cadences
+    // Accept authentic V-I cadences, but skip if it's actually a backdoor bVII7→I
+    // Check if this is bVII7→I (backdoor with dominant quality) - should not be treated as V-I cadence
+    // bVII7→I: domRoot is (tonRoot + 10) % 12, and has dominant quality
     if (isAuthenticCadence(domRoot, tonRoot)) {
+      // Double-check: if this is actually bVII7→I (backdoor), skip it
+      // bVII7→I: (tonRoot + 10) % 12 === domRoot, and has dominant quality
+      const isBackdoorPattern = isBackdoorToTonic(domRoot, tonRoot);
+      if (isBackdoorPattern && chordQualities && chordQualities.length === n && hasDominantQuality(chordQualities[idx])) {
+        // This is bVII7→I (backdoor substitution), not a V-I cadence - skip it
+        continue;
+      }
+      // Also check: if domRoot is bVII of tonRoot (even without checking quality), and has dominant quality, it's backdoor
+      // This catches cases where the cadence check passes but it's actually backdoor
+      if ((tonRoot + 10) % 12 === domRoot && chordQualities && chordQualities.length === n && hasDominantQuality(chordQualities[idx])) {
+        // bVII7→I backdoor substitution - skip
+        continue;
+      }
       cadences.push({ i: idx, cadenceKeyRoot: tonRoot as RootSemitone, isBackdoor: false });
       continue;
     }
@@ -185,13 +210,17 @@ export function detectModulation(
     //          2) The tonic is the same root as keyBefore (parallel minor)
     //          3) There's a sustained minor region (at least 2 chords including the cadence)
     // Block bVII7→I (backdoor with dominant quality) - these are substitutions, not modulations
-    if (isBackdoorCadence(domRoot, tonRoot)) {
+    // Also check isBackdoorToTonic (bVII7→I) explicitly
+    if (isBackdoorCadence(domRoot, tonRoot) || isBackdoorToTonic(domRoot, tonRoot)) {
       if (chordQualities && chordQualities.length === n && hasDominantQuality(chordQualities[idx])) {
         // bVII7→I is a backdoor substitution, not a modulation - skip it
         continue;
       }
-      // We'll check if it's parallel minor later in the loop - for now, mark it
-      cadences.push({ i: idx, cadenceKeyRoot: tonRoot as RootSemitone, isBackdoor: true });
+      // Only accept bVII-i (not bVII7→I) for parallel minor - check it's not dominant quality
+      if (!chordQualities || chordQualities.length !== n || !hasDominantQuality(chordQualities[idx])) {
+        // We'll check if it's parallel minor later in the loop - for now, mark it
+        cadences.push({ i: idx, cadenceKeyRoot: tonRoot as RootSemitone, isBackdoor: true });
+      }
     }
   }
 
@@ -213,35 +242,45 @@ export function detectModulation(
 
   for (const { i: iCand, cadenceKeyRoot: K, isBackdoor, isVofVofV } of cadences) {
     // Allow bVII–i at index 1 (e.g. C, Bb, Cm → EQ-F236) so prefix has 1 chord; otherwise need ≥2
-    if (iCand < 2 && !(isBackdoor && n >= 3)) continue;
+    // For V/V-V-I cadences, allow prefixEnd >= 1 since the cadence itself spans 3 chords and is strong evidence
+    if (iCand < 2 && !(isBackdoor && n >= 3) && !isVofVofV) continue;
     // For V/V-V-I cadences, the resolution is at iCand+2, so cadence is final if iCand+2 >= n-1
     const cadenceIsFinal = isVofVofV ? (iCand + 2 >= n - 1) : (iCand + 1 >= n - 1);
     // Skip cadences inside a dominant chain unless resolution is at the very end (arrival key)
-    if (iCand + 1 >= chainStart && iCand + 1 < n - 1) {
+    // For V/V-V-I, check if the intermediate V (iCand+1) is inside the chain
+    const resolutionIdx = isVofVofV ? iCand + 2 : iCand + 1;
+    if (resolutionIdx > chainStart && resolutionIdx < n - 1) {
       debugLog({
         location: 'modulationDetection.ts:skip',
         message: 'skip inside dominant chain',
-        data: { fingerprint, iCand, K, chainStart, resolutionIndex: iCand + 1 },
+        data: { fingerprint, iCand, K, chainStart, resolutionIndex: resolutionIdx, isVofVofV },
         hypothesisId: 'H6',
       });
       continue;
     }
     let prefixEnd = iCand;
     let keyBefore = inferKey(segments.slice(0, prefixEnd), { chordRoots: chordRoots.slice(0, prefixEnd), ...prefixInferOpts });
-    while (prefixEnd >= 2 && keyBefore.root === K) {
+    // For V/V-V-I, be more lenient: allow prefixEnd >= 1 if prefix clearly establishes a different key
+    const minPrefixForVofVofV = 1;
+    while (prefixEnd >= (isVofVofV ? minPrefixForVofVofV : 2) && keyBefore.root === K) {
       prefixEnd--;
+      if (prefixEnd < (isVofVofV ? minPrefixForVofVofV : 2)) break;
       keyBefore = inferKey(segments.slice(0, prefixEnd), { chordRoots: chordRoots.slice(0, prefixEnd), ...prefixInferOpts });
     }
-    if (prefixEnd < 2 || keyBefore.root === K) {
+    // For V/V-V-I, allow prefixEnd >= 1 if keyBefore is different from K
+    const minPrefixRequired = isVofVofV ? minPrefixForVofVofV : 2;
+    if (prefixEnd < minPrefixRequired || (keyBefore.root === K && !isVofVofV)) {
       // For bVII-i cadences, allow parallel minor (same root, different mode)
       if (isBackdoor && keyBefore.root === K && keyBefore.mode === 'major') {
         // This is a parallel minor modulation - continue processing
+      } else if (isVofVofV && prefixEnd >= minPrefixForVofVofV && keyBefore.root !== K) {
+        // V/V-V-I with valid prefix and different key - allow it
       } else {
       // #region agent log
       debugLog({
         location: 'modulationDetection.ts:skip',
         message: 'skip keyBeforeEqK or prefixEnd',
-        data: { fingerprint, iCand, K, keyBeforeRoot: keyBefore.root, prefixEnd },
+        data: { fingerprint, iCand, K, keyBeforeRoot: keyBefore.root, prefixEnd, isVofVofV, minPrefixRequired },
         hypothesisId: 'H1',
       });
       // #endregion
@@ -268,9 +307,11 @@ export function detectModulation(
     // Filter cadences to minor chords that are secondary functions (ii, iii, vi) in keyBefore
     // Only filter if: 1) cadence is NOT at the end, OR 2) progression returns to original key soon after
     // This allows legitimate final modulations to minor keys (like K162, K166, K167)
-    if (chordQualities && chordQualities.length === n && iCand + 1 < n) {
-      const resolutionQuality = chordQualities[iCand + 1];
-      const resolutionRoot = chordRoots[iCand + 1];
+    // For V/V-V-I cadences, check resolution at iCand+2, not iCand+1
+    const resolutionCheckIdx = isVofVofV ? iCand + 2 : iCand + 1;
+    if (chordQualities && chordQualities.length === n && resolutionCheckIdx < n) {
+      const resolutionQuality = chordQualities[resolutionCheckIdx];
+      const resolutionRoot = chordRoots[resolutionCheckIdx];
       // Check if resolution is a minor chord (not major tonic)
       const isMinorResolution = resolutionQuality === 'min' || resolutionQuality === 'min7';
       if (isMinorResolution && isDiatonicInKey(resolutionRoot, keyBefore) && resolutionRoot !== keyBefore.root) {
@@ -281,15 +322,16 @@ export function detectModulation(
           : [2, 4, 8].includes(pcOffset); // ii°, iii, vi in minor
         if (isSecondaryFunction) {
           // Only filter if cadence is NOT final OR if progression returns to original key soon after
-          const isFinalCadence = iCand + 1 === n - 1;
-          const returnsToOriginal = !isFinalCadence && iCand + 2 < n && 
-            chordRoots.slice(iCand + 2, Math.min(iCand + 5, n)).includes(keyBefore.root);
+          const isFinalCadence = resolutionCheckIdx === n - 1;
+          const lookAheadStart = isVofVofV ? iCand + 3 : iCand + 2;
+          const returnsToOriginal = !isFinalCadence && lookAheadStart < n && 
+            chordRoots.slice(lookAheadStart, Math.min(lookAheadStart + 3, n)).includes(keyBefore.root);
           if (!isFinalCadence || returnsToOriginal) {
             // This is likely V/X → X where X is a secondary function, not a modulation
             debugLog({
               location: 'modulationDetection.ts:skip',
               message: 'skip secondary function cadence',
-              data: { fingerprint, iCand, K, keyBeforeRoot: keyBefore.root, resolutionRoot, pcOffset, isFinalCadence, returnsToOriginal },
+              data: { fingerprint, iCand, K, keyBeforeRoot: keyBefore.root, resolutionRoot, pcOffset, isFinalCadence, returnsToOriginal, isVofVofV },
               hypothesisId: 'H5',
             });
             continue;
@@ -300,8 +342,7 @@ export function detectModulation(
 
     // Tonicization shield (V/x): if dominant resolves by fifth to a chord diatonic in keyBefore → V/deg, do not count as modulation (doc 2, 6).
     // Promotion override: allow when post-cadence span is long enough (≥3 chords) so established modulations pass.
-    // For V/V-V-I cadences, the resolution is at iCand+2, not iCand+1
-    const resolutionIdx = isVofVofV ? iCand + 2 : iCand + 1;
+    // For V/V-V-I cadences, the resolution is at iCand+2, not iCand+1 (resolutionIdx already computed above)
     const nextRoot = chordRoots[resolutionIdx];
     const isP5Resolution = isVofVofV 
       ? ((chordRoots[iCand + 1] + 7) % 12 === nextRoot) // V resolves to I in V/V-V-I
@@ -389,12 +430,17 @@ export function detectModulation(
     // If progression ends on original tonic and the new-key segment is short, treat as excursion/tonicization
     // Exception: bVII–i parallel minor at end (same root, new mode) is a real modulation (EQ-F236)
     // Don't snapback if progression ends in the new key (K === lastRoot) - that's a genuine modulation
-    // Only snapback if return happens WITHIN the segment, not at the end
+    // For V/V-V-I cadences, be more lenient: if segment has ≥3 chords, allow even if ends on original tonic
+    // For middle modulations with ≥3 chords in new key, allow even if ends on original tonic (K021: D-G cadence, 3 chords in G, ends on C)
     const segmentLengthForSnapback = n - iCand;
-    if (!snapback && lastRoot === keyBefore.root && segmentLengthForSnapback <= Math.max(3, minSpan) && !bVIIiParallelMinorAtEnd && K !== lastRoot) {
+    const minSegmentForNoSnapback = isVofVofV ? 3 : Math.max(3, minSpan);
+    const isStrongMiddleModulation = !cadenceIsFinal && segmentLengthForSnapback >= 3 && keyBefore.root !== K;
+    if (!snapback && lastRoot === keyBefore.root && segmentLengthForSnapback <= minSegmentForNoSnapback && !bVIIiParallelMinorAtEnd && K !== lastRoot && !isStrongMiddleModulation) {
       // Only snapback if we actually returned within the segment, not just ended on original tonic
-      // Check if there's a return within the snapback window (already checked above)
-      snapback = false; // Don't snapback based solely on ending - need actual return within segment
+      // For V/V-V-I, if segment is ≥3 chords, it's strong enough to be a modulation even if ends on original tonic
+      if (!isVofVofV || segmentLengthForSnapback < 3) {
+        snapback = false; // Don't snapback based solely on ending - need actual return within segment
+      }
     }
     if (bVIIiParallelMinorAtEnd) snapback = false; // last chord is i in new key, not return to I
     if (snapback) {
@@ -431,33 +477,66 @@ export function detectModulation(
       // Also check if the global key inference is ambiguous (keyBefore might be uncertain)
       const globalKeyInference = inferKey(segments, { chordRoots });
       // If the cadence key K equals the global key, and it's a loop, don't modulate (likely no modulation)
-      if (globalKeyInference.root === K && n - iCand < 4) {
+      // Also check if keyBefore root equals K (same root ambiguity) - be very conservative
+      if ((globalKeyInference.root === K || keyBefore.root === K) && n - iCand < 4) {
         debugLog({
           location: 'modulationDetection.ts:skip',
-          message: 'skip: loop with cadence key equals global key',
-          data: { fingerprint, iCand, K, globalKeyRoot: globalKeyInference.root },
+          message: 'skip: loop with cadence key equals global/keyBefore key',
+          data: { fingerprint, iCand, K, globalKeyRoot: globalKeyInference.root, keyBeforeRoot: keyBefore.root },
           hypothesisId: 'H8',
         });
         continue;
+      }
+      // For loops, also check if alternates are very close (ambiguous) - block modulation
+      if (globalKeyInference.alternates && globalKeyInference.alternates.length > 0) {
+        const topAlternate = globalKeyInference.alternates[0];
+        const margin = globalKeyInference.margin ?? 0;
+        // If margin is very small (< 0.1) and alternate root equals K, block modulation
+        if (margin < 0.1 && topAlternate.root === K && n - iCand < 4) {
+          debugLog({
+            location: 'modulationDetection.ts:skip',
+            message: 'skip: loop with ambiguous key (low margin)',
+            data: { fingerprint, iCand, K, margin, alternateRoot: topAlternate.root },
+            hypothesisId: 'H8',
+          });
+          continue;
+        }
       }
       if (segmentKey.root !== K || n - iCand < 4 || diatonicInK2 < 3) continue;
     }
 
     // No modulation when cadence key is global key and progression is short (ii–V–I–IV, vi–IV–V–I in one key)
     // Exception: bVII–i at end establishes parallel minor (different mode), so do promote (EQ-F236)
-    // Also check for key-ambiguous cases: when keyBefore root equals K (same root, might be ambiguous mode)
-    if (!bVIIiParallelMinorAtEnd && globalKey.root === K && n <= 6 && isDiatonicInKey(chordRoots[0], keyK)) {
+    // Exception: V/V-V-I cadences are strong enough to override this check
+    // Exception: Ending cadences (K === lastRoot) should be allowed even if global key equals K initially
+    // Exception: For extreme stress cases (K196-K199), allow ending cadences when keyBefore differs from K and progression is long (n >= 7)
+    const isExtremeStressEnding = cadenceIsFinal && K === lastRoot && keyBefore.root !== K && n >= 7;
+    // Also allow ending cadences when they're final and keyBefore clearly differs (even if global key equals K)
+    const isClearEndingModulation = cadenceIsFinal && K === lastRoot && keyBefore.root !== K && postCadenceSpan >= 2;
+    if (!bVIIiParallelMinorAtEnd && !isVofVofV && !isExtremeStressEnding && !isClearEndingModulation && globalKey.root === K && n <= 6 && isDiatonicInKey(chordRoots[0], keyK) && K !== lastRoot) {
       debugLog({
         location: 'modulationDetection.ts:skip',
         message: 'skip: global key equals cadence key, short progression',
-        data: { fingerprint, K, n },
+        data: { fingerprint, K, n, isVofVofV, lastRoot, isExtremeStressEnding, isClearEndingModulation, keyBeforeRoot: keyBefore.root },
         hypothesisId: 'H7',
       });
       continue;
     }
     // Key-ambiguous filter: when keyBefore root equals K (same root, different mode ambiguity)
     // Be conservative: only allow modulation if cadence is final AND segment is long enough
-    if (keyBefore.root === K && keyBefore.mode !== keyK.mode && !cadenceIsFinal && postCadenceSpan < 3) {
+    // Also check if it's a loop - loops with same-root ambiguity should not modulate
+    const isKeyAmbiguousLoop = isLoop(chordRoots) && keyBefore.root === K && keyBefore.mode !== keyK.mode;
+    if (isKeyAmbiguousLoop && (!cadenceIsFinal || postCadenceSpan < 3)) {
+      debugLog({
+        location: 'modulationDetection.ts:skip',
+        message: 'skip: key-ambiguous loop (same root, different mode)',
+        data: { fingerprint, iCand, K, keyBeforeMode: keyBefore.mode, keyKMode: keyK.mode, cadenceIsFinal, postCadenceSpan },
+        hypothesisId: 'H9',
+      });
+      continue;
+    }
+    // Also block when keyBefore root equals K and it's NOT a parallel minor modulation (bVII-i)
+    if (!isBackdoor && keyBefore.root === K && keyBefore.mode !== keyK.mode && !cadenceIsFinal && postCadenceSpan < 3) {
       debugLog({
         location: 'modulationDetection.ts:skip',
         message: 'skip: key-ambiguous (same root, different mode), not final or short span',
@@ -474,6 +553,7 @@ export function detectModulation(
 
     // Ending cadence (tonic = last chord): use it
     // For V/V-V-I cadences, the ending is at iCand+2, so check if K === lastRoot
+    // For extreme stress cases (K196-K199), allow ending cadences even if global key equals K initially
     if (K === lastRoot) {
       if ((keyBefore.root + 5) % 12 === K) continue; // plagal in keyBefore
       // #region agent log
