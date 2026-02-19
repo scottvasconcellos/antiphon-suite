@@ -1,0 +1,12 @@
+Antiphon Manager — First run (Windows)
+
+We don't pay for Windows code-signing certificates. We're a small team keeping overhead low until there's proven demand, so we don't use paid signing yet. The app is safe — Windows may show a one-time SmartScreen warning.
+
+HOW TO RUN THE INSTALLER / APP
+If Windows blocks the installer or the app: click "More info" then "Run anyway" (or equivalent). You may need to do this once per download.
+
+WHERE IT INSTALLS
+The installer will ask for a folder (default: Program Files). You can leave the default or choose a folder. That's where the app lives.
+
+UNINSTALL
+Settings → Apps → Installed apps → find Antiphon Manager → Uninstall (or Control Panel → Programs → Uninstall a program).

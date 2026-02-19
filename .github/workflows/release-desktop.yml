@@ -47,7 +47,6 @@ jobs:
 
   build-win:
     runs-on: windows-latest
-    if: ${{ vars.ENABLE_WINDOWS_BUILD == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -86,6 +85,9 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         run: pnpm run build:win
 
+      - name: Copy Windows README into release
+        run: copy apps\layer0-hub\build\First-run-Windows.txt apps\layer0-hub\release\First-run-Windows.txt
+
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -93,9 +95,10 @@ jobs:
           path: |
             apps/layer0-hub/release/*.exe
             apps/layer0-hub/release/latest.yml
+            apps/layer0-hub/release/First-run-Windows.txt
 
   release:
-    needs: [build-mac]
+    needs: [build-mac, build-win]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -106,8 +109,16 @@ jobs:
           name: mac-dist
           path: dist/mac
 
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: win-dist
+          path: dist/win
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/mac/*
+          files: |
+            dist/mac/*
+            dist/win/*
           generate_release_notes: true

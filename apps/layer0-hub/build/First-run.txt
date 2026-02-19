@@ -1,6 +1,9 @@
 Antiphon Manager — First run
 
-We don't pay Apple's $99/year Developer Program, so macOS will show a one-time "unknown developer" warning. The app is safe — use either method below once and you're set.
+We don't pay for Apple's developer certificates. We're a small team keeping overhead low until there's proven demand, so we don't use paid signing yet. The app is safe — you may see a one-time warning. Follow the steps below.
+
+MOVE TO APPLICATIONS
+Drag Antiphon Manager from this window into the Applications folder, then open it from Applications.
 
 ONE-TIME FIX (fastest)
 1. Hold Control and right-click the app.
