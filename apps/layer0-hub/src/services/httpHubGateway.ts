@@ -136,4 +136,31 @@ export class HttpHubGateway implements HubGateway {
       throw new Error(`Transaction fetch failed: ${normalizeApiError(error)}`);
     }
   }
+
+  async redeemSerial(serial: string): Promise<import("../domain/ports").RedeemSerialResult> {
+    try {
+      const payload = await requestJson<unknown>(`${this.apiBaseUrl}/redeem`, {
+        method: "POST",
+        body: JSON.stringify({ serial })
+      });
+      if (typeof payload === "object" && payload !== null) {
+        const result = payload as { success?: boolean; productId?: string; productName?: string; reason?: string; entitlements?: unknown };
+        if (result.success === true && result.productId && result.productName) {
+          return {
+            success: true,
+            productId: result.productId,
+            productName: result.productName,
+            entitlements: result.entitlements ? parseEntitlements(result.entitlements) : []
+          };
+        }
+        if (result.success === false && result.reason) {
+          return { success: false, reason: result.reason };
+        }
+      }
+      throw new Error("Invalid response format");
+    } catch (error) {
+      const message = normalizeApiError(error);
+      return { success: false, reason: message };
+    }
+  }
 }

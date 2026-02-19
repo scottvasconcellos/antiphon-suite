@@ -204,11 +204,11 @@ export function AppCatalog({ entitlements, onInstall, onUpdate, onLaunch, engine
 }
 
 function groupByCategory(apps: EntitledApp[]): Record<AppCategory, EntitledApp[]> {
-  const order: AppCategory[] = ["effects", "instruments", "layer-apps", "utilities"];
+  const order: AppCategory[] = ["effects", "instruments", "apps", "utilities"];
   const map: Record<string, EntitledApp[]> = {};
   for (const app of apps) {
     const meta = APP_METADATA[app.id];
-    const cat = meta?.category ?? "layer-apps";
+    const cat = meta?.category ?? "apps";
     (map[cat] ??= []).push(app);
   }
   for (const cat of order) {
@@ -259,7 +259,7 @@ const AppCard = memo(function AppCard({ app, onInstall, onUpdate, onLaunch, engi
     name: app.name,
     tagline: "",
     description: "",
-    category: "layer-apps" as AppCategory,
+    category: "apps" as AppCategory,
     useCases: [],
   };
 

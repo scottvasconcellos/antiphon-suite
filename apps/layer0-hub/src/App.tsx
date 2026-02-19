@@ -109,6 +109,24 @@ export default function App() {
     [hubState]
   );
 
+  const handleRedeemSerial = useCallback(
+    async (serial: string) => {
+      if (!built.engine) return { success: false as const, reason: "Engine not ready" };
+      try {
+        const result = await built.engine.redeemSerial(serial);
+        if (result.success) {
+          // Refresh entitlements to show the new license
+          const refreshed = await built.engine.refreshEntitlements();
+          setHubState(refreshed);
+        }
+        return result;
+      } catch (error) {
+        return { success: false as const, reason: error instanceof Error ? error.message : "Redeem failed" };
+      }
+    },
+    []
+  );
+
   const engineReady = built.engine !== null && hubState.status.mode === "ready";
   const session = hubState.snapshot.session;
 
@@ -206,7 +224,7 @@ export default function App() {
             </section>
           ) : view === "licenses-keys" ? (
             <section className="hub-section" aria-label="Licenses and keys">
-              <AddSerialView />
+              <AddSerialView onRedeem={handleRedeemSerial} engineReady={engineReady} />
               <LicensesView entitlements={hubState.snapshot.entitlements} session={null} />
             </section>
           ) : (
@@ -233,7 +251,7 @@ export default function App() {
           </section>
         ) : view === "licenses-keys" ? (
           <section className="hub-section" aria-label="Licenses and keys">
-            <AddSerialView />
+            <AddSerialView onRedeem={handleRedeemSerial} engineReady={engineReady} />
             <LicensesView entitlements={hubState.snapshot.entitlements} session={session} />
           </section>
         ) : view === "support" ? (

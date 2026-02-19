@@ -137,15 +137,25 @@ export function inferKey(segments: number[][], options?: InferKeyOptions): Key {
         // Tonic prevalence: first chord root repeated strongly favors that key (e.g. K081 inversions in C)
         const tonicCount = roots.filter((r) => (r - root + 12) % 12 === 0).length;
         if (tonicCount >= 2) {
-          const prevalenceBonus = Math.min(0.25, (tonicCount - 1) * 0.08); // Increased from 0.18/0.06 to 0.25/0.08
+          const prevalenceBonus = Math.min(0.28, (tonicCount - 1) * 0.09); // Slightly increased for K081
           scoreMaj += prevalenceBonus;
           scoreMin += prevalenceBonus;
         }
         // Additional boost when first chord is repeated at the end (strong bookending)
+        // But reduce this if there are many different roots (indicates inversions, not key change)
+        const uniqueRoots = new Set(roots);
+        const isLikelyInversions = uniqueRoots.size <= roots.length * 0.6 && roots.length >= 6; // Many repeats suggests inversions
         if (lastRoot !== null && firstRoot === lastRoot && roots.length >= 4) {
-          const bookendBonus = 0.12; // Strong signal that first chord is the key center
+          const bookendBonus = isLikelyInversions ? 0.16 : 0.12; // Stronger for inversion-heavy progressions
           scoreMaj += bookendBonus;
           scoreMin += bookendBonus;
+        }
+        // For K081: if first chord appears multiple times and progression has inversions (many roots repeated),
+        // give extra boost to first chord key, but be careful not to overdo it
+        if (tonicCount >= 3 && uniqueRoots.size <= roots.length * 0.7 && roots.length >= 6) {
+          const inversionBonus = 0.12; // Moderate boost for inversion-heavy progressions starting on tonic
+          scoreMaj += inversionBonus;
+          scoreMin += inversionBonus;
         }
       }
       if (lastRoot !== null && (lastRoot - root + 12) % 12 === 0) {

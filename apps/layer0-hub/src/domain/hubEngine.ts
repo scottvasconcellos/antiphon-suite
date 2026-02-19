@@ -333,6 +333,22 @@ export class HubEngine implements HubEngineContract {
     return token;
   }
 
+  async redeemSerial(serial: string): Promise<import("./engineContract").RedeemSerialResult> {
+    const result = await this.gateway.redeemSerial(serial);
+    if (result.success && result.entitlements) {
+      // Update local state with new entitlements
+      const current = this.store.load();
+      const next = applyHubEvent(current, {
+        type: "BOOTSTRAP_SYNCED",
+        entitlements: result.entitlements,
+        offlineCache: current.offlineCache,
+        transactions: current.transactions
+      });
+      this.store.save(next.snapshot);
+    }
+    return result;
+  }
+
   reset(): HubState {
     const next = applyHubEvent(DEFAULT_HUB_SNAPSHOT, { type: "RESET" });
     return { ...next, snapshot: this.store.save(next.snapshot) };

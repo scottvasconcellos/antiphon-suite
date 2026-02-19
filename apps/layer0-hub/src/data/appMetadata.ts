@@ -2,7 +2,7 @@
  * Client-side app metadata for display in the Hub.
  * Descriptions, categories, use cases, and links for each app.
  */
-export type AppCategory = "effects" | "layer-apps" | "utilities" | "instruments";
+export type AppCategory = "effects" | "apps" | "utilities" | "instruments";
 
 export type AppMetadata = {
   id: string;
@@ -23,7 +23,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
     name: "Hello World",
     tagline: "Minimal layer app for testing the control-plane.",
     description: "Minimal layer app for testing install, update, and launch flows.",
-    category: "layer-apps",
+    category: "apps",
     useCases: ["Verify Hub control-plane", "Test artifact install", "Smoke test layer apps"],
     iconPath: "/icons/hello-world.svg",
   },
@@ -32,7 +32,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
     name: "Rhythm",
     tagline: "Rhythm and groove tools for producers and performers.",
     description: "Rhythm and groove tools for producers and performers.",
-    category: "layer-apps",
+    category: "apps",
     useCases: ["Create rhythmic patterns", "Sync groove with projects", "Quick rhythm sketching"],
     iconPath: "/icons/rhythm.svg",
   },
@@ -41,7 +41,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
     name: "Chord Scale Helper",
     tagline: "One definitive chord-scale per view, exportable.",
     description: "Definitive chord-scale reference: one chord per view, exportable.",
-    category: "layer-apps",
+    category: "apps",
     useCases: ["Chord lookup while composing", "Scale reference for solos", "Export chord charts"],
     iconPath: "/icons/chord-scale-helper.svg",
   },
@@ -77,7 +77,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
 
 export const CATEGORY_LABELS: Record<AppCategory, string> = {
   effects: "Effects",
-  "layer-apps": "Layer Apps",
+  "apps": "Apps",
   utilities: "Utilities",
   instruments: "Instruments",
 };

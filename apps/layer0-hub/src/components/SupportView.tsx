@@ -79,6 +79,21 @@ export function SupportView() {
       </Card>
 
       <Card variant="raised" padding="default">
+        <h3 className="category-label">Contact support</h3>
+        <p className="note-text" style={{ marginBottom: "1rem" }}>
+          Email us at{" "}
+          <a
+            href="mailto:support@antiphon.audio"
+            className="hub-link-button"
+            style={{ display: "inline" }}
+          >
+            support@antiphon.audio
+          </a>
+          {" "}or use the contact form below. We respond within 1–2 business days.
+        </p>
+      </Card>
+
+      <Card variant="raised" padding="default">
         <h3 className="category-label">Frequently asked questions</h3>
         <dl className="faq-list">
           {FAQ_ITEMS.map((item, i) => (
@@ -102,7 +117,13 @@ export function SupportView() {
         </button>
         {contactOpen && (
           <div className="settings-collapse-content">
-            <p className="settings-muted">Send us a message.</p>
+            <p className="settings-muted">
+              Send us a message. You can also email{" "}
+              <a href="mailto:support@antiphon.audio" className="hub-link-button" style={{ display: "inline" }}>
+                support@antiphon.audio
+              </a>
+              {" "}directly.
+            </p>
             <form onSubmit={handleContactSubmit} className="settings-field">
               <label htmlFor="support-contact-message" className="hardware-label">
                 Message

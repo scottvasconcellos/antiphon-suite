@@ -7,6 +7,8 @@ import cors from "cors";
 import express, { type Request, type Response } from "express";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { verifyFirebaseIdToken } from "./firebaseAuth.js";
+import { getDb } from "./db.js";
+import * as dbService from "./dbService.js";
 
 type InstallState = "not-installed" | "installing" | "installed" | "error";
 
@@ -363,6 +365,37 @@ app.post("/updates/:appId", (req: Request, res: Response) => {
   const next = writeState(state);
   const saved = findApp(next, appId);
   res.json(saved);
+});
+
+// Serial redemption endpoint
+app.post("/redeem", (req: Request, res: Response) => {
+  try {
+    const db = getDb();
+    const state = readState();
+    const session = requireSession(state, res);
+    if (!session) {
+      return;
+    }
+
+    const serial = String(req.body?.serial ?? "").trim();
+    if (!serial) {
+      res.status(400).json({ message: "Serial is required." });
+      return;
+    }
+
+    const result = dbService.redeemSerial(db, session.userId, serial);
+    if (!result.success) {
+      res.status(400).json({ message: result.reason });
+      return;
+    }
+
+    // Return updated entitlements
+    const entitlements = dbService.getUserEntitlements(db, session.userId);
+    res.json({ success: true, productId: result.productId, productName: result.productName, entitlements });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Redeem failed";
+    res.status(500).json({ message });
+  }
 });
 
 const port = Number(process.env.PORT ?? 8787);

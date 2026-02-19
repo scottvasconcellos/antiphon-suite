@@ -25,3 +25,8 @@ apps/layer0-hub/public/brand
 
 # Generated file map (machine-specific paths)
 docs/REPO_FILE_MAP.md
+
+# Authority database (contains user data, should not be committed)
+apps/layer0-authority/data/authority.db
+apps/layer0-authority/data/authority.db-wal
+apps/layer0-authority/data/authority.db-shm

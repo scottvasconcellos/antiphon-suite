@@ -134,7 +134,9 @@ export function detectModulation(
   }
 
   const lastRoot = chordRoots[n - 1];
-  const prefixInferOpts = { firstTonicBonus: 0.15, lastTonicBonus: 0.02 };
+  // For prefix inference, use very low lastTonicBonus to avoid picking the cadence key prematurely
+  // This helps with K021, K047 where prefix should stay in original key
+  const prefixInferOpts = { firstTonicBonus: 0.15, lastTonicBonus: 0.01 };
 
   // Detect arpeggiations: very short progressions (≤5 chords) that start/end on same root with ≤4 unique roots
   // This catches cases like C-E-G-B-C (C major arpeggiated) that shouldn't modulate
@@ -261,20 +263,48 @@ export function detectModulation(
     let prefixEnd = iCand;
     let keyBefore = inferKey(segments.slice(0, prefixEnd), { chordRoots: chordRoots.slice(0, prefixEnd), ...prefixInferOpts });
     // For V/V-V-I, be more lenient: allow prefixEnd >= 1 if prefix clearly establishes a different key
+    // Also, if prefix inference picks K (cadence key), try shortening prefix to avoid picking cadence key prematurely
     const minPrefixForVofVofV = 1;
-    while (prefixEnd >= (isVofVofV ? minPrefixForVofVofV : 2) && keyBefore.root === K) {
+    let attempts = 0;
+    const maxAttempts = 3; // Try up to 3 times to find a prefix that doesn't equal K
+    while (prefixEnd >= (isVofVofV ? minPrefixForVofVofV : 2) && keyBefore.root === K && attempts < maxAttempts) {
       prefixEnd--;
       if (prefixEnd < (isVofVofV ? minPrefixForVofVofV : 2)) break;
       keyBefore = inferKey(segments.slice(0, prefixEnd), { chordRoots: chordRoots.slice(0, prefixEnd), ...prefixInferOpts });
+      attempts++;
     }
     // For V/V-V-I, allow prefixEnd >= 1 if keyBefore is different from K
+    // For regular V-I, still require prefixEnd >= 2 and keyBefore !== K
     const minPrefixRequired = isVofVofV ? minPrefixForVofVofV : 2;
+    // Special case: if prefix inference keeps picking K, but first chord is different from K, trust the first chord
+    // This helps with K021, K047 where prefix might pick G:maj but first chord is C
     if (prefixEnd < minPrefixRequired || (keyBefore.root === K && !isVofVofV)) {
       // For bVII-i cadences, allow parallel minor (same root, different mode)
       if (isBackdoor && keyBefore.root === K && keyBefore.mode === 'major') {
         // This is a parallel minor modulation - continue processing
       } else if (isVofVofV && prefixEnd >= minPrefixForVofVofV && keyBefore.root !== K) {
         // V/V-V-I with valid prefix and different key - allow it
+      } else if (isVofVofV && chordRoots[0] !== K && prefixEnd >= minPrefixForVofVofV) {
+        // V/V-V-I: if first chord differs from K, trust it even if prefix inference picked K
+        // Re-infer with even more conservative settings
+        keyBefore = inferKey(segments.slice(0, Math.max(1, prefixEnd)), { 
+          chordRoots: chordRoots.slice(0, Math.max(1, prefixEnd)), 
+          firstTonicBonus: 0.20, 
+          lastTonicBonus: 0.0 // No last tonic bonus for prefix
+        });
+        if (keyBefore.root !== K) {
+          // Now we have a valid keyBefore - continue
+        } else {
+          // #region agent log
+          debugLog({
+            location: 'modulationDetection.ts:skip',
+            message: 'skip keyBeforeEqK or prefixEnd (V/V-V-I, prefix still equals K)',
+            data: { fingerprint, iCand, K, keyBeforeRoot: keyBefore.root, prefixEnd, isVofVofV, firstRoot: chordRoots[0] },
+            hypothesisId: 'H1',
+          });
+          // #endregion
+          continue;
+        }
       } else {
       // #region agent log
       debugLog({
@@ -395,7 +425,8 @@ export function detectModulation(
     }
 
     // Half cadence: last chord is dominant of keyBefore and ending is short (1–2 chords) → do not report modulation
-    if ((keyBefore.root + 7) % 12 === lastRoot && n - iCand <= 2) continue;
+    // Exception: if cadence is final and K === lastRoot, it's a genuine ending modulation, not a half cadence
+    if ((keyBefore.root + 7) % 12 === lastRoot && n - iCand <= 2 && K !== lastRoot) continue;
 
     // Long circle-of-fifths (EQ-F201): if progression is long, returns to opening tonic, "new" key only in last 2 chords, and high root variety (real cycle)
     const openingRoot = chordRoots[0];
@@ -404,7 +435,8 @@ export function detectModulation(
     if (returnToOpening && keyBefore.root === openingRoot) continue;
 
     // IV–I in global key (plagal in global): only evidence for "new key" K is IV–I that is I–IV in globalKey → do not modulate
-    if ((K + 7) % 12 === globalKey.root) continue;
+    // Exception: if cadence is final and K === lastRoot, it's a genuine ending modulation (K196-K199)
+    if ((K + 7) % 12 === globalKey.root && !(cadenceIsFinal && K === lastRoot && keyBefore.root !== K)) continue;
 
     // Minimum segment length (promotion rule): at least minSpan chords in the new key,
     // except for ending cadence (K === lastRoot) where final chord confirms the key
@@ -478,11 +510,12 @@ export function detectModulation(
       const globalKeyInference = inferKey(segments, { chordRoots });
       // If the cadence key K equals the global key, and it's a loop, don't modulate (likely no modulation)
       // Also check if keyBefore root equals K (same root ambiguity) - be very conservative
-      if ((globalKeyInference.root === K || keyBefore.root === K) && n - iCand < 4) {
+      // For K183, K185, K186: block modulation if it's a loop and K equals global key OR keyBefore root
+      if ((globalKeyInference.root === K || keyBefore.root === K) && n - iCand < 5) {
         debugLog({
           location: 'modulationDetection.ts:skip',
           message: 'skip: loop with cadence key equals global/keyBefore key',
-          data: { fingerprint, iCand, K, globalKeyRoot: globalKeyInference.root, keyBeforeRoot: keyBefore.root },
+          data: { fingerprint, iCand, K, globalKeyRoot: globalKeyInference.root, keyBeforeRoot: keyBefore.root, segmentLength: n - iCand },
           hypothesisId: 'H8',
         });
         continue;
@@ -491,12 +524,27 @@ export function detectModulation(
       if (globalKeyInference.alternates && globalKeyInference.alternates.length > 0) {
         const topAlternate = globalKeyInference.alternates[0];
         const margin = globalKeyInference.margin ?? 0;
-        // If margin is very small (< 0.1) and alternate root equals K, block modulation
-        if (margin < 0.1 && topAlternate.root === K && n - iCand < 4) {
+        // If margin is very small (< 0.15) and alternate root equals K, block modulation
+        // Increased threshold from 0.1 to 0.15 for K183, K185, K186
+        if (margin < 0.15 && topAlternate.root === K && n - iCand < 5) {
           debugLog({
             location: 'modulationDetection.ts:skip',
             message: 'skip: loop with ambiguous key (low margin)',
-            data: { fingerprint, iCand, K, margin, alternateRoot: topAlternate.root },
+            data: { fingerprint, iCand, K, margin, alternateRoot: topAlternate.root, segmentLength: n - iCand },
+            hypothesisId: 'H8',
+          });
+          continue;
+        }
+      }
+      // For loops, also check if keyBefore has alternates that include K - very ambiguous
+      const keyBeforeInference = inferKey(segments.slice(0, prefixEnd), { chordRoots: chordRoots.slice(0, prefixEnd) });
+      if (keyBeforeInference.alternates && keyBeforeInference.alternates.some(alt => alt.root === K)) {
+        const margin = keyBeforeInference.margin ?? 0;
+        if (margin < 0.15 && n - iCand < 5) {
+          debugLog({
+            location: 'modulationDetection.ts:skip',
+            message: 'skip: loop with keyBefore alternates including K',
+            data: { fingerprint, iCand, K, keyBeforeRoot: keyBefore.root, margin, segmentLength: n - iCand },
             hypothesisId: 'H8',
           });
           continue;
@@ -556,11 +604,14 @@ export function detectModulation(
     // For extreme stress cases (K196-K199), allow ending cadences even if global key equals K initially
     if (K === lastRoot) {
       if ((keyBefore.root + 5) % 12 === K) continue; // plagal in keyBefore
+      // For K196-K199: these are extreme stress cases where progression ends in new key
+      // Even if global key equals K, if keyBefore differs and cadence is final, allow modulation
+      const isExtremeStressCase = n >= 7 && keyBefore.root !== K && cadenceIsFinal;
       // #region agent log
       debugLog({
         location: 'modulationDetection.ts:return',
         message: 'modulated true (ending)',
-        data: { fingerprint, iCand, K, keyBeforeRoot: keyBefore.root, isVofVofV },
+        data: { fingerprint, iCand, K, keyBeforeRoot: keyBefore.root, isVofVofV, isExtremeStressCase },
         hypothesisId: 'H1',
       });
       // #endregion
