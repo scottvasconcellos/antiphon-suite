@@ -7,7 +7,7 @@
  * Runs all cases and reports pass/fail count and percentage (then exits non-zero if any fail).
  */
 
-import { analyzeProgressionFromSymbols } from '../src/engine/analyzeProgression.js';
+import { analyzeProgressionFromSymbols } from '@antiphon/harmonic-analysis-engine';
 
 const INVARIANTS: Array<{ id: string; progression: string[] }> = [
   { id: 'INV_I_IV_V_I_C_maj', progression: ['C', 'F', 'G', 'C'] },

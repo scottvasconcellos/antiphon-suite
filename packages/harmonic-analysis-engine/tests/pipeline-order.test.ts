@@ -5,13 +5,15 @@
  * - Pipeline runs with custom params (cooldown/hysteresis in params).
  */
 
-import { analyzeProgressionFromSymbols } from '../src/engine/analyzeProgression.js';
-import { runKeyDecisionPipeline } from '../src/engine/keyDecisionPipeline.js';
-import { inferKey } from '../src/engine/keyInference.js';
-import { getChordPitchClasses } from '../src/engine/chordTones.js';
-import { parseChordSymbol } from '../src/engine/chordParser.js';
-import type { RootSemitone } from '../src/domain/key.js';
-import { DEFAULT_KEY_MODULATION_PARAMS } from '../src/engine/keyModulationParams.js';
+import {
+  analyzeProgressionFromSymbols,
+  runKeyDecisionPipeline,
+  inferKey,
+  getChordPitchClasses,
+  parseChordSymbol,
+  DEFAULT_KEY_MODULATION_PARAMS,
+} from '@antiphon/harmonic-analysis-engine';
+import type { RootSemitone, ChordQuality } from '@antiphon/harmonic-analysis-engine';
 
 function symbolsToPipelineInput(symbols: string[]) {
   const chordRoots: RootSemitone[] = [];
@@ -21,7 +23,7 @@ function symbolsToPipelineInput(symbols: string[]) {
     const p = parseChordSymbol(sym.trim());
     chordRoots.push(p.root);
     chordQualities.push(p.quality);
-    segments.push(getChordPitchClasses(p.root, p.quality as import('../src/domain/chord.js').ChordQuality));
+    segments.push(getChordPitchClasses(p.root, p.quality as ChordQuality));
   }
   return { chordRoots, segments, chordQualities };
 }

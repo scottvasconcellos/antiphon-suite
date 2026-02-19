@@ -2,16 +2,21 @@
  * Chord parser and time signature tests.
  */
 
-import { parseChordSymbol } from '../src/engine/chordParser.js';
-import { parseTimeSignature } from '../src/engine/timeSignatureParser.js';
-import { getChordPitchClasses } from '../src/engine/chordTones.js';
-import { inferKey } from '../src/engine/keyInference.js';
-import { getRomanNumeral } from '../src/engine/romanNumeralAnalysis.js';
-import { getChordScale } from '../src/engine/chordScaleSelector.js';
-import { checkConsistency } from '../src/engine/consistencyChecker.js';
-import { getTimeSignatureFromMidiMeta } from '../src/engine/midiTimeSignature.js';
-import { getChordFromPitchClassSet } from '../src/engine/chordFromPitchClassSet.js';
-import { buildScaleMapForExport } from '../src/engine/midiExport.js';
+import {
+  parseChordSymbol,
+  parseTimeSignature,
+  getChordPitchClasses,
+  inferKey,
+  getRomanNumeral,
+  getChordScale,
+  checkConsistency,
+  getTimeSignatureFromMidiMeta,
+  getChordFromPitchClassSet,
+  buildScaleMapForExport,
+  analyzeProgression,
+  buildProgressionFromChordEvents,
+} from '@antiphon/harmonic-analysis-engine';
+import type { AnalyzedProgression, RootSemitone } from '@antiphon/harmonic-analysis-engine';
 
 function assertParse(
   symbol: string,
@@ -152,15 +157,35 @@ if (g7.root !== 7 || g7.quality !== '7') throw new Error('PC set G7: root=' + g7
 // Scale map export (minimal AnalyzedProgression)
 const prog = {
   id: 'p1',
-  chords: [{ id: 'c1', symbol: 'Cmaj7', root: 0, quality: 'maj7' as const, span: { startBeat: 0, durationBeats: 4 } }],
+  chords: [{ id: 'c1', symbol: 'Cmaj7', root: 0 as RootSemitone, quality: 'maj7' as const, span: { startBeat: 0, durationBeats: 4 } }],
   timeSignature: { numerator: 4, denominator: 4 },
-  key: { root: 0, mode: 'major' as const },
+  key: { root: 0 as RootSemitone, mode: 'major' as const },
 };
 const scale = { id: 'ionian', name: 'Ionian', intervals: [0, 2, 4, 5, 7, 9, 11] };
 const rn = { symbol: 'I', degree: 1, quality: 'major' as const };
-const analyzed = { progression: prog, assignments: [{ chordId: 'c1', scale, romanNumeral: rn, chordToneDegrees: [1, 3, 5, 7] }] };
+const analyzed: AnalyzedProgression = { progression: prog, assignments: [{ chordId: 'c1', scale, romanNumeral: rn, chordToneDegrees: [1, 3, 5, 7] }] };
 const map = buildScaleMapForExport(analyzed);
 if (map.length !== 1 || map[0].scaleName !== 'Ionian' || map[0].startBeat !== 0) throw new Error('Scale map: ' + JSON.stringify(map));
 
-console.log('All chord parser, time signature, chord tones, key inference, Roman numeral, chord-scale, consistency, MIDI, and export tests passed.');
+// analyzeProgression: full pipeline from Progression → AnalyzedProgression
+const analyzedFromPipeline = analyzeProgression(prog);
+if (analyzedFromPipeline.assignments.length !== 1) throw new Error('analyzeProgression: expected 1 assignment');
+// Engine prefers Lydian for maj7 (no avoid note); Ionian is also valid
+if (!['Ionian', 'Lydian'].includes(analyzedFromPipeline.assignments[0].scale.name)) throw new Error('analyzeProgression: expected Ionian or Lydian, got ' + analyzedFromPipeline.assignments[0].scale.name);
+const map2 = buildScaleMapForExport(analyzedFromPipeline);
+if (map2.length !== 1 || map2[0].romanNumeralSymbol !== 'I') throw new Error('analyzeProgression scale map: ' + JSON.stringify(map2));
+
+// buildProgressionFromChordEvents: PC set + bass + beats → Progression → analyzeProgression
+const events = [
+  { pitchClasses: [0, 4, 7], bass: 0, startBeat: 0, durationBeats: 4 },
+  { pitchClasses: [7, 11, 14, 17], bass: 7, startBeat: 4, durationBeats: 2 },
+  { pitchClasses: [0, 4, 7], bass: 0, startBeat: 6, durationBeats: 4 },
+];
+const progFromEvents = buildProgressionFromChordEvents(events);
+if (progFromEvents.chords.length !== 3) throw new Error('buildProgressionFromChordEvents: expected 3 chords');
+if (progFromEvents.chords[0].symbol !== 'C' || progFromEvents.chords[1].symbol !== 'G7') throw new Error('buildProgressionFromChordEvents: expected C, G7, C got ' + progFromEvents.chords.map((c) => c.symbol).join(', '));
+const analyzedFromEvents = analyzeProgression(progFromEvents);
+if (analyzedFromEvents.assignments.length !== 3) throw new Error('analyzeProgression(events): expected 3 assignments');
+
+console.log('All chord parser, time signature, chord tones, key inference, Roman numeral, chord-scale, consistency, MIDI, export, analyzeProgression, and buildProgressionFromChordEvents tests passed.');
 process.exit(0);

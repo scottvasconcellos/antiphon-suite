@@ -136,3 +136,11 @@ function normalizedSymbol(root: RootSemitone, quality: ChordQuality, bass?: Root
   if (bass !== undefined) return `${base}/${ROOT_NAMES[bass]}`;
   return base;
 }
+
+/**
+ * Format root + quality (and optional bass) as a chord symbol (sharp spelling).
+ * Used when building a Progression from detected chords (e.g. MIDI → PC set → symbol).
+ */
+export function chordToSymbol(root: RootSemitone, quality: ChordQuality, bass?: RootSemitone): string {
+  return normalizedSymbol(root, quality, bass);
+}

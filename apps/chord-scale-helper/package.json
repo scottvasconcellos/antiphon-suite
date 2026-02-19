@@ -1,5 +1,5 @@
 {
-  "name": "@antiphon/layer-app-chord-scale-helper",
+  "name": "@antiphon/chord-scale-helper",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -7,15 +7,14 @@
     "build": "pnpm exec tsc -p tsconfig.json --noEmit",
     "typecheck": "pnpm exec tsc -p tsconfig.json --noEmit",
     "dev": "pnpm run typecheck",
-    "test": "pnpm exec tsx tests/chordParser.test.ts",
-    "test:key-suite": "pnpm exec tsx tests/key-modulation-suite.test.ts",
-    "test:key-all": "pnpm exec tsx tests/key-invariants.test.ts && pnpm exec tsx tests/key-modulation-suite.test.ts",
-    "test:edge-questions": "pnpm exec tsx tests/edge-case-questions.test.ts"
+    "test": "pnpm --filter @antiphon/harmonic-analysis-engine run test"
   },
   "dependencies": {
-    "@antiphon/design-system": "workspace:*"
+    "@antiphon/design-system": "workspace:*",
+    "@antiphon/harmonic-analysis-engine": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "^22.10.0",
     "typescript": "^5.9.3",
     "tsx": "^4.19.2"
   }

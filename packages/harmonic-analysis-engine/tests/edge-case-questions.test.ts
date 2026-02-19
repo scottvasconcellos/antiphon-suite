@@ -3,7 +3,7 @@
  * Same harness as K-suite: pass/soft/fail and percentage.
  */
 
-import { analyzeProgressionFromSymbols } from '../src/engine/analyzeProgression.js';
+import { analyzeProgressionFromSymbols } from '@antiphon/harmonic-analysis-engine';
 import type { KeyModulationCase } from './fixtures/key-modulation-suite.js';
 
 const STRONG_THRESHOLD = 0.85;

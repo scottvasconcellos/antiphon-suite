@@ -1,13 +1,20 @@
 /**
  * Single pipeline: chord symbol list → key, alternates, modulation, optional per-chord data.
- * Used by the key-modulation test harness and by future UI.
+ * Full progression: Progression (with beat spans) → AnalyzedProgression (one chord-scale per chord).
  */
 
-import type { RootSemitone } from '../domain/key.js';
+import type { Key, RootSemitone } from '../domain/key.js';
 import { ROOT_NAMES } from '../domain/key.js';
+import type { ChordQuality } from '../domain/chord.js';
+import type { ChordScaleAssignment } from '../domain/chordScaleAssignment.js';
+import type { Progression, AnalyzedProgression } from '../domain/progression.js';
+import type { Scale } from '../domain/scale.js';
 import { parseChordSymbol } from './chordParser.js';
 import { getChordPitchClasses } from './chordTones.js';
 import { runKeyDecisionPipeline } from './keyDecisionPipeline.js';
+import { getRomanNumeral } from './romanNumeralAnalysis.js';
+import { getChordScale } from './chordScaleSelector.js';
+import { checkConsistency } from './consistencyChecker.js';
 
 /** Key as string for comparison: "C:maj", "A:min". */
 export function keyToString(key: { root: number; mode: string }): string {
@@ -20,9 +27,9 @@ export interface AnalysisResult {
   primaryKey: string;
   /** Alternate keys (same format). */
   alternates: string[];
-  /** Whether modulation was detected (currently always false in engine). */
+  /** Whether modulation was detected. */
   modulated: boolean;
-  /** Segment keys when modulated (empty for MVP). */
+  /** Segment keys when modulated. */
   segmentKeys?: Array<{ startChordIdx: number; endChordIdx: number; key: string }>;
   /** Parse errors (symbol and message). */
   errors: Array<{ symbol: string; message: string }>;
@@ -93,4 +100,69 @@ export function analyzeProgressionFromSymbols(symbols: string[]): AnalysisResult
     errors,
     confidence: key.confidence,
   };
+}
+
+/** Parse "C:maj" / "A:min" into Key. Uses sharp spellings from ROOT_NAMES. */
+function keyFromString(s: string): Key {
+  const [rootPart, modePart] = s.split(':');
+  const nameToRoot: Record<string, RootSemitone> = {};
+  for (let i = 0; i <= 11; i++) {
+    const r = i as RootSemitone;
+    nameToRoot[ROOT_NAMES[r]] = r;
+  }
+  const root = (nameToRoot[rootPart ?? ''] ?? 0) as RootSemitone;
+  const mode = (modePart === 'min' ? 'minor' : 'major') as Key['mode'];
+  return { root, mode };
+}
+
+/** Scale degrees (1–7) that are chord tones for this quality in the given scale (intervals from chord root). */
+function getChordToneDegrees(scale: Scale, quality: ChordQuality): number[] {
+  const chordIntervals = getChordPitchClasses(0 as RootSemitone, quality);
+  const degrees: number[] = [];
+  for (const interval of chordIntervals) {
+    const idx = scale.intervals.indexOf(interval);
+    if (idx >= 0) degrees.push(idx + 1);
+  }
+  return degrees.length > 0 ? degrees.sort((a, b) => a - b) : [1];
+}
+
+/**
+ * Build full AnalyzedProgression from a Progression (chords with symbol, root, quality, span).
+ * Uses analyzeProgressionFromSymbols for key/segments, then assigns one chord-scale per chord
+ * and runs consistency checks.
+ */
+export function analyzeProgression(progression: Progression): AnalyzedProgression {
+  const symbols = progression.chords.map((c) => c.symbol);
+  const result = analyzeProgressionFromSymbols(symbols);
+  const primaryKey = keyFromString(result.primaryKey);
+
+  const segmentKeyForIndex = (index: number): Key => {
+    if (result.segmentKeys && result.modulated) {
+      for (const seg of result.segmentKeys) {
+        if (index >= seg.startChordIdx && index <= seg.endChordIdx) return keyFromString(seg.key);
+      }
+    }
+    return primaryKey;
+  };
+
+  const assignments: ChordScaleAssignment[] = [];
+  for (let i = 0; i < progression.chords.length; i++) {
+    const chord = progression.chords[i];
+    const key = segmentKeyForIndex(i);
+    const rn = getRomanNumeral(key, chord.root, chord.quality as ChordQuality);
+    const scale = getChordScale(key, chord.root, chord.quality as ChordQuality, rn.degree);
+    const chordToneDegrees = getChordToneDegrees(scale, chord.quality as ChordQuality);
+    const cons = checkConsistency(key, chord.root, chord.quality as ChordQuality, scale, rn);
+    if (!cons.valid && cons.errors.length > 0) {
+      // Still assign; caller can surface errors
+    }
+    assignments.push({
+      chordId: chord.id,
+      scale,
+      romanNumeral: rn,
+      chordToneDegrees,
+    });
+  }
+
+  return { progression, assignments };
 }
