@@ -12,6 +12,8 @@
     "electron:dev": "concurrently \"pnpm dev\" \"wait-on http://localhost:5173 && electron .\"",
     "dist": "pnpm build:all && electron-builder",
     "dist:mac": "pnpm build:all && electron-builder --mac",
+    "build:mac": "pnpm build:all && electron-builder --mac --publish always",
+    "build:win": "pnpm build:all && electron-builder --win --publish always",
     "test": "vitest run"
   },
   "build": {
