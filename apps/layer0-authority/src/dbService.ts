@@ -138,13 +138,14 @@ export function getUserEntitlements(db: Database.Database, userId: string): Enti
       installedVersion,
       owned,
       installState: installedVersion ? "installed" : "not-installed",
-      updateAvailable: owned && installedVersion && installedVersion !== currentVersion
+      updateAvailable: Boolean(owned && installedVersion && installedVersion !== currentVersion)
     };
   });
 }
 
 /**
  * Redeem a serial and grant entitlement.
+ * Uses database transaction to prevent race conditions.
  */
 export function redeemSerial(
   db: Database.Database,
@@ -156,41 +157,56 @@ export function redeemSerial(
   // Normalize serial: remove spaces, convert to uppercase
   const normalized = serial.trim().replace(/\s+/g, "-").toUpperCase();
 
-  const serialRow = db
-    .prepare("SELECT * FROM serials WHERE serial = ?")
-    .get(normalized) as
-    | { serial: string; product_id: string; redeemed_at: string | null; redeemed_by_user_id: string | null }
-    | undefined;
+  // Use transaction to ensure atomicity (prevents race conditions)
+  const transaction = db.transaction((): { success: true; productId: string; productName: string } | { success: false; reason: string } => {
+    // Check serial exists and get product_id (with lock to prevent concurrent redemption)
+    const serialRow = db
+      .prepare("SELECT * FROM serials WHERE serial = ?")
+      .get(normalized) as
+      | { serial: string; product_id: string; redeemed_at: string | null; redeemed_by_user_id: string | null }
+      | undefined;
 
-  if (!serialRow) {
-    return { success: false, reason: "Serial not found" };
-  }
+    if (!serialRow) {
+      return { success: false, reason: "Serial not found" };
+    }
 
-  if (serialRow.redeemed_at) {
-    return { success: false, reason: "Serial already redeemed" };
-  }
+    if (serialRow.redeemed_at) {
+      return { success: false, reason: "Serial already redeemed" };
+    }
 
-  // Mark serial as redeemed
-  db.prepare("UPDATE serials SET redeemed_at = ?, redeemed_by_user_id = ? WHERE serial = ?").run(
-    nowIso(),
-    userId,
-    normalized
-  );
+    // Mark serial as redeemed (atomic update)
+    db.prepare("UPDATE serials SET redeemed_at = ?, redeemed_by_user_id = ? WHERE serial = ? AND redeemed_at IS NULL").run(
+      nowIso(),
+      userId,
+      normalized
+    );
 
-  // Grant entitlement
-  db.prepare(
-    "INSERT OR IGNORE INTO entitlements (user_id, product_id, granted_at, granted_via) VALUES (?, ?, ?, ?)"
-  ).run(userId, serialRow.product_id, nowIso(), "serial");
+    // Check if update actually happened (another process might have redeemed it)
+    const checkRedeemed = db
+      .prepare("SELECT redeemed_at FROM serials WHERE serial = ?")
+      .get(normalized) as { redeemed_at: string | null } | undefined;
 
-  const product = db.prepare("SELECT name FROM products WHERE id = ?").get(serialRow.product_id) as
-    | { name: string }
-    | undefined;
+    if (!checkRedeemed || !checkRedeemed.redeemed_at) {
+      return { success: false, reason: "Serial redemption failed (concurrent redemption detected)" };
+    }
 
-  return {
-    success: true,
-    productId: serialRow.product_id,
-    productName: product?.name || serialRow.product_id
-  };
+    // Grant entitlement
+    db.prepare(
+      "INSERT OR IGNORE INTO entitlements (user_id, product_id, granted_at, granted_via) VALUES (?, ?, ?, ?)"
+    ).run(userId, serialRow.product_id, nowIso(), "serial");
+
+    const product = db.prepare("SELECT name FROM products WHERE id = ?").get(serialRow.product_id) as
+      | { name: string }
+      | undefined;
+
+    return {
+      success: true,
+      productId: serialRow.product_id,
+      productName: product?.name || serialRow.product_id
+    };
+  });
+
+  return transaction();
 }
 
 /**
