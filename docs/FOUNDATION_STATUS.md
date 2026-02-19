@@ -20,7 +20,7 @@
 ## Executable Foundation Gates
 - `pnpm build` (authority + hub build)
 - `pnpm typecheck` (authority + hub typecheck)
-- `pnpm test` (foundation smoke pipeline: build, typecheck, authority runtime health contract)
+- `pnpm test` / `pnpm run smoke` (foundation smoke: build, typecheck, control-plane, structure, **ARC 2 Operations arc** harmonic-analysis-engine typecheck + tests, persistence, hub build, authority runtime health contract)
 
 ## Foundation Risks
 - Repository currently has broad dirty state beyond core app files; baseline cleanup must be committed intentionally.

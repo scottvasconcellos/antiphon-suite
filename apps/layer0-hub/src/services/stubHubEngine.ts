@@ -1,4 +1,4 @@
-import { type HubEngineContract } from "../domain/engineContract";
+import { type HubEngineContract, type RedeemSerialResult } from "../domain/engineContract";
 import { DEFAULT_HUB_SNAPSHOT } from "../domain/defaults";
 import { applyHubEvent } from "../domain/hubEngineCore";
 import { type EntitledApp, type HubSnapshot, type HubState } from "../domain/types";
@@ -103,6 +103,10 @@ export class StubHubEngine implements HubEngineContract {
     const next = applyHubEvent(this.snapshot, { type: "TRANSACTIONS_SYNCED", transactions: [] });
     this.snapshot = next.snapshot;
     return next;
+  }
+
+  async redeemSerial(_serial: string): Promise<RedeemSerialResult> {
+    return { success: false, reason: "Stub: serial redemption not available" };
   }
 
   async getLaunchToken(appId: string): Promise<string | null> {

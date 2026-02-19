@@ -94,6 +94,9 @@ async function run() {
   runStep("pnpm", ["typecheck"]);
   runStep("node", ["scripts/control-plane-smoke.mjs"]);
   runStep("node", ["scripts/structure-smoke.mjs"]);
+  // ARC 2: Operations arc — harmonic analysis engine (chord-scale-helper)
+  runStep("pnpm", ["--filter", "@antiphon/harmonic-analysis-engine", "run", "typecheck"]);
+  runStep("pnpm", ["--filter", "@antiphon/harmonic-analysis-engine", "run", "test"]);
   runStep("pnpm", ["--filter", "@antiphon/layer0-hub", "exec", "tsx", "tests/persistence-restart-interruption.test.ts"]);
   verifyHubBuildOutput();
 

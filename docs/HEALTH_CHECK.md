@@ -18,7 +18,7 @@
 | Engine `typecheck` | ✅ |
 | chord-scale-helper `typecheck` | ✅ |
 | Engine `test` (chordParser, key-invariants, pipeline-order, key-modulation-suite, edge-case-questions) | ✅ (exit 0) |
-| `pnpm run smoke` (control-plane + foundation) | ✅ |
+| `pnpm run smoke` (control-plane + foundation; includes **ARC 2** harmonic-analysis-engine typecheck + test) | ✅ |
 | `pnpm run gate` | ⚠️ Fails if **scoped-dirty** (uncommitted changes in control-plane scoped paths). Passes when repo is scoped-clean. |
 
 ## Key-modulation suite (252 cases)
