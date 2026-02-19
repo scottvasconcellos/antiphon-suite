@@ -113,9 +113,27 @@ export function inferKey(segments: number[][], options?: InferKeyOptions): Key {
         scoreMaj += opts.lastTonicBonus;
         scoreMin += opts.lastTonicBonus;
       }
+      // Arpeggiation bonus: if progression is short (≤5 chords) and starts/ends on same root, strongly favor that root
+      if (firstRoot !== null && lastRoot !== null && firstRoot === lastRoot && (firstRoot - root + 12) % 12 === 0 && roots.length <= 5) {
+        const uniqueRoots = new Set(roots);
+        if (uniqueRoots.size <= 4) {
+          // Very likely an arpeggiation - boost significantly
+          scoreMaj += 0.25;
+          scoreMin += 0.25;
+        }
+      }
       if (secondToLastRoot !== null && lastRoot !== null) {
         if (isAuthenticCadence(root, 'major', secondToLastRoot, lastRoot)) scoreMaj += opts.cadenceBonus;
         if (isAuthenticCadence(root, 'minor', secondToLastRoot, lastRoot)) scoreMin += opts.cadenceBonus;
+      }
+      // Slight minor preference when bookended by same root, flat-side color (bVII, bVI, bIII), and minor is already close to major
+      if (firstRoot !== null && lastRoot !== null && firstRoot === lastRoot && (firstRoot - root + 12) % 12 === 0) {
+        const flatSide = [3, 8, 10]; // bIII, bVI, bVII (strong minor color)
+        const count = roots.filter((r) => flatSide.includes((r - root + 12) % 12)).length;
+        // If we see bIII (like Eb in C), strongly favor minor
+        const hasFlatIII = roots.some((r) => (r - root + 12) % 12 === 3);
+        if (hasFlatIII && scoreMin >= scoreMaj - 0.2) scoreMin += 0.12; // Stronger boost for bIII
+        else if (count >= 2 && scoreMin >= scoreMaj - 0.15) scoreMin += 0.065;
       }
     }
 

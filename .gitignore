@@ -18,3 +18,5 @@ credentials*.json
 release
 .cursor
 **/storybook-static
+# Hub (and other apps) copy from assets/brand at build/dev; don't commit the copy
+apps/layer0-hub/public/brand

@@ -3,22 +3,36 @@
  * reports pass / soft-pass / fail and pressure-test summary.
  */
 
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { analyzeProgressionFromSymbols } from '../src/engine/analyzeProgression.js';
+import { parseChordSymbol } from '../src/engine/chordParser.js';
 import { KEY_MODULATION_SUITE, type KeyModulationCase } from './fixtures/key-modulation-suite.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DEBUG_LOG_PATH = path.resolve(__dirname, '../../../.cursor/debug.log');
+
+const DEBUG_LOG = (payload: object) => {
+  const line = JSON.stringify({ ...payload, timestamp: Date.now(), runId: 'test', hypothesisId: 'H0' }) + '\n';
+  try {
+    fs.appendFileSync(DEBUG_LOG_PATH, line);
+  } catch (_) {}
+};
 
 const STRONG_THRESHOLD = 0.85;
 const AMBIGUOUS_THRESHOLD = 0.55;
 
 /** Parse ground truth key string to comparable root (0-11) and mode. Engine only has maj/min; dorian/mixolydian map to min/maj for root comparison. */
 function parseGroundTruthKey(keyStart: string): { root: number; mode: 'maj' | 'min'; isModal: boolean } {
-  const isModal = keyStart.includes('dorian') || keyStart.includes('mixolydian');
+  const isModal = keyStart.includes('dorian') || keyStart.includes('mixolydian') || keyStart.includes('aeolian');
   const [rootPart, modePart] = keyStart.split(':');
   const rootMap: Record<string, number> = {
     C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11,
   };
   const root = rootMap[rootPart] ?? 0;
   let mode: 'maj' | 'min' = 'maj';
-  if (modePart === 'min' || modePart === 'dorian') mode = 'min';
+  if (modePart === 'min' || modePart === 'dorian' || modePart === 'aeolian') mode = 'min';
   if (modePart === 'mixolydian') mode = 'maj'; // engine will infer maj for mixolydian center
   return { root, mode, isModal };
 }
@@ -90,22 +104,95 @@ const results: Array<{ id: string; result: Result; reason: string }> = [];
 for (const c of KEY_MODULATION_SUITE) {
   const { result, reason } = runCase(c);
   results.push({ id: c.id, result, reason });
+  if (result === 'fail') {
+    const analysis = analyzeProgressionFromSymbols(c.progression);
+    let fingerprint = '';
+    try {
+      fingerprint = c.progression.map((s) => parseChordSymbol(s.trim()).root).join(',');
+    } catch (_) {}
+    DEBUG_LOG({
+      location: 'key-modulation-suite.test.ts:fail',
+      message: 'case failed',
+      data: {
+        id: c.id,
+        reason,
+        fingerprint,
+        primaryKey: analysis.primaryKey,
+        modulated: analysis.modulated,
+        keyStart: c.groundTruth.keyStart,
+        gtModulates: c.groundTruth.modulates,
+      },
+    });
+  }
 }
 
 const pass = results.filter((r) => r.result === 'pass').length;
 const softPass = results.filter((r) => r.result === 'soft-pass').length;
 const fail = results.filter((r) => r.result === 'fail').length;
 
-console.log('\n--- Key/Modulation 50-Case Stress Test ---\n');
+const total = results.length;
+const passOrSoft = pass + softPass;
+const pct = total > 0 ? ((passOrSoft / total) * 100).toFixed(1) : '0';
+
+console.log(`\n--- Key/Modulation ${total}-Case Stress Test ---\n`);
 console.log(`Pass:      ${pass}`);
 console.log(`Soft-pass: ${softPass}`);
 console.log(`Fail:      ${fail}`);
-console.log(`Total:     ${results.length}\n`);
+console.log(`Total:     ${total}`);
+console.log(`Pass+soft: ${passOrSoft}/${total} (${pct}%)\n`);
+
+// Per-category metrics (Axis A/B/C by phenomenon: parallel_minor, modal, circle_of_fifths, etc.)
+type CatStats = { total: number; pass: number; soft: number; fail: number };
+const byCategoryAll = new Map<string, CatStats>();
+for (const c of KEY_MODULATION_SUITE) {
+  const cat = c.groundTruth.category ?? '(no category)';
+  if (!byCategoryAll.has(cat)) {
+    byCategoryAll.set(cat, { total: 0, pass: 0, soft: 0, fail: 0 });
+  }
+  const stats = byCategoryAll.get(cat)!;
+  const r = results.find((x) => x.id === c.id);
+  stats.total += 1;
+  if (!r) continue;
+  if (r.result === 'pass') stats.pass += 1;
+  else if (r.result === 'soft-pass') stats.soft += 1;
+  else if (r.result === 'fail') stats.fail += 1;
+}
+
+if (byCategoryAll.size > 0) {
+  console.log('By category (pass/soft/fail):');
+  for (const [cat, stats] of Array.from(byCategoryAll.entries()).sort((a, b) => a[0].localeCompare(b[0]))) {
+    const catPct = stats.total > 0 ? (((stats.pass + stats.soft) / stats.total) * 100).toFixed(1) : '0';
+    console.log(
+      `  ${cat}: ${stats.pass}/${stats.total} pass, ${stats.soft} soft, ${stats.fail} fail (pass+soft ${catPct}%)`
+    );
+  }
+  console.log('');
+}
 
 if (fail > 0) {
+  const failed = results.filter((r) => r.result === 'fail');
   console.log('Failed cases:');
-  results.filter((r) => r.result === 'fail').forEach((r) => console.log(`  ${r.id}: ${r.reason}`));
+  failed.forEach((r) => console.log(`  ${r.id}: ${r.reason}`));
+  const byCategory = new Map<string, string[]>();
+  for (const r of failed) {
+    const c = KEY_MODULATION_SUITE.find((x) => x.id === r.id);
+    const cat = c?.groundTruth?.category ?? '(no category)';
+    if (!byCategory.has(cat)) byCategory.set(cat, []);
+    byCategory.get(cat)!.push(`${r.id}: ${r.reason}`);
+  }
+  if (byCategory.size > 1) {
+    console.log('\nBy category:');
+    for (const [cat, lines] of Array.from(byCategory.entries()).sort((a, b) => a[0].localeCompare(b[0]))) {
+      console.log(`  ${cat}: ${lines.length}`);
+      lines.slice(0, 5).forEach((l) => console.log(`    ${l}`));
+      if (lines.length > 5) console.log(`    ... and ${lines.length - 5} more`);
+    }
+  }
   console.log('');
+}
+
+if (passOrSoft >= total * 0.9) {
+  console.log('✓ 90% success rate (pass+soft) reached.\n');
 }
 
 // Exit with error if any hard fail (so CI can catch it)

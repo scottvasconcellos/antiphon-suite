@@ -4,12 +4,37 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "pnpm exec tsc -p tsconfig.json && pnpm exec vite build",
+    "dev": "node ../../scripts/copy-brand-to-hub.mjs && vite",
+    "build": "node ../../scripts/copy-brand-to-hub.mjs && pnpm exec tsc -p tsconfig.json && pnpm exec vite build",
     "preview": "vite preview",
     "typecheck": "pnpm exec tsc -p tsconfig.json --noEmit",
     "test:foundation:artifacts": "pnpm exec tsx tests/foundation-artifact.test.ts",
-    "test:foundation:persistence-restart": "pnpm exec tsx tests/persistence-restart-interruption.test.ts"
+    "test:foundation:persistence-restart": "pnpm exec tsx tests/persistence-restart-interruption.test.ts",
+    "electron": "electron .",
+    "electron:dev": "ELECTRON_DEV=1 electron .",
+    "build:desktop": "pnpm run build && electron-builder --mac --win",
+    "build:mac": "pnpm run build && electron-builder --mac",
+    "build:win": "pnpm run build && electron-builder --win"
+  },
+  "main": "electron/main.cjs",
+  "build": {
+    "appId": "com.antiphon.manager",
+    "productName": "Antiphon Manager",
+    "npmRebuild": false,
+    "directories": { "output": "release" },
+    "files": ["dist/**", "electron/**"],
+    "afterSign": "../../scripts/notarize.js",
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }, { "target": "zip", "arch": ["arm64", "x64"] }],
+      "category": "public.app-category.productivity",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }] },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true },
+    "publish": { "provider": "github", "owner": "scottvasconcellos", "repo": "antiphon-suite" }
   },
   "dependencies": {
     "@antiphon/design-system": "workspace:*",
@@ -21,6 +46,10 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.1.0",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "electron-updater": "^6.3.9",
+    "@electron/notarize": "^2.3.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.17",

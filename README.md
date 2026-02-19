@@ -73,6 +73,8 @@ Layer apps integrate via `apps/layer0-hub/src/services/publicControlPlane.ts`.
 - **Hub runbook** — `docs/HUB_RUNBOOK.md` — How to run Hub + authority, env vars, common failures.
 - **Layer-app spec** — `docs/LAYER_APP_COMPATIBILITY_SPEC.md` — Artifact manifest format, entitlement mapping, launch boundary.
 - **Design principles** — `docs/DESIGN_PRINCIPLES.md` — Layout, hierarchy, typography, and logo placement so UIs stay visually consistent; central reference for agents and developers.
+- **Legal (shared)** — `docs/legal/` — Canonical Privacy Policy and EULA for all apps and endpoints; Hub and other apps serve or link to these.
+- **Shared assets** — `assets/` — Brand logos and other shared PNG/assets; see `assets/README.md`. All apps should pull from here. Hub copies `assets/brand/` into its public folder at build/dev.
 
 ## Failure Codes
 

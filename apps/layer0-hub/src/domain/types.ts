@@ -4,6 +4,8 @@ export type HubSession = {
   userId: string;
   email: string;
   displayName: string;
+  /** Optional profile photo URL (from Firebase); used for topbar/account UI. */
+  photoURL?: string;
   signedInAt: string;
 };
 

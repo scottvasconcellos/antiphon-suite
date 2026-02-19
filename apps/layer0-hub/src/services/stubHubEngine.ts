@@ -56,7 +56,7 @@ export class StubHubEngine implements HubEngineContract {
   }
 
   async signInWithFirebase(_idToken: string): Promise<HubState> {
-    return this.signIn("stub@firebase.local");
+    return this.signIn("stub@example.com");
   }
 
   async signOut(): Promise<HubState> {

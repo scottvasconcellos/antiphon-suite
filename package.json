@@ -31,6 +31,11 @@
     "rc0-release": "node scripts/rc0-release-dry-run.mjs",
     "rc0-tag": "node scripts/rc0-tag.mjs",
     "rc0-tag:verify": "node scripts/rc0-tag.mjs --verify",
-    "rc0-finalize": "node scripts/rc0-finalize.mjs"
+    "rc0-finalize": "node scripts/rc0-finalize.mjs",
+    "build:mac": "pnpm --filter @antiphon/layer0-hub build:mac",
+    "build:win": "pnpm --filter @antiphon/layer0-hub build:win"
+  },
+  "devDependencies": {
+    "playwright": "^1.58.2"
   }
 }

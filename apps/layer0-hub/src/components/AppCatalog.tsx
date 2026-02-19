@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, memo } from "react";
 import type { EntitledApp } from "../domain/types";
 import { Card, CardHeader, Button } from "@antiphon/design-system/components";
 import { APP_METADATA, CATEGORY_LABELS, type AppCategory } from "../data/appMetadata";
@@ -44,6 +44,15 @@ export function AppCatalog({ entitlements, onInstall, onUpdate, onLaunch, engine
   const owned = entitlements.filter((app) => app.owned);
   const unowned = entitlements.filter((app) => !app.owned);
 
+  const updatable = useMemo(
+    () => owned.filter((app) => app.updateAvailable && app.installedVersion != null),
+    [owned]
+  );
+  const installable = useMemo(
+    () => owned.filter((app) => app.owned && !app.installedVersion),
+    [owned]
+  );
+
   const filteredOwned = useMemo(() => {
     let list = filterApps(owned, filter);
     if (search.trim()) list = list.filter((app) => matchesSearch(app, search.trim()));
@@ -54,6 +63,19 @@ export function AppCatalog({ entitlements, onInstall, onUpdate, onLaunch, engine
     if (!search.trim()) return unowned;
     return unowned.filter((app) => matchesSearch(app, search.trim()));
   }, [unowned, search]);
+
+  const handleUpdateAll = useCallback(() => {
+    updatable.forEach((app) => onUpdate(app.id));
+  }, [updatable, onUpdate]);
+
+  const handleInstallAll = useCallback(() => {
+    installable.forEach((app) => onInstall(app.id));
+  }, [installable, onInstall]);
+
+  const hasUpdates = updatable.length > 0;
+  const hasInstallable = installable.length > 0;
+  const showBulkAction = hasUpdates || hasInstallable;
+  const bulkDisabled = !engineReady || busyAppId !== null;
 
   return (
     <div className="app-catalog">
@@ -144,6 +166,39 @@ export function AppCatalog({ entitlements, onInstall, onUpdate, onLaunch, engine
           </div>
         </section>
       )}
+
+      {showBulkAction && (
+        <section className="app-catalog-section library-bulk-actions">
+          <Card variant="raised" padding="default">
+            <div className="library-bulk-main">
+              <div className="library-bulk-copy">
+                <h3 className="library-bulk-title">
+                  {hasUpdates ? "Updates available" : "Ready to install"}
+                </h3>
+                <p className="library-bulk-subtitle">
+                  {hasUpdates
+                    ? `${updatable.length} app${updatable.length !== 1 ? "s" : ""} can be updated.`
+                    : `${installable.length} owned app${installable.length !== 1 ? "s" : ""} not installed yet.`}
+                </p>
+              </div>
+              <Button
+                variant="primary"
+                size="compact"
+                onClick={hasUpdates ? handleUpdateAll : handleInstallAll}
+                disabled={bulkDisabled}
+              >
+                {bulkDisabled
+                  ? hasUpdates
+                    ? "Updating…"
+                    : "Installing…"
+                  : hasUpdates
+                    ? "Update all"
+                    : "Install all"}
+              </Button>
+            </div>
+          </Card>
+        </section>
+      )}
     </div>
   );
 }
@@ -164,9 +219,10 @@ function groupByCategory(apps: EntitledApp[]): Record<AppCategory, EntitledApp[]
 
 function MoreByAntiphonCard({ app, viewMode }: { app: EntitledApp; viewMode: ViewMode }) {
   const meta = APP_METADATA[app.id] ?? { tagline: "", description: "", iconPath: undefined };
+  const isList = viewMode === "list";
   return (
-    <Card variant="raised" padding="default" className={`app-card app-card-compact ${viewMode}`}>
-      <div className="app-card-main">
+    <Card variant="raised" padding="default" className={`app-card app-card-compact ${viewMode} ${isList ? "app-card-list-row" : ""}`}>
+      <div className={`app-card-main ${isList ? "app-card-main-list" : ""}`}>
         <div className="app-card-art">
           {meta.iconPath ? (
             <img src={meta.iconPath} alt="" className="app-card-icon" />
@@ -174,7 +230,7 @@ function MoreByAntiphonCard({ app, viewMode }: { app: EntitledApp; viewMode: Vie
             <div className="app-card-icon-fallback" aria-hidden="true" />
           )}
         </div>
-        <div className="app-card-info">
+        <div className={`app-card-info ${isList ? "app-card-info-list" : ""}`}>
           <h3 className="app-card-title">{app.name}</h3>
           {meta.tagline ? <p className="app-card-tagline">{meta.tagline}</p> : null}
         </div>
@@ -197,8 +253,7 @@ type AppCardProps = {
   viewMode: ViewMode;
 };
 
-function AppCard({ app, onInstall, onUpdate, onLaunch, engineReady, busy, anyBusy, viewMode }: AppCardProps) {
-  const [expanded, setExpanded] = useState(false);
+const AppCard = memo(function AppCard({ app, onInstall, onUpdate, onLaunch, engineReady, busy, anyBusy, viewMode }: AppCardProps) {
   const meta = APP_METADATA[app.id] ?? {
     id: app.id,
     name: app.name,
@@ -223,79 +278,83 @@ function AppCard({ app, onInstall, onUpdate, onLaunch, engineReady, busy, anyBus
           ? "up-to-date"
           : "not-installed";
 
-  const toggleExpand = useCallback(() => setExpanded((v) => !v), []);
-
-  return (
-    <div
-      className={`app-card-wrapper ${viewMode} ${expanded ? "app-card-expanded" : ""}`}
-      role="button"
-      tabIndex={0}
-      onClick={toggleExpand}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), toggleExpand())}
-      aria-expanded={expanded}
-    >
-    <Card variant="raised" padding="default" className="app-card">
-      <div className="app-card-main">
-        <div className="app-card-art">
-          {meta.iconPath ? (
-            <img src={meta.iconPath} alt="" className="app-card-icon" />
-          ) : (
-            <div className="app-card-icon-fallback" aria-hidden="true" />
-          )}
-        </div>
-        <div className="app-card-info">
-          <div className="app-card-header">
-            <h3 className="app-card-title">{app.name}</h3>
-            <span className={`app-badge app-badge-${badge}`}>{badgeText(badge)}</span>
-          </div>
-          {meta.tagline ? <p className="app-card-tagline">{meta.tagline}</p> : null}
-          <p className="app-card-desc">{meta.description || `Version ${app.version}.`}</p>
-        </div>
-        <div className="app-card-chevron" aria-hidden="true">
-          {expanded ? "−" : "+"}
-        </div>
-      </div>
-
-      {expanded && (
-        <div className="app-card-details">
-          {meta.useCases.length > 0 && (
-            <div className="app-card-use-cases">
-              <span className="hardware-label">Use cases</span>
-              <ul>
-                {meta.useCases.map((u, i) => (
-                  <li key={i}>{u}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {meta.videoUrl && (
-            <a href={meta.videoUrl} target="_blank" rel="noopener noreferrer" className="app-card-link" onClick={(e) => e.stopPropagation()}>
-              Learn more →
-            </a>
-          )}
-          <div className="app-card-actions" onClick={(e) => e.stopPropagation()}>
-            {canInstall && (
-              <Button variant="primary" size="compact" onClick={() => onInstall(app.id)} disabled={disabled}>
-                {busy ? "Installing…" : "Install"}
-              </Button>
-            )}
-            {canUpdate && (
-              <Button variant="primary" size="compact" onClick={() => onUpdate(app.id)} disabled={disabled}>
-                {busy ? "Updating…" : "Update"}
-              </Button>
-            )}
-            {canLaunch && (
-              <Button variant="primary" size="compact" onClick={() => onLaunch(app.id)} disabled={disabled}>
-                Launch
-              </Button>
-            )}
-          </div>
-        </div>
+  const actionsBlock = (
+    <div className="app-card-actions" onClick={(e) => e.stopPropagation()}>
+      {canInstall && (
+        <Button variant="primary" size="compact" onClick={() => onInstall(app.id)} disabled={disabled}>
+          {busy ? "Installing…" : "Install"}
+        </Button>
       )}
-    </Card>
+      {canUpdate && (
+        <Button variant="primary" size="compact" onClick={() => onUpdate(app.id)} disabled={disabled}>
+          {busy ? "Updating…" : "Update"}
+        </Button>
+      )}
+      {canLaunch && (
+        <Button variant="primary" size="compact" onClick={() => onLaunch(app.id)} disabled={disabled}>
+          Launch
+        </Button>
+      )}
     </div>
   );
-}
+
+  if (viewMode === "list") {
+    return (
+      <div className="app-card-wrapper app-card-wrapper-list">
+        <Card variant="raised" padding="default" className="app-card app-card-list-row">
+          <div className="app-card-main app-card-main-list">
+            <div className="app-card-art">
+              {meta.iconPath ? (
+                <img src={meta.iconPath} alt="" className="app-card-icon" />
+              ) : (
+                <div className="app-card-icon-fallback" aria-hidden="true" />
+              )}
+            </div>
+            <div className="app-card-info app-card-info-list">
+              <div className="app-card-header">
+                <h3 className="app-card-title">{app.name}</h3>
+              </div>
+              {meta.tagline ? <p className="app-card-tagline">{meta.tagline}</p> : null}
+            </div>
+            <div className="app-card-meta-row">
+              <span className="app-card-version">Version {app.version}</span>
+              <span className={`app-badge app-badge-${badge}`}>{badgeText(badge)}</span>
+              {actionsBlock}
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app-card-wrapper tile">
+      <Card variant="raised" padding="default" className="app-card app-card-tile">
+        <div className="app-card-main">
+          <div className="app-card-art">
+            {meta.iconPath ? (
+              <img src={meta.iconPath} alt="" className="app-card-icon" />
+            ) : (
+              <div className="app-card-icon-fallback" aria-hidden="true" />
+            )}
+          </div>
+          <div className="app-card-info">
+            <div className="app-card-header">
+              <h3 className="app-card-title">{app.name}</h3>
+            </div>
+            {meta.tagline ? <p className="app-card-tagline">{meta.tagline}</p> : null}
+            <p className="app-card-desc">{meta.description || `Version ${app.version}.`}</p>
+          </div>
+          <span className="app-card-version app-card-version-tile">Version {app.version}</span>
+          <div className="app-card-meta-row app-card-meta-row-tile">
+            <span className={`app-badge app-badge-${badge}`}>{badgeText(badge)}</span>
+            {actionsBlock}
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+});
 
 function badgeText(badge: string): string {
   switch (badge) {

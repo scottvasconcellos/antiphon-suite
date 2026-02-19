@@ -17,13 +17,13 @@ export function AddSerialView() {
 
   return (
     <div className="add-serial-view">
-      <h2 className="section-title">Add serial</h2>
-      <p className="section-subtitle">Enter your license key to activate a product.</p>
+      <h2 className="section-title">Paste serial number</h2>
+      <p className="section-subtitle">Enter your license key below to link it to your account. Validation is handled by our entitlement service.</p>
 
       <Card variant="raised" padding="default">
         <CardHeader
-          title="Redeem serial number"
-          subtitle="Link a license to your Antiphon account."
+          title="Redeem"
+          subtitle="Paste one serial at a time; your licenses appear below once linked."
         />
         {submitted ? (
           <p className="note-text">Serial submitted. Your license will be linked shortly. If you don't see it, contact support.</p>

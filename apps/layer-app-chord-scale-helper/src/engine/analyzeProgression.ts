@@ -62,12 +62,21 @@ export function analyzeProgressionFromSymbols(symbols: string[]): AnalysisResult
     getChordPitchClasses(root, quality as import('../domain/chord.js').ChordQuality)
   );
   const chordRoots: RootSemitone[] = parsed.map((p) => p.root);
+  const chordQualities: string[] = parsed.map((p) => p.quality);
 
   const key = inferKey(segments, { chordRoots });
-  const mod = detectModulation(chordRoots, key);
+  const mod = detectModulation(chordRoots, segments, key, chordQualities);
 
-  const primaryKey = keyToString(key);
-  const alternates = (key.alternates ?? []).map((a) => `${ROOT_NAMES[a.root]}:${a.mode === 'major' ? 'maj' : 'min'}`);
+  // When modulation is detected, report the start key as primary so keyStart matches ground truth
+  const primaryKey =
+    mod.modulated && mod.segmentKeys?.length
+      ? keyToString(mod.segmentKeys[0].key)
+      : keyToString(key);
+  let alternates = (key.alternates ?? []).map((a) => `${ROOT_NAMES[a.root]}:${a.mode === 'major' ? 'maj' : 'min'}`);
+  if (mod.modulated && mod.segmentKeys && mod.segmentKeys.length >= 2) {
+    const endKeyStr = keyToString(mod.segmentKeys[mod.segmentKeys.length - 1].key);
+    if (primaryKey !== endKeyStr && !alternates.includes(endKeyStr)) alternates = [endKeyStr, ...alternates].slice(0, 3);
+  }
 
   const segmentKeys: Array<{ startChordIdx: number; endChordIdx: number; key: string }> =
     mod.segmentKeys?.map((s) => ({
