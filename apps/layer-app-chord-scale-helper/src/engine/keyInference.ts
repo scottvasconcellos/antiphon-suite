@@ -80,6 +80,32 @@ function isAuthenticCadence(keyRoot: number, mode: 'major' | 'minor', secondToLa
   return dom === 7;
 }
 
+const MAJOR_DEGREES = [0, 2, 4, 5, 7, 9, 11];
+
+function allRootsDiatonicInMajor(roots: number[], keyRoot: number): boolean {
+  for (const r of roots) {
+    if (!MAJOR_DEGREES.includes((r - keyRoot + 12) % 12)) return false;
+  }
+  return true;
+}
+
+/** Parallel minor boost from bIII, bVI, no leading tone. Only when root is stable (≥2 or bookended). */
+function parallelMinorBoost(root: number, roots: number[], firstRoot: number | null, lastRoot: number | null): number {
+  const hasB3 = roots.some((r) => (r - root + 12) % 12 === 3);
+  const hasB6 = roots.some((r) => (r - root + 12) % 12 === 8);
+  const noLeadingTone = !roots.some((r) => (r - root + 12) % 12 === 10);
+  const tonicCount = roots.filter((r) => (r - root + 12) % 12 === 0).length;
+  const stable = tonicCount >= 2 || (firstRoot === root && lastRoot === root);
+  if (!stable) return 0;
+  let boost = 0;
+  if (hasB3) boost += 0.18;
+  if (hasB6) boost += 0.10;
+  if (noLeadingTone) boost += 0.05;
+  return boost;
+}
+
+const PARALLEL_MODE_MARGIN = 0.06;
+
 /**
  * Infer key from segments (each segment = array of pitch classes 0–11).
  * Optional chord roots enable cadence and first/last tonic weighting; alternates returned when ambiguous.
@@ -108,6 +134,13 @@ export function inferKey(segments: number[][], options?: InferKeyOptions): Key {
       if (firstRoot !== null && (firstRoot - root + 12) % 12 === 0) {
         scoreMaj += opts.firstTonicBonus;
         scoreMin += opts.firstTonicBonus;
+        // Tonic prevalence: first chord root repeated strongly favors that key (e.g. K081 inversions in C)
+        const tonicCount = roots.filter((r) => (r - root + 12) % 12 === 0).length;
+        if (tonicCount >= 2) {
+          const prevalenceBonus = Math.min(0.18, (tonicCount - 1) * 0.06);
+          scoreMaj += prevalenceBonus;
+          scoreMin += prevalenceBonus;
+        }
       }
       if (lastRoot !== null && (lastRoot - root + 12) % 12 === 0) {
         scoreMaj += opts.lastTonicBonus;
@@ -126,24 +159,96 @@ export function inferKey(segments: number[][], options?: InferKeyOptions): Key {
         if (isAuthenticCadence(root, 'major', secondToLastRoot, lastRoot)) scoreMaj += opts.cadenceBonus;
         if (isAuthenticCadence(root, 'minor', secondToLastRoot, lastRoot)) scoreMin += opts.cadenceBonus;
       }
-      // Slight minor preference when bookended by same root, flat-side color (bVII, bVI, bIII), and minor is already close to major
-      if (firstRoot !== null && lastRoot !== null && firstRoot === lastRoot && (firstRoot - root + 12) % 12 === 0) {
-        const flatSide = [3, 8, 10]; // bIII, bVI, bVII (strong minor color)
-        const count = roots.filter((r) => flatSide.includes((r - root + 12) % 12)).length;
-        // If we see bIII (like Eb in C), strongly favor minor
-        const hasFlatIII = roots.some((r) => (r - root + 12) % 12 === 3);
-        if (hasFlatIII && scoreMin >= scoreMaj - 0.2) scoreMin += 0.12; // Stronger boost for bIII
-        else if (count >= 2 && scoreMin >= scoreMaj - 0.15) scoreMin += 0.065;
+      // Middle cadence (e.g. ii–V–I–IV): any adjacent V–I favors that tonic so we don't pick IV as key
+      for (let i = 0; i < roots.length - 1; i++) {
+        const domRoot = roots[i];
+        const tonRoot = roots[i + 1];
+        if ((root - tonRoot + 12) % 12 === 0 && (domRoot - tonRoot + 12) % 12 === 7) {
+          const boost = roots.length <= 5 ? 0.22 : opts.cadenceBonus * 0.8;
+          scoreMaj += boost;
+          scoreMin += boost;
+          break;
+        }
       }
+      // ii–V–I–IV (4 chords): roots[1] V of roots[2], roots[3] IV of roots[2]; strong bonus for roots[2] as tonic
+      if (roots.length === 4 && (roots[1] - roots[2] + 12) % 12 === 7 && (roots[3] - roots[2] + 12) % 12 === 5) {
+        if ((root - roots[2] + 12) % 12 === 0) {
+          scoreMaj += 0.28;
+          scoreMin += 0.28;
+        }
+      }
+      // Parallel minor: add boost from bIII, bVI, no leading tone; margin so minor wins only when clearly ahead
+      const boost = parallelMinorBoost(root, roots, firstRoot, lastRoot);
+      scoreMin += boost - (boost > 0 ? PARALLEL_MODE_MARGIN : 0);
     }
 
     candidates.push({ root: root as RootSemitone, mode: 'major', score: scoreMaj });
     candidates.push({ root: root as RootSemitone, mode: 'minor', score: scoreMin });
   }
 
+  // vi-ending demotion: when one major key has all chords diatonic, progression ends on its vi, no V-i to vi, major has cadence → prefer major
+  const majScores = new Map<number, number>();
+  candidates.forEach((c) => { if (c.mode === 'major') majScores.set(c.root, c.score); });
+  if (roots.length >= 3 && roots.length <= 8 && lastRoot !== null) {
+    for (let majorRoot = 0; majorRoot < 12; majorRoot++) {
+      const viRoot = (majorRoot + 9) % 12;
+      if (lastRoot !== viRoot) continue;
+      if (!allRootsDiatonicInMajor(roots, majorRoot)) continue;
+      const viCount = roots.filter((r) => r === viRoot).length;
+      if (viCount !== 1) continue; // vi only at end
+      const hasVIcadence = (() => {
+        for (let i = 0; i < roots.length - 1; i++)
+          if (roots[i + 1] === viRoot && (roots[i] - viRoot + 12) % 12 === 7) return true;
+        return false;
+      })();
+      const majorHasCadence = (() => {
+        for (let i = 0; i < roots.length - 1; i++) {
+          if (roots[i + 1] !== majorRoot) continue;
+          const rel = (roots[i] - majorRoot + 12) % 12;
+          if (rel === 7 || rel === 5) return true; // V-I or IV-I
+        }
+        return false;
+      })();
+      // Prefer major when it has a cadence and progression opens in major (I, IV, or V) even if vi has V-i at end
+      const firstRel = firstRoot !== null ? (firstRoot - majorRoot + 12) % 12 : -1;
+      const opensInMajor = firstRel === 0 || firstRel === 5 || firstRel === 7;
+      if (majorHasCadence && (opensInMajor || !hasVIcadence)) {
+        for (const c of candidates) {
+          if (c.mode === 'minor' && c.root === viRoot) {
+            const majScore = majScores.get(majorRoot) ?? 0;
+            c.score = Math.min(c.score, majScore - 0.10); // end-only vi: cap so major wins (K079)
+            break;
+          }
+        }
+        break; // applied for this majorRoot
+      }
+    }
+  }
+
+  // First-chord tie-breaker for ambiguous major vs relative minor (EQ-F222: G Em C D Em → prefer G:maj)
+  if (roots.length >= 3 && roots.length <= 6 && firstRoot !== null) {
+    const majorRoot = firstRoot;
+    const viRoot = (majorRoot + 9) % 12;
+    const hasVIcadence = (() => {
+      for (let i = 0; i < roots.length - 1; i++)
+        if (roots[i + 1] === viRoot && (roots[i] - viRoot + 12) % 12 === 7) return true;
+      return false;
+    })();
+    if (!hasVIcadence) {
+      const majC = candidates.find((c) => c.mode === 'major' && c.root === majorRoot);
+      const minC = candidates.find((c) => c.mode === 'minor' && c.root === viRoot);
+      if (majC && minC && minC.score > majC.score) {
+        const gap = minC.score - majC.score;
+        majC.score += Math.min(0.18, gap + 0.02); // prefer major when first chord is I and no V-i to vi (EQ-F222)
+      }
+    }
+  }
+
   candidates.sort((a, b) => b.score - a.score);
   const best = candidates[0];
   const bestScore = best.score;
+  const secondBest = candidates[1];
+  const margin = secondBest ? (bestScore - secondBest.score) / (Math.abs(bestScore) + 1e-6) : 1;
   const alternates = candidates
     .slice(1)
     .filter((c) => c.score >= opts.alternateThreshold * bestScore)
@@ -155,5 +260,21 @@ export function inferKey(segments: number[][], options?: InferKeyOptions): Key {
     mode: best.mode,
     confidence: toConfidence(bestScore),
     ...(alternates.length > 0 && { alternates }),
+    margin,
   };
+}
+
+/** Result of key inference with margin (for two-track commitment). */
+export interface InferKeyWithMarginResult {
+  key: Key;
+  /** Margin between best and second-best key (normalized); use for commitMarginThreshold. */
+  margin: number;
+}
+
+/**
+ * Infer key and margin (two-track: commit only when margin exceeds threshold).
+ */
+export function inferKeyWithMargin(segments: number[][], options?: InferKeyOptions): InferKeyWithMarginResult {
+  const key = inferKey(segments, options);
+  return { key, margin: key.margin ?? 0 };
 }

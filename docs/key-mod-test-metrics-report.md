@@ -1,17 +1,18 @@
 # Key/Modulation Test Metrics Report
 
 **Date:** 2025-02-17  
-**Runs:** Each test type executed twice. Results were identical across runs (deterministic).
+**Runs:** Each test type executed; results deterministic.
 
 ---
 
-## 1. Percentages (both runs)
+## 1. Percentages (current run)
 
-| Test type | Run 1 | Run 2 |
-|-----------|-------|-------|
-| **Invariants** (pass % — must never modulate) | 7/9 **(77.8%)** | 7/9 **(77.8%)** |
-| **K-suite** (pass+soft / 252) | 220/252 **(87.3%)** | 220/252 **(87.3%)** |
-| **Edge-case questions** (pass+soft / 10) | 7/10 **(70.0%)** | 7/10 **(70.0%)** |
+| Test type | Pass | Soft | Fail | Total | Pass+soft % |
+|-----------|------|------|------|-------|-------------|
+| **Invariants** (must never modulate) | 9 | 0 | 0 | 9 | **100%** |
+| **K-suite** (252-case stress) | 200 | 27 | 25 | 252 | **90.1%** |
+| **Edge-case questions** | 5 | 2 | 3 | 10 | **70.0%** |
+| **Pipeline-order** | — | — | 0 | — | **pass** |
 
 ---
 
@@ -22,34 +23,46 @@ Grading scale: **A+** 97–100%, **A** 93–96, **A-** 90–92, **B+** 87–89, 
 ### Global metrics
 
 | Metric | Pass+soft % | Grade |
-|--------|-------------|--------|
-| **Invariants** (no false modulation on “never modulate” progressions) | 77.8% | **C+** |
-| **K-suite (252-case stress test)** | 87.3% | **B+** |
+|--------|-------------|-------|
+| **Invariants** | 100% | **A+** |
+| **K-suite (252-case stress test)** | 90.1% | **A-** |
 | **Edge-case questions (10 key-detection questions)** | 70.0% | **C-** |
 
 ### K-suite by category (pass+soft %)
 
 | Category | Pass+soft % | Grade |
-|----------|-------------|--------|
+|----------|-------------|-------|
 | false_cadence | 100% | **A+** |
-| multi_step_modulation | 100% | **A+** |
-| (no category) | 90.1% | **A-** |
+| tonicization | 100% | **A+** |
+| modal | 100% | **A+** |
+| (no category) | 91.1% | **A** |
+| extreme_stress | 90.0% | **A-** |
 | ambiguous_loop | 83.3% | **B** |
-| modal | 80.0% | **B-** |
-| tonicization | 66.7% | **D** |
-| extreme_stress | 60.0% | **D** |
-| parallel_minor | 57.1% | **F** |
+| parallel_minor | 85.7% | **B** |
+| multi_step_modulation | 71.4% | **C+** |
 | key_ambiguous | 50.0% | **F** |
 
 ---
 
 ## 3. Summary
 
-- **Invariants:** 2 failures (INV_circle_C, INV_circle_G — circle-of-fifths loops reported as modulating). **Grade: C+**
-- **K-suite:** 32 hard fails, 27 soft; 220/252 pass+soft. **Grade: B+**
-- **Edge-questions:** 3 fails (EQ-F211 parallel minor, EQ-F236 missed modulation, EQ-F201 false modulation). **Grade: C-**
-- **Category weak spots:** key_ambiguous and parallel_minor at F; extreme_stress and tonicization at D. false_cadence and multi_step_modulation at A+.
+- **Invariants:** 9/9 pass. **Grade: A+**
+- **K-suite:** 200 pass, 27 soft, 25 fail; 227/252 pass+soft. **Grade: A-**
+- **Edge-questions:** 7/10 pass+soft (EQ-F236 missed modulation, EQ-F201 false modulation, EQ-F222 G:maj vs E:min). **Grade: C-**
+- **Pipeline-order:** pass.
+- **Category weak spots:** key_ambiguous at F; multi_step_modulation at C+.
 
 ---
 
-*Generated from: `pnpm exec tsx tests/key-invariants.test.ts`, `tests/key-modulation-suite.test.ts`, `tests/edge-case-questions.test.ts` (each run twice).*
+## 4. Post–engine tuning (2025-02-17)
+
+Engine changes applied from assistant recommendations:
+
+- **Parallel minor / Aeolian:** `parallelMinorBoost` from bIII, bVI, no leading tone; guardrail: root stable (≥2 or bookended). **PARALLEL_MODE_MARGIN** so minor wins only when clearly ahead.
+- **vi-ending demotion:** When one major key has all chords diatonic, progression ends on its vi, and (opens in major I/IV/V or no V–i to vi) and major has cadence → cap relative-minor score so major wins (K079).
+- **First-root prevalence:** Stronger first-root repeat bonus (cap 0.18, 0.06 per repeat).
+- **Modulation:** Loop-only promotion margin (segment must infer to K, min span 4, diatonic ≥3). Final-cadence min diatonic = 1.
+
+---
+
+*Generated from: `pnpm exec tsx tests/key-invariants.test.ts`, `tests/key-modulation-suite.test.ts`, `tests/edge-case-questions.test.ts`, `tests/pipeline-order.test.ts`.*

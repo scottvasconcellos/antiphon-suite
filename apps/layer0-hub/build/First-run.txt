@@ -1,0 +1,18 @@
+Antiphon Manager — First run
+
+We don't pay Apple's $99/year Developer Program, so macOS will show a one-time "unknown developer" warning. The app is safe — use either method below once and you're set.
+
+ONE-TIME FIX (fastest)
+1. Hold Control and right-click the app.
+2. Choose Open.
+3. When macOS says "Developer cannot be verified," click Open again. The app will open and won't ask again.
+
+PERMANENT FIX (via System Settings)
+1. Open System Settings → Privacy & Security.
+2. In Security, find the line about the app being blocked.
+3. Click "Open Anyway".
+4. Enter your password if asked. macOS will remember; no more prompts for this app.
+
+UNINSTALL
+Drag the app to Trash. The app may leave a small preferences folder in Application Support; you can delete it if you want a full cleanup:
+  ~/Library/Application Support/Antiphon Manager

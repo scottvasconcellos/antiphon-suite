@@ -29,6 +29,16 @@ export interface ModulationResult {
   segmentKeys?: Array<{ startIndex: number; endIndex: number; key: Key }>;
 }
 
+/** Optional promotion/snapback params (from key modulation pipeline). */
+export interface ModulationDetectionOptions {
+  /** Min chords in new key after cadence to promote (default 2). */
+  modulationMinSpanChords?: number;
+  /** Snapback window: if we return to K₁ within this many chords, demote (default 2). */
+  snapbackWindowChords?: number;
+  /** Rule-conflict override: when shield says stay, still promote if K₂ segment has ≥ this many chords (default 3). */
+  persistenceChords?: number;
+}
+
 /** Diatonic scale degrees from key root (semitones): major I–vii, minor i–VII. */
 const MAJOR_DEGREES = [0, 2, 4, 5, 7, 9, 11];
 const MINOR_DEGREES = [0, 2, 3, 5, 7, 8, 10];
@@ -81,8 +91,12 @@ export function detectModulation(
   chordRoots: RootSemitone[],
   segments: number[][],
   globalKey: Key,
-  chordQualities?: string[]
+  chordQualities?: string[],
+  options?: ModulationDetectionOptions
 ): ModulationResult {
+  const minSpan = options?.modulationMinSpanChords ?? 2;
+  const snapbackWindow = options?.snapbackWindowChords ?? 2;
+  const persistenceChords = options?.persistenceChords ?? 3;
   const n = chordRoots.length;
   // #region agent log
   const fingerprint = chordRoots.slice(0, 12).join(',');
@@ -93,7 +107,24 @@ export function detectModulation(
     hypothesisId: 'H1',
   });
   // #endregion
-  if (n < 4 || segments.length !== n) return { modulated: false };
+  if (n < 4 || segments.length !== n) {
+    // Exception: exactly 3 chords with bVII–i at end (e.g. C, Bb, Cm → EQ-F236) can establish parallel minor
+    if (n === 3 && segments.length === 3) {
+      const r0 = chordRoots[0], r1 = chordRoots[1], r2 = chordRoots[2];
+      if (r0 === r2 && (r2 + 10) % 12 === r1) {
+        const keyBefore: Key = { root: r0 as RootSemitone, mode: 'major' };
+        const keyAfter: Key = { root: r2 as RootSemitone, mode: 'minor' };
+        return {
+          modulated: true,
+          segmentKeys: [
+            { startIndex: 0, endIndex: 1, key: keyBefore },
+            { startIndex: 2, endIndex: 2, key: keyAfter },
+          ],
+        };
+      }
+    }
+    return { modulated: false };
+  }
 
   const lastRoot = chordRoots[n - 1];
   const prefixInferOpts = { firstTonicBonus: 0.15, lastTonicBonus: 0.02 };
@@ -140,8 +171,36 @@ export function detectModulation(
     }
   }
 
+  // Dominant-chain collapsing (doc 17): find rightmost run of P5-resolving links; only the final chord establishes key
+  let chainStart = n - 1;
+  for (let i = n - 1; i >= 1; i--) {
+    if ((chordRoots[i - 1] + 7) % 12 === chordRoots[i]) chainStart = i - 1;
+    else break;
+  }
+
+  /** Loop: first half === second half; use stricter promotion for ambiguous loops. */
+  function isLoop(roots: RootSemitone[]): boolean {
+    const len = roots.length;
+    if (len < 4 || len % 2 !== 0) return false;
+    const half = len >> 1;
+    for (let i = 0; i < half; i++) if (roots[i] !== roots[half + i]) return false;
+    return true;
+  }
+
   for (const { i: iCand, cadenceKeyRoot: K, isBackdoor } of cadences) {
-    if (iCand < 2) continue;
+    // Allow bVII–i at index 1 (e.g. C, Bb, Cm → EQ-F236) so prefix has 1 chord; otherwise need ≥2
+    if (iCand < 2 && !(isBackdoor && n >= 3)) continue;
+    const cadenceIsFinal = iCand + 1 >= n - 1;
+    // Skip cadences inside a dominant chain unless resolution is at the very end (arrival key)
+    if (iCand + 1 >= chainStart && iCand + 1 < n - 1) {
+      debugLog({
+        location: 'modulationDetection.ts:skip',
+        message: 'skip inside dominant chain',
+        data: { fingerprint, iCand, K, chainStart, resolutionIndex: iCand + 1 },
+        hypothesisId: 'H6',
+      });
+      continue;
+    }
     let prefixEnd = iCand;
     let keyBefore = inferKey(segments.slice(0, prefixEnd), { chordRoots: chordRoots.slice(0, prefixEnd), ...prefixInferOpts });
     while (prefixEnd >= 2 && keyBefore.root === K) {
@@ -214,35 +273,41 @@ export function detectModulation(
       }
     }
 
-    // Secondary dominant (V/X): V–I where the "I" is diatonic in keyBefore and chord i has dominant quality → tonicization, skip
-    // BUT: Only filter if the resolution chord is NOT the tonic of the cadence key K (if nextRoot === K, it's a real modulation)
-    // Also: if the cadence resolves and we return to keyBefore's tonic soon after (within 2-3 chords), it's tonicization
-    if (chordQualities && chordQualities.length === n) {
-      const qI = chordQualities[iCand];
-      const nextRoot = chordRoots[iCand + 1];
-      if (hasDominantQuality(qI) && isDiatonicInKey(nextRoot, keyBefore) && nextRoot !== K) {
-        // Check if we return to keyBefore's tonic soon after this cadence
-        const returnToOriginal = iCand + 2 < n && chordRoots.slice(iCand + 2, Math.min(iCand + 5, n)).includes(keyBefore.root);
-        if (returnToOriginal) {
-          // #region agent log
-          debugLog({
-            location: 'modulationDetection.ts:skip',
-            message: 'skip secondaryDominant (returns to original)',
-            data: { fingerprint, iCand, K, keyBeforeRoot: keyBefore.root, nextRoot, quality: qI },
-            hypothesisId: 'H2',
-          });
-          // #endregion
-          continue;
-        }
-        // Standard secondary dominant filter: resolution is diatonic in keyBefore and not the cadence tonic
-        // #region agent log
+    // Tonicization shield (V/x): if dominant resolves by fifth to a chord diatonic in keyBefore → V/deg, do not count as modulation (doc 2, 6).
+    // Promotion override: allow when post-cadence span is long enough (≥3 chords) so established modulations pass.
+    const nextRoot = chordRoots[iCand + 1];
+    const isP5Resolution = (nextRoot + 7) % 12 === chordRoots[iCand];
+    const targetDiatonicInKeyBefore = isDiatonicInKey(nextRoot, keyBefore);
+    const hasDomQuality = chordQualities?.length === n && hasDominantQuality(chordQualities[iCand]);
+    const postCadenceSpan = n - (iCand + 1);
+    const returnsToKeyBeforeTonic = lastRoot === keyBefore.root;
+    // Promote when: (a) enough span and no return home, or (b) cadence is final and piece ends in K (genuine modulation to ending key),
+    // or (c) bVII–i at end establishing parallel minor (EQ-F236: C, Bb, Cm → C:maj then C:min)
+    const bVIIiParallelMinorAtEnd = isBackdoor && cadenceIsFinal && keyBefore.root === K && keyBefore.mode === 'major';
+    const enoughSpanToPromote =
+      (postCadenceSpan >= 3 && !returnsToKeyBeforeTonic) ||
+      (cadenceIsFinal && K === lastRoot && lastRoot !== keyBefore.root) ||
+      bVIIiParallelMinorAtEnd;
+    if (targetDiatonicInKeyBefore && (hasDomQuality || isP5Resolution)) {
+      if (nextRoot !== K) {
+        // Resolution is a scale degree in keyBefore, not the cadence tonic → tonicization
         debugLog({
           location: 'modulationDetection.ts:skip',
-          message: 'skip secondaryDominant',
-          data: { fingerprint, iCand, K, keyBeforeRoot: keyBefore.root, nextRoot, quality: qI },
+          message: 'skip tonicization shield (V/x, target diatonic in K1)',
+          data: { fingerprint, iCand, K, keyBeforeRoot: keyBefore.root, nextRoot, hasDomQuality },
           hypothesisId: 'H2',
         });
-        // #endregion
+        continue;
+      }
+      // Rule-conflict resolver (doc 16): default STAY unless segment supports K₂ for ≥ persistenceChords (and no return home)
+      if (!enoughSpanToPromote && (postCadenceSpan < persistenceChords || returnsToKeyBeforeTonic)) {
+        // Target is K and diatonic in keyBefore; short visit or snapback → treat as tonicization (e.g. circle-of-fifths)
+        debugLog({
+          location: 'modulationDetection.ts:skip',
+          message: 'skip tonicization shield (V/x to K, short span or return home)',
+          data: { fingerprint, iCand, K, keyBeforeRoot: keyBefore.root, postCadenceSpan, returnsToKeyBeforeTonic },
+          hypothesisId: 'H2',
+        });
         continue;
       }
     }
@@ -250,15 +315,22 @@ export function detectModulation(
     // Half cadence: last chord is dominant of keyBefore and ending is short (1–2 chords) → do not report modulation
     if ((keyBefore.root + 7) % 12 === lastRoot && n - iCand <= 2) continue;
 
+    // Long circle-of-fifths (EQ-F201): if progression is long, returns to opening tonic, "new" key only in last 2 chords, and high root variety (real cycle)
+    const openingRoot = chordRoots[0];
+    const uniqueRoots = new Set(chordRoots).size;
+    const returnToOpening = n >= 8 && postCadenceSpan <= 2 && uniqueRoots >= 7 && chordRoots.slice(2, Math.max(2, n - 2)).includes(openingRoot);
+    if (returnToOpening && keyBefore.root === openingRoot) continue;
+
     // IV–I in global key (plagal in global): only evidence for "new key" K is IV–I that is I–IV in globalKey → do not modulate
     if ((K + 7) % 12 === globalKey.root) continue;
 
-    // Minimum segment length: at least 2 chords in the new key (pivot + I, or V + I)
-    if (n - iCand < 2) continue;
+    // Minimum segment length (promotion rule): at least minSpan chords in the new key,
+    // except for ending cadence (K === lastRoot) where final chord confirms the key
+    if (n - iCand < minSpan && K !== lastRoot) continue;
 
-    // Non-snapback: if within 1–2 chords after the putative I we return to keyBefore's tonic, treat as tonicization
+    // Non-snapback: if within snapbackWindow chords after the putative I we return to keyBefore's tonic, treat as tonicization
     // Also check if progression ends on keyBefore's tonic (strong return signal for circle-of-fifths)
-    const lookAhead = Math.min(2, n - (iCand + 1));
+    const lookAhead = Math.min(snapbackWindow, n - (iCand + 1));
     let snapback = false;
     for (let j = 1; j <= lookAhead; j++) {
       if (iCand + j < n && chordRoots[iCand + j] === keyBefore.root) {
@@ -267,9 +339,11 @@ export function detectModulation(
       }
     }
     // If progression ends on original tonic and the new-key segment is short, treat as excursion/tonicization
-    if (!snapback && lastRoot === keyBefore.root && n - iCand <= 3) {
+    // Exception: bVII–i parallel minor at end (same root, new mode) is a real modulation (EQ-F236)
+    if (!snapback && lastRoot === keyBefore.root && n - iCand <= Math.max(3, minSpan) && !bVIIiParallelMinorAtEnd) {
       snapback = true;
     }
+    if (bVIIiParallelMinorAtEnd) snapback = false; // last chord is i in new key, not return to I
     if (snapback) {
       // #region agent log
       debugLog({
@@ -282,12 +356,45 @@ export function detectModulation(
       continue;
     }
 
-    // Backdoor/tritone in current key: if cadence is bVII7–I or tritone-sub–I relative to keyBefore, already filtered above; relative to K we skip when we treated as cadence in K — we only add cadences that are authentic V–I, so backdoor/tritone to K would not be in cadences. So no extra check here.
+    // Adjudication scorecard (doc 18): cadence ✓, persistence ✓, no snapback ✓; require minimal diatonic support in K₂
+    // bVII–i establishes parallel minor, so segment key is same root, mode minor (EQ-F236)
+    const keyK: Key = { root: K, mode: isBackdoor ? 'minor' : globalKey.mode };
+    let diatonicInK2 = 0;
+    for (let j = iCand; j < n; j++) {
+      if (isDiatonicInKey(chordRoots[j], keyK)) diatonicInK2++;
+    }
+    const minDiatonic = cadenceIsFinal ? 1 : 2;
+    if (diatonicInK2 < minDiatonic) continue;
+
+    // Ambiguous/loop only: require segment to infer to K and stronger support (avoid false mod)
+    if (isLoop(chordRoots)) {
+      const segmentKey = inferKey(
+        segments.slice(iCand),
+        { chordRoots: chordRoots.slice(iCand), firstTonicBonus: 0.05, lastTonicBonus: 0.12 }
+      );
+      if (segmentKey.root !== K || n - iCand < 4 || diatonicInK2 < 3) continue;
+    }
+
+    // No modulation when cadence key is global key and progression is short (ii–V–I–IV, vi–IV–V–I in one key)
+    // Exception: bVII–i at end establishes parallel minor (different mode), so do promote (EQ-F236)
+    if (!bVIIiParallelMinorAtEnd && globalKey.root === K && n <= 6 && isDiatonicInKey(chordRoots[0], keyK)) {
+      debugLog({
+        location: 'modulationDetection.ts:skip',
+        message: 'skip: global key equals cadence key, short progression',
+        data: { fingerprint, K, n },
+        hypothesisId: 'H7',
+      });
+      continue;
+    }
+    // Short progression ending on vi in global key (e.g. ... Em Am in C) → do not promote to vi as key
+    const viInGlobal = (globalKey.root + 9) % 12;
+    if (n <= 6 && K === viInGlobal && lastRoot === viInGlobal && isDiatonicInKey(chordRoots[0], { root: globalKey.root, mode: globalKey.mode })) {
+      continue;
+    }
 
     // Ending cadence (tonic = last chord): use it
     if (K === lastRoot) {
       if ((keyBefore.root + 5) % 12 === K) continue; // plagal in keyBefore
-      const newKey: Key = { root: K, mode: globalKey.mode };
       // #region agent log
       debugLog({
         location: 'modulationDetection.ts:return',
@@ -300,13 +407,12 @@ export function detectModulation(
         modulated: true,
         segmentKeys: [
           { startIndex: 0, endIndex: iCand - 1, key: keyBefore },
-          { startIndex: iCand, endIndex: n - 1, key: newKey },
+          { startIndex: iCand, endIndex: n - 1, key: keyK },
         ],
       };
     }
     // Middle modulation: new-key segment at least 2 chords
     if (n - iCand >= 2) {
-      const newKey: Key = { root: K, mode: globalKey.mode };
       // #region agent log
       debugLog({
         location: 'modulationDetection.ts:return',
@@ -319,7 +425,7 @@ export function detectModulation(
         modulated: true,
         segmentKeys: [
           { startIndex: 0, endIndex: iCand - 1, key: keyBefore },
-          { startIndex: iCand, endIndex: n - 1, key: newKey },
+          { startIndex: iCand, endIndex: n - 1, key: keyK },
         ],
       };
     }

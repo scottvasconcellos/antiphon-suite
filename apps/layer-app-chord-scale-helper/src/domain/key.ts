@@ -17,6 +17,8 @@ export interface Key {
   confidence?: number;
   /** Runner-up keys when inference is ambiguous (e.g. two keys close in score). */
   alternates?: Array<{ root: RootSemitone; mode: Mode; confidence?: number }>;
+  /** Margin between best and second-best (for two-track commitment). */
+  margin?: number;
 }
 
 /** Root note name (sharp spelling). */

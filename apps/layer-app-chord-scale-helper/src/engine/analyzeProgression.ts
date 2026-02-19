@@ -3,17 +3,15 @@
  * Used by the key-modulation test harness and by future UI.
  */
 
-import type { Key } from '../domain/key.js';
 import type { RootSemitone } from '../domain/key.js';
 import { ROOT_NAMES } from '../domain/key.js';
 import { parseChordSymbol } from './chordParser.js';
 import { getChordPitchClasses } from './chordTones.js';
-import { inferKey } from './keyInference.js';
-import { detectModulation } from './modulationDetection.js';
+import { runKeyDecisionPipeline } from './keyDecisionPipeline.js';
 
 /** Key as string for comparison: "C:maj", "A:min". */
-export function keyToString(key: Key): string {
-  const rootName = ROOT_NAMES[key.root];
+export function keyToString(key: { root: number; mode: string }): string {
+  const rootName = ROOT_NAMES[key.root as RootSemitone];
   return `${rootName}:${key.mode === 'major' ? 'maj' : 'min'}`;
 }
 
@@ -64,22 +62,24 @@ export function analyzeProgressionFromSymbols(symbols: string[]): AnalysisResult
   const chordRoots: RootSemitone[] = parsed.map((p) => p.root);
   const chordQualities: string[] = parsed.map((p) => p.quality);
 
-  const key = inferKey(segments, { chordRoots });
-  const mod = detectModulation(chordRoots, segments, key, chordQualities);
+  const result = runKeyDecisionPipeline(
+    { chordRoots, segments, chordQualities }
+  );
+  const { key, modulated, segmentKeys: rawSegmentKeys } = result;
 
   // When modulation is detected, report the start key as primary so keyStart matches ground truth
   const primaryKey =
-    mod.modulated && mod.segmentKeys?.length
-      ? keyToString(mod.segmentKeys[0].key)
+    modulated && rawSegmentKeys?.length
+      ? keyToString(rawSegmentKeys[0].key)
       : keyToString(key);
   let alternates = (key.alternates ?? []).map((a) => `${ROOT_NAMES[a.root]}:${a.mode === 'major' ? 'maj' : 'min'}`);
-  if (mod.modulated && mod.segmentKeys && mod.segmentKeys.length >= 2) {
-    const endKeyStr = keyToString(mod.segmentKeys[mod.segmentKeys.length - 1].key);
+  if (modulated && rawSegmentKeys && rawSegmentKeys.length >= 2) {
+    const endKeyStr = keyToString(rawSegmentKeys[rawSegmentKeys.length - 1].key);
     if (primaryKey !== endKeyStr && !alternates.includes(endKeyStr)) alternates = [endKeyStr, ...alternates].slice(0, 3);
   }
 
   const segmentKeys: Array<{ startChordIdx: number; endChordIdx: number; key: string }> =
-    mod.segmentKeys?.map((s) => ({
+    rawSegmentKeys?.map((s) => ({
       startChordIdx: s.startIndex,
       endChordIdx: s.endIndex,
       key: keyToString(s.key),
@@ -88,7 +88,7 @@ export function analyzeProgressionFromSymbols(symbols: string[]): AnalysisResult
   return {
     primaryKey,
     alternates,
-    modulated: mod.modulated,
+    modulated,
     ...(segmentKeys.length > 0 && { segmentKeys }),
     errors,
     confidence: key.confidence,
