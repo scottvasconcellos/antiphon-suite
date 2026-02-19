@@ -242,6 +242,7 @@ export function inferKey(segments: number[][], options?: InferKeyOptions): Key {
   }
 
   // First-chord tie-breaker for ambiguous major vs relative minor (EQ-F222: G Em C D Em → prefer G:maj)
+  // Research: Prefer major for vi-IV-I-V patterns (K112, K122): Score major mode +10% if I-V cadence present despite vi start
   if (roots.length >= 3 && roots.length <= 6 && firstRoot !== null) {
     const majorRoot = firstRoot;
     const viRoot = (majorRoot + 9) % 12;
@@ -250,13 +251,41 @@ export function inferKey(segments: number[][], options?: InferKeyOptions): Key {
         if (roots[i + 1] === viRoot && (roots[i] - viRoot + 12) % 12 === 7) return true;
       return false;
     })();
-    if (!hasVIcadence) {
+    // Check for vi-IV-I-V pattern: first chord is vi, then IV, then I, then V
+    const isViIVIVPattern = roots.length === 4 && 
+      roots[0] === viRoot && 
+      (roots[1] - majorRoot + 12) % 12 === 5 && // IV
+      roots[2] === majorRoot && // I
+      (roots[3] - majorRoot + 12) % 12 === 7; // V
+    // Check for I-V cadence (V-I or I-V)
+    const hasIVCadence = (() => {
+      for (let i = 0; i < roots.length - 1; i++) {
+        const rel = (roots[i + 1] - majorRoot + 12) % 12;
+        if (roots[i] === majorRoot && rel === 7) return true; // I-V
+        if (rel === 0 && (roots[i] - majorRoot + 12) % 12 === 7) return true; // V-I
+      }
+      return false;
+    })();
+    if (!hasVIcadence || (isViIVIVPattern && hasIVCadence)) {
       const majC = candidates.find((c) => c.mode === 'major' && c.root === majorRoot);
       const minC = candidates.find((c) => c.mode === 'minor' && c.root === viRoot);
       if (majC && minC && minC.score > majC.score) {
         const gap = minC.score - majC.score;
-        majC.score += Math.min(0.18, gap + 0.02); // prefer major when first chord is I and no V-i to vi (EQ-F222)
+        // Research: +10% for vi-IV-I-V patterns with I-V cadence
+        const bonus = isViIVIVPattern && hasIVCadence ? Math.min(0.28, gap + 0.10) : Math.min(0.18, gap + 0.02);
+        majC.score += bonus; // prefer major when first chord is I and no V-i to vi (EQ-F222)
       }
+    }
+  }
+  // Research: For short (<4 chords), tie-break by first chord quality (maj > min)
+  if (roots.length < 4 && firstRoot !== null) {
+    const majorRoot = firstRoot;
+    const viRoot = (majorRoot + 9) % 12;
+    const majC = candidates.find((c) => c.mode === 'major' && c.root === majorRoot);
+    const minC = candidates.find((c) => c.mode === 'minor' && c.root === viRoot);
+    // If scores are close, prefer major (maj > min)
+    if (majC && minC && Math.abs(majC.score - minC.score) < 0.15) {
+      majC.score += 0.10; // Tie-break bonus for major
     }
   }
 
