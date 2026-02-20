@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>STEM Forge</title>
+  <style>
+    :root { --bg: #0f0f12; --surface: #1a1a20; --text: #e8e8ed; --muted: #888; --accent: #6b8cff; --success: #6f6; --warning: #ff6; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .phase { display: none; margin-bottom: 2rem; }
+    .phase.active { display: block; }
+    .zone {
+      border: 2px dashed var(--muted);
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      background: var(--surface);
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .zone:hover { border-color: var(--accent); }
+    .zone input { display: none; }
+    .stems { margin: 1rem 0; }
+    .stem { padding: 0.75rem; background: var(--surface); border-radius: 6px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem; }
+    .stem-info { flex: 1; }
+    .stem-name { font-weight: 500; }
+    .stem-meta { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
+    .instrument-badge { display: inline-block; padding: 0.25rem 0.5rem; background: var(--accent); color: #fff; border-radius: 4px; font-size: 0.8rem; margin-right: 0.5rem; }
+    .btn { background: var(--accent); color: #fff; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: 500; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn.secondary { background: var(--surface); color: var(--text); border: 1px solid var(--muted); }
+    .btn.danger { background: #f66; }
+    .progress { width: 100%; height: 8px; background: var(--surface); border-radius: 4px; overflow: hidden; margin: 1rem 0; }
+    .progress-bar { height: 100%; background: var(--accent); transition: width 0.3s; }
+    .status { padding: 0.75rem; background: var(--surface); border-radius: 6px; margin-bottom: 0.5rem; }
+    .status-ok { color: var(--success); }
+    .status-err { color: #f66; }
+    .status-info { color: var(--accent); }
+    .instrument-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
+    .instrument-card { padding: 1rem; background: var(--surface); border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: border-color 0.2s; }
+    .instrument-card:hover { border-color: var(--accent); }
+    .instrument-card.selected { border-color: var(--accent); background: rgba(107, 140, 255, 0.1); }
+    .instrument-card h3 { margin: 0 0 0.5rem 0; font-size: 0.9rem; }
+    .instrument-card .stems-list { font-size: 0.85rem; color: var(--muted); }
+    .checkbox-group { margin: 1rem 0; }
+    .checkbox-group label { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; cursor: pointer; }
+    .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 8px; overflow: hidden; }
+    th, td { padding: 0.75rem; text-align: left; }
+    th { background: #252530; }
+    .links a { color: var(--accent); margin-right: 0.8rem; text-decoration: none; }
+    .links a:hover { text-decoration: underline; }
+    .section { margin-top: 2rem; }
+    .section h2 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+    textarea { width: 100%; min-height: 100px; background: var(--surface); border: 1px solid var(--muted); border-radius: 6px; color: var(--text); padding: 0.75rem; font-family: inherit; }
+    .advanced-toggle { margin: 1rem 0; }
+    .advanced-options { margin-left: 1.5rem; padding-left: 1rem; border-left: 2px solid var(--muted); }
+  </style>
+</head>
+<body>
+  <h1>STEM Forge</h1>
+  <p class="sub">Bulk upload stems → intelligent analysis → auto-instrument detection → polyphonic separation → MIDI with articulations → high-quality remaster. Local, watermark-free.</p>
+
+  <!-- Phase 1: Upload -->
+  <div class="phase active" id="phase-upload">
+    <h2>1. Upload Stems</h2>
+    <div class="zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".wav,.aiff,.aif,.flac,.ogg,.m4a" multiple />
+      <p>Drop all stems here or click to select (WAV, AIFF, FLAC, OGG, M4A)</p>
+      <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">Upload all stems at once for cross-reference analysis</p>
+    </div>
+    <div class="stems" id="stemsList"></div>
+    <button class="btn" id="analyzeBtn" disabled>Analyze All Stems</button>
+  </div>
+
+  <!-- Phase 2: Analysis -->
+  <div class="phase" id="phase-analysis">
+    <h2>2. Analyzing Stems</h2>
+    <div class="status status-info">
+      <p><strong>Cross-referencing stems...</strong></p>
+      <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+        <li>Detecting tempo (BPM) across all stems</li>
+        <li>Detecting key signature</li>
+        <li>Detecting time signature</li>
+        <li>Creating unified MIDI map</li>
+      </ul>
+    </div>
+    <div class="progress">
+      <div class="progress-bar" id="analysisProgress" style="width: 0%"></div>
+    </div>
+    <div id="analysisStatus"></div>
+  </div>
+
+  <!-- Phase 3: Instrument Assignment -->
+  <div class="phase" id="phase-instruments">
+    <h2>3. Instrument Detection & Assignment</h2>
+    <p class="sub">Auto-detected instruments. Click to assign stems manually if needed.</p>
+    <div id="instrumentGrid"></div>
+    <div style="margin-top: 1.5rem;">
+      <button class="btn" id="confirmInstrumentsBtn">Confirm & Continue</button>
+      <button class="btn secondary" id="backToUploadBtn">Back</button>
+    </div>
+  </div>
+
+  <!-- Phase 4: MIDI Generation -->
+  <div class="phase" id="phase-midi">
+    <h2>4. Generating MIDI</h2>
+    <div class="status status-info">
+      <p><strong>Converting stems to MIDI...</strong></p>
+      <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+        <li>Extracting notes and timing</li>
+        <li>Detecting articulations (slides, bends, hammer-ons, pull-offs)</li>
+        <li>Adding drum articulations (flams, pedal sounds)</li>
+        <li>Encoding advanced MIDI features</li>
+      </ul>
+    </div>
+    <div class="progress">
+      <div class="progress-bar" id="midiProgress" style="width: 0%"></div>
+    </div>
+    <div id="midiStatus"></div>
+    <div class="advanced-toggle">
+      <label><input type="checkbox" id="advancedMidiToggle" /> Include advanced MIDI articulations</label>
+      <div class="advanced-options" id="advancedMidiOptions" style="display: none;">
+        <label><input type="checkbox" id="optBuzz" /> Include string buzz (guitars/bass)</label>
+        <label><input type="checkbox" id="optFlams" checked /> Include drum flams</label>
+        <label><input type="checkbox" id="optPedal" checked /> Include pedal sounds (drums)</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 5: Remaster Selection -->
+  <div class="phase" id="phase-remaster-select">
+    <h2>5. Select Tracks to Remaster</h2>
+    <p class="sub">Choose which tracks you want remastered to high-quality, realistic human-performance replicas.</p>
+    <div id="remasterTracks"></div>
+    <div style="margin-top: 1rem; padding: 0.75rem; background: var(--surface); border-radius: 6px;">
+      <strong id="remasterSummary">0 tracks selected</strong>
+    </div>
+    <div style="margin-top: 1.5rem;">
+      <button class="btn" id="startRemasterBtn" disabled>Start Remastering</button>
+      <button class="btn secondary" id="skipRemasterBtn">Skip Remastering</button>
+    </div>
+  </div>
+
+  <!-- Phase 6: Remastering -->
+  <div class="phase" id="phase-remaster">
+    <h2>6. Remastering Tracks</h2>
+    <div class="status status-info">
+      <p><strong>Generating high-quality audio replicas...</strong></p>
+      <p style="font-size: 0.9rem; margin-top: 0.5rem;">Using sophisticated synthesis: original audio + MIDI + tempo grid → optimal human-performance replica</p>
+    </div>
+    <div class="progress">
+      <div class="progress-bar" id="remasterProgress" style="width: 0%"></div>
+    </div>
+    <div id="remasterStatus"></div>
+  </div>
+
+  <!-- Phase 7: Backing Vocals & Lyrics -->
+  <div class="phase" id="phase-vocals">
+    <h2>7. Backing Vocals & Lyrics</h2>
+    <p class="sub">For backing vocal tracks, provide lyrics for vowel matching and timing alignment.</p>
+    <div class="checkbox-group">
+      <label><input type="checkbox" id="autoDetectLyrics" /> Auto-detect lyrics from audio (if possible)</label>
+    </div>
+    <textarea id="lyrics" placeholder="Paste or type lyrics here. Blocks will be aligned to MIDI timing (phrases per measure)."></textarea>
+    <div style="margin-top: 1rem;">
+      <button class="btn" id="processVocalsBtn">Process Backing Vocals</button>
+      <button class="btn secondary" id="skipVocalsBtn">Skip</button>
+    </div>
+  </div>
+
+  <!-- Phase 8: Results -->
+  <div class="phase" id="phase-results">
+    <h2>8. Results</h2>
+    <div id="results"></div>
+    <div style="margin-top: 1.5rem;">
+      <button class="btn secondary" id="startOverBtn">Start Over</button>
+    </div>
+  </div>
+
+  <script type="module">
+    const fileInput = document.getElementById("fileInput");
+    const dropZone = document.getElementById("dropZone");
+    const stemsList = document.getElementById("stemsList");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    
+    let uploadedStems = [];
+    let analysisResult = null;
+    let instrumentAssignments = {};
+    let midiResults = null;
+    let remasterSelections = {};
+    let finalResults = null;
+
+    // Phase management
+    function showPhase(phaseId) {
+      document.querySelectorAll(".phase").forEach(p => p.classList.remove("active"));
+      document.getElementById(phaseId).classList.add("active");
+    }
+
+    // Upload handling
+    dropZone.onclick = () => fileInput.click();
+    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add("over"); };
+    dropZone.ondragleave = () => dropZone.classList.remove("over");
+    dropZone.ondrop = (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("over");
+      if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+    };
+    fileInput.onchange = () => handleFiles(fileInput.files);
+
+    async function handleFiles(files) {
+      const form = new FormData();
+      for (const f of files) {
+        if (!/\.(wav|aiff|aif|flac|ogg|m4a)$/i.test(f.name)) continue;
+        form.append("files", f);
+      }
+      if (form.getAll("files").length === 0) return;
+      const r = await fetch("/api/upload", { method: "POST", body: form });
+      const data = await r.json();
+      if (data.error) {
+        stemsList.innerHTML = "<p class=\"status-err\">" + data.error + "</p>";
+        return;
+      }
+      uploadedStems = (data.paths || []).map((p, i) => ({ path: p, name: p.split("/").pop(), id: `stem-${i}` }));
+      renderStems();
+      analyzeBtn.disabled = uploadedStems.length === 0;
+    }
+
+    function renderStems() {
+      stemsList.innerHTML = uploadedStems.map(s => 
+        `<div class="stem"><div class="stem-info"><div class="stem-name">${s.name}</div></div></div>`
+      ).join("");
+    }
+
+    // Phase 1 → 2: Analyze
+    analyzeBtn.onclick = async () => {
+      showPhase("phase-analysis");
+      const progressBar = document.getElementById("analysisProgress");
+      const statusEl = document.getElementById("analysisStatus");
+      
+      statusEl.innerHTML = "<p>Starting analysis...</p>";
+      progressBar.style.width = "10%";
+      
+      try {
+        const r = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ paths: uploadedStems.map(s => s.path) }),
+        });
+        const data = await r.json();
+        if (data.error) throw new Error(data.error);
+        
+        analysisResult = data;
+        progressBar.style.width = "100%";
+        statusEl.innerHTML = `<p class="status-ok">Analysis complete!</p>
+          <p>Tempo: ${data.tempo || "N/A"} BPM</p>
+          <p>Key: ${data.keySignature || "N/A"}</p>
+          <p>Time Signature: ${data.timeSignature || "N/A"}</p>`;
+        
+        setTimeout(() => {
+          showPhase("phase-instruments");
+          renderInstrumentAssignment();
+        }, 1500);
+      } catch (e) {
+        statusEl.innerHTML = `<p class="status-err">Error: ${e.message}</p>`;
+      }
+    };
+
+    // Phase 3: Instrument assignment
+    function renderInstrumentAssignment() {
+      const grid = document.getElementById("instrumentGrid");
+      const instruments = analysisResult?.instruments || [];
+      const instrumentTypes = [
+        "electric-lead-guitar", "electric-rhythm-guitar", "acoustic-guitar",
+        "drums-kick", "drums-snare", "drums-tops", "percussion",
+        "piano", "electric-piano", "keys-rhythm", "keys-lead-synth",
+        "vocals-melody", "vocals-background", "bass"
+      ];
+      
+      grid.innerHTML = instrumentTypes.map(type => {
+        const stemsForType = instruments.filter(i => i.instrument === type) || [];
+        return `<div class="instrument-card" data-instrument="${type}">
+          <h3>${type.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</h3>
+          <div class="stems-list">${stemsForType.length > 0 ? stemsForType.map(s => s.name).join(", ") : "No stems assigned"}</div>
+        </div>`;
+      }).join("");
+      
+      document.querySelectorAll(".instrument-card").forEach(card => {
+        card.onclick = () => {
+          card.classList.toggle("selected");
+          const inst = card.dataset.instrument;
+          instrumentAssignments[inst] = card.classList.contains("selected");
+        };
+      });
+    }
+
+    document.getElementById("confirmInstrumentsBtn").onclick = () => {
+      showPhase("phase-midi");
+      generateMIDI();
+    };
+    document.getElementById("backToUploadBtn").onclick = () => showPhase("phase-upload");
+
+    // Phase 4: MIDI generation
+    async function generateMIDI() {
+      const progressBar = document.getElementById("midiProgress");
+      const statusEl = document.getElementById("midiStatus");
+      const advanced = document.getElementById("advancedMidiToggle").checked;
+      const optBuzz = document.getElementById("optBuzz").checked;
+      const optFlams = document.getElementById("optFlams").checked;
+      const optPedal = document.getElementById("optPedal").checked;
+      
+      statusEl.innerHTML = "<p>Generating MIDI files...</p>";
+      progressBar.style.width = "20%";
+      
+      try {
+        const r = await fetch("/api/generate-midi", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            stems: uploadedStems.map(s => ({ path: s.path, instrument: analysisResult?.instruments?.find(i => i.path === s.path)?.instrument || "unknown" })),
+            advanced,
+            options: { buzz: optBuzz, flams: optFlams, pedal: optPedal },
+          }),
+        });
+        const data = await r.json();
+        if (data.error) throw new Error(data.error);
+        
+        midiResults = data;
+        progressBar.style.width = "100%";
+        statusEl.innerHTML = `<p class="status-ok">MIDI generation complete! ${data.midiFiles?.length || 0} MIDI files created.</p>`;
+        
+        setTimeout(() => {
+          showPhase("phase-remaster-select");
+          renderRemasterSelection();
+        }, 1500);
+      } catch (e) {
+        statusEl.innerHTML = `<p class="status-err">Error: ${e.message}</p>`;
+      }
+    }
+
+    document.getElementById("advancedMidiToggle").onchange = (e) => {
+      document.getElementById("advancedMidiOptions").style.display = e.target.checked ? "block" : "none";
+    };
+
+    // Phase 5: Remaster selection
+    function renderRemasterSelection() {
+      const container = document.getElementById("remasterTracks");
+      const tracks = midiResults?.tracks || [];
+      
+      container.innerHTML = tracks.map(track => `
+        <div class="checkbox-group">
+          <label>
+            <input type="checkbox" data-track-id="${track.id}" />
+            <strong>${track.name}</strong> <span style="color: var(--muted);">(${track.instrument})</span>
+          </label>
+        </div>
+      `).join("");
+      
+      document.querySelectorAll("#remasterTracks input[type='checkbox']").forEach(cb => {
+        cb.onchange = () => {
+          remasterSelections[cb.dataset.trackId] = cb.checked;
+          updateRemasterSummary();
+        };
+      });
+      
+      updateRemasterSummary();
+    }
+
+    function updateRemasterSummary() {
+      const count = Object.values(remasterSelections).filter(Boolean).length;
+      document.getElementById("remasterSummary").textContent = `${count} track${count !== 1 ? "s" : ""} selected for remastering`;
+      document.getElementById("startRemasterBtn").disabled = count === 0;
+    }
+
+    document.getElementById("startRemasterBtn").onclick = () => {
+      showPhase("phase-remaster");
+      startRemastering();
+    };
+    document.getElementById("skipRemasterBtn").onclick = () => {
+      showPhase("phase-results");
+      renderResults();
+    };
+
+    // Phase 6: Remastering
+    async function startRemastering() {
+      const progressBar = document.getElementById("remasterProgress");
+      const statusEl = document.getElementById("remasterStatus");
+      
+      const selectedTracks = (midiResults?.tracks || []).filter(t => remasterSelections[t.id]);
+      statusEl.innerHTML = `<p>Remastering ${selectedTracks.length} tracks...</p>`;
+      progressBar.style.width = "10%";
+      
+      try {
+        const r = await fetch("/api/remaster", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tracks: selectedTracks,
+            tempo: analysisResult?.tempo,
+            keySignature: analysisResult?.keySignature,
+            timeSignature: analysisResult?.timeSignature,
+          }),
+        });
+        const data = await r.json();
+        if (data.error) throw new Error(data.error);
+        
+        finalResults = data;
+        progressBar.style.width = "100%";
+        statusEl.innerHTML = `<p class="status-ok">Remastering complete! ${data.remasteredFiles?.length || 0} files created.</p>`;
+        
+        setTimeout(() => {
+          showPhase("phase-vocals");
+        }, 1500);
+      } catch (e) {
+        statusEl.innerHTML = `<p class="status-err">Error: ${e.message}</p>`;
+      }
+    }
+
+    // Phase 7: Vocals
+    document.getElementById("processVocalsBtn").onclick = async () => {
+      const lyrics = document.getElementById("lyrics").value;
+      const autoDetect = document.getElementById("autoDetectLyrics").checked;
+      
+      // Process vocals with lyrics
+      showPhase("phase-results");
+      renderResults();
+    };
+    document.getElementById("skipVocalsBtn").onclick = () => {
+      showPhase("phase-results");
+      renderResults();
+    };
+
+    // Phase 8: Results
+    function renderResults() {
+      const container = document.getElementById("results");
+      let html = "<h3>MIDI Files</h3><table><thead><tr><th>Track</th><th>Instrument</th><th>Basic MIDI</th><th>Advanced MIDI</th></tr></thead><tbody>";
+      
+      (midiResults?.tracks || []).forEach(track => {
+        html += `<tr>
+          <td>${track.name}</td>
+          <td>${track.instrument}</td>
+          <td><a href="/api/file?path=${encodeURIComponent(track.midiPath)}" download>Download</a></td>
+          <td>${track.advancedMidiPath ? `<a href="/api/file?path=${encodeURIComponent(track.advancedMidiPath)}" download>Download</a>` : "—"}</td>
+        </tr>`;
+      });
+      html += "</tbody></table>";
+      
+      if (finalResults?.remasteredFiles?.length > 0) {
+        html += "<h3 style='margin-top: 2rem;'>Remastered Audio Files</h3><table><thead><tr><th>Track</th><th>Instrument</th><th>Download</th></tr></thead><tbody>";
+        finalResults.remasteredFiles.forEach(file => {
+          html += `<tr>
+            <td>${file.name}</td>
+            <td>${file.instrument}</td>
+            <td><a href="/api/file?path=${encodeURIComponent(file.path)}" download>Download</a></td>
+          </tr>`;
+        });
+        html += "</tbody></table>";
+      }
+      
+      container.innerHTML = html;
+    }
+
+    document.getElementById("startOverBtn").onclick = () => {
+      uploadedStems = [];
+      analysisResult = null;
+      instrumentAssignments = {};
+      midiResults = null;
+      remasterSelections = {};
+      finalResults = null;
+      showPhase("phase-upload");
+      renderStems();
+      analyzeBtn.disabled = true;
+    };
+  </script>
+</body>
+</html>

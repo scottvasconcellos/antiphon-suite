@@ -1,0 +1,4 @@
+# Venv for FOSS audio scripts (Basic Pitch + pretty-midi). See docs/FOSS_AND_LOCAL_LLM_STACK.md
+# Create: python3 -m venv .venv && source .venv/bin/activate && pip install -r scripts/audio-tools-requirements.txt
+basic-pitch>=0.2.0
+pretty-midi>=0.2.9

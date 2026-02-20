@@ -1,0 +1,5 @@
+{
+  "cloneModels": ["rave-guitar", "basic-pitch-only", "fluid-synth","heartmula"],
+  "routerModel": "qwen2.5-coder:7b",
+  "musicModel": "llama3.2:latest"
+}

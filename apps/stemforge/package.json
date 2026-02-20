@@ -1,0 +1,16 @@
+{
+  "name": "@antiphon/stemforge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "STEMForge: bulk upload stems, intelligent analysis, auto-instrument detection, polyphonic separation, MIDI with articulations, high-quality remaster. Local, watermark-free.",
+  "scripts": {
+    "dev": "node app/server.mjs",
+    "start": "node app/server.mjs",
+    "pipeline": "node scripts/run-stem-pipeline.mjs",
+    "normalize": "node scripts/ffmpeg-normalize.mjs",
+    "midi-clean": "node scripts/stem-forge-midi-clean-cli.mjs",
+    "smoke": "node scripts/stem-forge-pipeline-smoke.mjs",
+    "health": "node scripts/stem-forge-health.mjs"
+  }
+}
