@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Advanced Drum Engine — Omnizart (via Docker) for drum transcription, then split to four role MIDIs.
-Requires Docker and the image: mctlab/omnizart:latest
+Advanced Drum Engine — Omnizart for drum transcription (no Docker: use .venv-omnizart), then split to four role MIDIs.
 In:  JSON stdin: { "audioPath": "<path>" [, "outputDir": "<dir>"] }
-Out: JSON stdout: { "drums_kick", "drums_snare", "drums_tops", "drums_perc" } (paths)
+Out: JSON stdout: { "drums_kick", "drums_snare", "drums_tops", "drums_perc" } (paths; filenames include _omnizart so you can tell which set)
 On error: JSON stderr { "error": "..." }, exit 1.
 """
 
@@ -30,33 +29,22 @@ def read_input() -> dict:
         emit_error(f"Invalid JSON: {e}")
 
 
-def run_omnizart_docker(audio_path: Path, output_dir: Path) -> Path:
-    """Run Omnizart drum transcribe in Docker. Returns path to the single output MIDI."""
-    # Docker needs absolute paths for bind mounts
+def run_omnizart_venv(audio_path: Path, output_dir: Path, venv_python: Path) -> Path:
+    """Run Omnizart drum transcribe via a dedicated venv (e.g. .venv-omnizart). Returns path to the single output MIDI."""
     audio_path = audio_path.resolve()
     output_dir = output_dir.resolve()
-    if not audio_path.is_file():
-        emit_error(f"Audio file not found: {audio_path}")
     output_dir.mkdir(parents=True, exist_ok=True)
-
-    # Use same filename for output; Omnizart replaces extension with .mid
-    out_midi_name = audio_path.stem + ".mid"
-    # Mount parent of audio so path inside container is simple
-    audio_parent = str(audio_path.parent)
-    # Mount output_dir to /out
+    # omnizart drum transcribe <input> -o <dir> writes <stem>.mid into dir
     cmd = [
-        "docker", "run", "--rm",
-        "-v", f"{audio_parent}:/in:ro",
-        "-v", f"{output_dir}:/out",
-        "mctlab/omnizart:latest",
-        "omnizart", "drum", "transcribe",
-        f"/in/{audio_path.name}",
-        "-o", "/out",
+        str(venv_python), "-m", "omnizart", "drum", "transcribe",
+        str(audio_path),
+        "-o", str(output_dir),
     ]
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, cwd=str(audio_path.parent))
     if result.returncode != 0:
         stderr = (result.stderr or "").strip() or (result.stdout or "").strip()
-        emit_error(f"Omnizart Docker failed: {stderr[:500]}")
+        emit_error(f"Omnizart failed: {stderr[:500]}")
+    out_midi_name = audio_path.stem + ".mid"
     out_midi = output_dir / out_midi_name
     if not out_midi.is_file():
         emit_error(f"Omnizart did not produce {out_midi_name} in {output_dir}")
@@ -84,8 +72,14 @@ def _audio_duration_and_bpm(audio_path: Path) -> tuple[float, float]:
         return (0.0, 120.0)
 
 
-def run_drum_split(midi_path: Path, output_dir: Path, audio_path: Path | None = None) -> dict[str, str]:
-    """Split Omnizart's single MIDI into four role MIDIs; clamp to source duration and set tempo from audio."""
+def run_drum_split(
+    midi_path: Path,
+    output_dir: Path,
+    audio_path: Path | None = None,
+    name_suffix: str = "",
+) -> dict[str, str]:
+    """Split Omnizart's single MIDI into four role MIDIs; clamp to source duration and set tempo from audio.
+    If name_suffix (e.g. 'omnizart') is set, filenames are base_suffix_drums_kick.mid so you can tell which set."""
     try:
         import pretty_midi
     except ImportError:
@@ -115,7 +109,6 @@ def run_drum_split(midi_path: Path, output_dir: Path, audio_path: Path | None = 
         duration_sec = float(pm.get_end_time()) if pm.get_end_time() else 0.0
     if duration_sec <= 0:
         duration_sec = 60.0
-    # Use BPM from source audio so Logic grid matches
     tempo = bpm
     by_role: dict[str, list] = {"drums_kick": [], "drums_snare": [], "drums_tops": [], "drums_perc": []}
     for inst in pm.instruments:
@@ -132,6 +125,8 @@ def run_drum_split(midi_path: Path, output_dir: Path, audio_path: Path | None = 
     base = midi_path.stem
     if base.endswith("_drums") or base.endswith(" (Drums)"):
         base = base.replace(" (Drums)", "").replace("_drums", "").strip() or "drums"
+    if name_suffix:
+        base = f"{base}_{name_suffix}"
     out_paths = {}
     for role in ROLES:
         out_pm = pretty_midi.PrettyMIDI(initial_tempo=tempo)
@@ -163,8 +158,19 @@ def main() -> None:
     else:
         out_dir = audio_path.parent
 
-    midi_path = run_omnizart_docker(audio_path, out_dir)
-    out_paths = run_drum_split(midi_path, out_dir, audio_path=audio_path)
+    # Prefer Omnizart via dedicated venv (no Docker)
+    script_dir = Path(__file__).resolve().parent
+    repo_root = script_dir.parent
+    venv_omnizart = repo_root / ".venv-omnizart" / "bin" / "python3"
+    if not venv_omnizart.is_file():
+        venv_omnizart = repo_root / ".venv-omnizart" / "bin" / "python"
+    if venv_omnizart.is_file():
+        midi_path = run_omnizart_venv(audio_path, out_dir, venv_omnizart)
+        out_paths = run_drum_split(midi_path, out_dir, audio_path=audio_path, name_suffix="omnizart")
+    else:
+        emit_error(
+            "Omnizart venv not found. Create .venv-omnizart with Python 3.8 and run: pip install omnizart. No Docker."
+        )
     print(json.dumps(out_paths))
 
 
