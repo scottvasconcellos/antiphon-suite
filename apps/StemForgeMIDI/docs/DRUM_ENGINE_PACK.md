@@ -9,7 +9,7 @@ StemForge MIDI’s drum engine runs **entirely in-app**: no Docker, no separate 
 - **Onset detection:** Librosa (hop 256, backtrack) so note times line up with transients.
 - **Features per onset:** Low/mid/high band energy, spectral centroid, transient sharpness, attack energy.
 - **Cross-referencing:** Several classification rules (snare-priority, kick-priority, balanced) run on the same onsets; onsets within 30 ms are merged and the **majority vote** picks the role (kick/snare/tops/perc). That keeps one process but uses multiple “opinions” for robustness.
-- **Tempo:** BPM is estimated from the same audio (or taken from the beat grid when the pipeline provides it) so the DAW grid matches the source.
+- **Tempo:** BPM is estimated from the same audio (or taken from the beat grid when the pipeline provides it) so the DAW grid matches the source. When the pipeline passes **beat_times**, a **variable tempo map** is written into each MIDI file (per-beat BPM from consecutive beat times), so the DAW grid follows the audio even when tempo changes.
 - **Length:** Each of the four MIDI tracks gets an end anchor at the **exact audio duration**, so in the DAW all four tracks are the same length as the original stem and don’t run long or short.
 
 ---

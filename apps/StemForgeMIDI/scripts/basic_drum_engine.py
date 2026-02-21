@@ -63,6 +63,42 @@ def _quantize_to_beat(t: float, beat_times: list[float]) -> float:
     return best
 
 
+def _set_tempo_map(pm, bpm: float, beat_times: list[float] | None, duration_sec: float) -> None:
+    """Write tempo from audio into the MIDI so the DAW grid matches. If beat_times has 2+ entries, use variable tempo (per-beat BPM)."""
+    res = pm.resolution
+    if not beat_times or len(beat_times) < 2:
+        pm._tick_scales = [(0, 60.0 / (bpm * res))]
+        max_tick = int(duration_sec * bpm * res / 60) + 100
+        pm._update_tick_to_time(max_tick)
+        return
+    # Segment boundaries: 0, beat_times[0], beat_times[1], ..., beat_times[-1]; BPM per segment from inter-beat interval
+    times = [0.0] + [float(t) for t in beat_times]
+    bpms = []
+    for i in range(len(times) - 1):
+        dt = times[i + 1] - times[i]
+        bpms.append((60.0 / dt) if dt > 0.01 else bpm)
+    if not bpms:
+        bpms = [bpm]
+    tick_scales = []
+    tick_scales.append((0, 60.0 / (bpms[0] * res)))
+    last_tick = 0
+    last_t = 0.0
+    last_scale = 60.0 / (bpms[0] * res)
+    for i in range(1, len(times)):
+        t_val = times[i]
+        bpm_val = bpms[min(i - 1, len(bpms) - 1)]
+        tick_delta = (t_val - last_t) / last_scale
+        tick = last_tick + int(round(tick_delta))
+        new_scale = 60.0 / (bpm_val * res)
+        if abs(new_scale - last_scale) > 1e-9:
+            tick_scales.append((tick, new_scale))
+            last_scale = new_scale
+        last_tick, last_t = tick, t_val
+    pm._tick_scales = tick_scales
+    final_tick = last_tick + int(round((duration_sec - last_t) / last_scale)) + 100
+    pm._update_tick_to_time(max(final_tick, last_tick + 1))
+
+
 def run(
     audio_path: Path,
     output_dir: Path,
@@ -119,6 +155,7 @@ def run(
         out_paths = {}
         for role in ROLES:
             out_pm = pretty_midi.PrettyMIDI(initial_tempo=bpm)
+            _set_tempo_map(out_pm, bpm, beat_times, duration_sec)
             out_pm.instruments.append(pretty_midi.Instrument(program=0, is_drum=True))
             path = output_dir / f"{audio_path.stem}_{role}.mid"
             out_pm.write(str(path))
@@ -284,6 +321,7 @@ def run(
     end_anchor_end = duration_sec
     for role in ROLES:
         out_pm = pretty_midi.PrettyMIDI(initial_tempo=bpm)
+        _set_tempo_map(out_pm, bpm, beat_times, duration_sec)
         drum_inst = pretty_midi.Instrument(program=0, is_drum=True)
         pitch = GM_NOTE[role]
         for start, vel in by_role[role]:
