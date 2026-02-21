@@ -199,28 +199,46 @@ def run(
     if max_attack <= 0:
         max_attack = 1.0
 
-    def classify(low_n: float, mid_n: float, high_n: float, centroid_n: float, trans_n: float, attack_n: float) -> str:
-        # Snare: sharp transient + attack (stick crack) and body in mid or high. Prioritize so we don't miss snares.
+    def classify_v1(low_n: float, mid_n: float, high_n: float, centroid_n: float, trans_n: float, attack_n: float) -> str:
         if trans_n > 0.4 and attack_n > 0.3 and (mid_n > 0.25 or high_n > 0.25):
             return "drums_snare"
         if mid_n > 0.5 and trans_n > 0.35:
             return "drums_snare"
-        # Kick: dominant low, low centroid
         if low_n > 0.45 and low_n >= mid_n and low_n >= high_n and centroid_n < 0.5:
             return "drums_kick"
         if low_n > 0.6:
             return "drums_kick"
-        # Tops: high energy and/or high centroid (hats, cymbals)
         if high_n > 0.35 and (high_n >= low_n or centroid_n > 0.45):
             return "drums_tops"
         if centroid_n > 0.6 and high_n > 0.2:
             return "drums_tops"
-        # Toms/perc: mid-low, not as transient as snare, not as low-dominant as kick
         if mid_n > 0.35 and low_n > 0.2 and trans_n < 0.5:
             return "drums_perc"
         return "drums_perc"
 
-    by_role: dict[str, list[tuple[float, int]]] = {r: [] for r in ROLES}
+    def classify_v2_snare_priority(low_n: float, mid_n: float, high_n: float, centroid_n: float, trans_n: float, attack_n: float) -> str:
+        if trans_n > 0.35 and (mid_n > 0.3 or high_n > 0.25):
+            return "drums_snare"
+        if low_n > 0.5 and low_n >= mid_n and centroid_n < 0.5:
+            return "drums_kick"
+        if high_n > 0.3:
+            return "drums_tops"
+        return "drums_perc"
+
+    def classify_v3_kick_priority(low_n: float, mid_n: float, high_n: float, centroid_n: float, trans_n: float, attack_n: float) -> str:
+        if low_n > 0.4 and low_n >= high_n and centroid_n < 0.55:
+            return "drums_kick"
+        if trans_n > 0.4 and attack_n > 0.25 and mid_n > 0.3:
+            return "drums_snare"
+        if high_n > 0.35 or centroid_n > 0.5:
+            return "drums_tops"
+        return "drums_perc"
+
+    classifiers = [classify_v1, classify_v2_snare_priority, classify_v3_kick_priority]
+
+    # Cross-reference: vote across classifiers; merge onsets within merge_sec and take majority role
+    merge_sec = 0.03
+    votes: list[tuple[float, list[str], float, float, float, float, float, float]] = []
     for (t, low_e, mid_e, high_e, centroid, trans, attack) in features:
         low_n = low_e / max_low
         mid_n = mid_e / max_mid
@@ -228,14 +246,42 @@ def run(
         centroid_n = centroid / max_centroid
         trans_n = trans / max_transient
         attack_n = attack / max_attack
-        role = classify(low_n, mid_n, high_n, centroid_n, trans_n, attack_n)
-        velocity = int(70 + 45 * (low_n + mid_n + high_n) / 3)
-        velocity = max(40, min(127, velocity))
-        by_role[role].append((t, velocity))
+        roles = [c(low_n, mid_n, high_n, centroid_n, trans_n, attack_n) for c in classifiers]
+        votes.append((t, roles, low_e, mid_e, high_e, centroid, trans, attack))
 
-    # Write one MIDI per role; strict duration and tempo so Logic aligns with source
+    # Merge nearby onsets: group by time, take median time and majority role
+    votes.sort(key=lambda x: x[0])
+    merged: list[tuple[float, str, float, float, float]] = []
+    i = 0
+    while i < len(votes):
+        t0, roles0, le, me, he, ce, tr, ae = votes[i]
+        group_t = [t0]
+        group_roles = [roles0]
+        j = i + 1
+        while j < len(votes) and votes[j][0] - t0 < merge_sec:
+            group_t.append(votes[j][0])
+            group_roles.append(votes[j][1])
+            j += 1
+        t_med = float(np.median(group_t))
+        all_roles = [r for rr in group_roles for r in rr]
+        counts = {}
+        for r in ROLES:
+            counts[r] = all_roles.count(r)
+        role = max(ROLES, key=lambda r: counts[r])
+        vel = int(70 + 45 * (le / max_low + me / max_mid + he / max_high) / 3)
+        vel = max(40, min(127, vel))
+        merged.append((t_med, role, vel, le, me))
+        i = j
+
+    by_role: dict[str, list[tuple[float, int]]] = {r: [] for r in ROLES}
+    for t, role, vel, _le, _me in merged:
+        by_role[role].append((t, vel))
+
+    # Write one MIDI per role; same length as audio so DAW aligns (end anchor on every track)
     base = audio_path.stem
     out_paths = {}
+    end_anchor_start = max(0.0, duration_sec - 0.001)
+    end_anchor_end = duration_sec
     for role in ROLES:
         out_pm = pretty_midi.PrettyMIDI(initial_tempo=bpm)
         drum_inst = pretty_midi.Instrument(program=0, is_drum=True)
@@ -247,6 +293,9 @@ def run(
             drum_inst.notes.append(
                 pretty_midi.Note(velocity=vel, pitch=pitch, start=start, end=end)
             )
+        drum_inst.notes.append(
+            pretty_midi.Note(velocity=1, pitch=pitch, start=end_anchor_start, end=end_anchor_end)
+        )
         out_pm.instruments.append(drum_inst)
         path = output_dir / f"{base}_{role}.mid"
         out_pm.write(str(path))
