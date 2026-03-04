@@ -1,0 +1,30 @@
+import { issueLaunchToken, verifyLaunchToken } from "../domain/launchTokenBoundary";
+import { toEpochSeconds } from "./timeControl";
+const TOKEN_SECRET = "antiphon.layer1.launch";
+const TOKEN_TTL_SECONDS = 3600;
+export function toLaunchReadinessMatrix(snapshot) {
+    const issuedAt = toEpochSeconds(new Date().toISOString());
+    return [...snapshot.entitlements]
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .map((app) => {
+        if (!app.owned) {
+            return { appId: app.id, ready: false, reason: "not_owned" };
+        }
+        if (!app.installedVersion) {
+            return { appId: app.id, ready: false, reason: "not_installed" };
+        }
+        const token = issueLaunchToken({
+            appId: app.id,
+            userId: snapshot.session?.userId ?? "offline-user",
+            entitlementOutcome: snapshot.session ? "Authorized" : "OfflineAuthorized",
+            issuedAt,
+            expiresAt: issuedAt + TOKEN_TTL_SECONDS
+        }, TOKEN_SECRET);
+        const verified = verifyLaunchToken(token, TOKEN_SECRET, issuedAt);
+        return {
+            appId: app.id,
+            ready: verified.valid,
+            reason: "token_issued"
+        };
+    });
+}
