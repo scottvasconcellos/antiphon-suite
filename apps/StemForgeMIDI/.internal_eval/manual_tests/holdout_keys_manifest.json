@@ -1,0 +1,45 @@
+{
+  "clips": [
+    {
+      "id": "STAR_TEST_001",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/star_drums_full/STAR_publication/data/test/midi/ANiMAL__Easy_Tiger_re_synth_drum_909_detailed_kit_full.mid"
+    },
+    {
+      "id": "STAR_TEST_002",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/star_drums_full/STAR_publication/data/test/midi/A_Classic_Education__NightOwl_re_synth_drum_stadium_kit_full.mid"
+    },
+    {
+      "id": "STAR_TEST_003",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/star_drums_full/STAR_publication/data/test/midi/Alexander_Ross__Velvet_Curtain_re_synth_drum_ar_70s_tight_kit_full.mid"
+    },
+    {
+      "id": "STAR_TEST_004",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/star_drums_full/STAR_publication/data/test/midi/Auctioneer__Our_Future_Faces_re_synth_drum_garage_kit_lite.mid"
+    },
+    {
+      "id": "STAR_TEST_005",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/star_drums_full/STAR_publication/data/test/midi/Dreamers_Of_The_Ghetto__Heavy_Love_re_synth_drum_ar_60s_late_kit_full.mid"
+    },
+    {
+      "id": "STAR_TEST_006",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/star_drums_full/STAR_publication/data/test/midi/Faces_On_Film__Waiting_For_Ga_re_synth_drum_ar_80s_chrome_kit_full.mid"
+    },
+    {
+      "id": "STAR_TEST_007",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/star_drums_full/STAR_publication/data/test/midi/Girls_Under_Glass__We_Feel_Alright_re_synth_drum_in_da_house_kit_full.mid"
+    },
+    {
+      "id": "STAR_TEST_008",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/star_drums_full/STAR_publication/data/test/midi/Giselle__Moss_re_synth_drum_dance_one_kit_full.mid"
+    },
+    {
+      "id": "STAR_TEST_009",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/star_drums_full/STAR_publication/data/test/midi/Helado_Negro__Mitad_Del_Mundo_re_synth_drum_session_kit_full.mid"
+    },
+    {
+      "id": "STAR_TEST_010",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/star_drums_full/STAR_publication/data/test/midi/Hezekiah_Jones__Borrowed_Heart_re_synth_drum_stadium_kit_full.mid"
+    }
+  ]
+}
+

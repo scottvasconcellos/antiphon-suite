@@ -1,0 +1,19 @@
+{
+  "name": "SCORING_CONTRACT_V1",
+  "purpose": "Normalized external-benchmark scoring contract for real-domain drum evaluation",
+  "syncAlign": true,
+  "syncAlignMode": "affine",
+  "matchSec": 0.08,
+  "recallMin": 0.9,
+  "precisionMin": 0.85,
+  "minVelocityThreshold": 40,
+  "enableAsymmetricPrecisionGate": false,
+  "thresholdPct": 35.0,
+  "seed": 4242,
+  "holdoutRatio": 0.3,
+  "notes": [
+    "Promotion is based on real blind holdout improvement.",
+    "Synthetic pass rate is a regression guard only (>=90%).",
+    "Holdout split boundary is immutable once generated."
+  ]
+}
