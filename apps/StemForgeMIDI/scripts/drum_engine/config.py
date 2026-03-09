@@ -18,6 +18,10 @@ class EngineConfig:
     # Onset and clustering (tuned for real stems: fewer candidates → higher precision)
     merge_sec: float = 0.04
     role_nms_sec: float = 0.12
+    # Per-role kick NMS window (wider than role_nms_sec to suppress resonance tails).
+    # Default 0.120 = same as role_nms_sec (no-op); raise to suppress late-resonance FP kicks.
+    # 0.165 caused ENST_005 kick recall regression (real double-kick within 165ms window).
+    kick_nms_window_sec: float = 0.120
     role_nms_beat_frac: float = 0.22
     role_nms_min_sec: float = 0.035
     low_med_p95_frac: float = 0.09

@@ -503,8 +503,11 @@ def _role_nms(
     hint_grid: "BackendHintGrid | None" = None,
 ) -> list[EmittedEvent]:
     min_sep_sec = _effective_role_nms_sec(cfg, bpm)
+    # Kicks use a wider flat window to suppress resonance-tail re-detections.
+    kick_sep_sec = max(cfg.role_nms_min_sec, cfg.kick_nms_window_sec)
     if nms_diag is not None:
         nms_diag["min_sep_sec"] = round(min_sep_sec, 6)
+        nms_diag["kick_sep_sec"] = round(kick_sep_sec, 6)
         nms_diag["dropped"] = []
     by_role: dict[RoleName, list[EmittedEvent]] = defaultdict(list)
     for e in events:
@@ -512,10 +515,11 @@ def _role_nms(
 
     out: list[EmittedEvent] = []
     for role, role_events in by_role.items():
+        role_sep = kick_sep_sec if role == "drums_kick" else min_sep_sec
         sorted_events = sorted(role_events, key=lambda e: e.time_sec)
         clusters: list[list[EmittedEvent]] = [[sorted_events[0]]]
         for e in sorted_events[1:]:
-            if e.time_sec - clusters[-1][-1].time_sec < min_sep_sec:
+            if e.time_sec - clusters[-1][-1].time_sec < role_sep:
                 clusters[-1].append(e)
             else:
                 clusters.append([e])
