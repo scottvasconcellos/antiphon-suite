@@ -619,6 +619,38 @@ def _role_nms(
     return out
 
 
+def _kick_reverb_snare_filter(events: list[EmittedEvent], cfg: EngineConfig) -> list[EmittedEvent]:
+    """
+    Post-NMS filter: suppress snare events that fall within kick_reverb_window_sec of a kick
+    event AND carry sub_share >= kick_reverb_max_snare_sub.
+
+    Rationale: genuine simultaneous snares (separate instrument from the kick) have low sub_share
+    (0.05–0.15) because they are mid/high-band sounds.  Kick body resonance misclassified as snare
+    retains elevated sub_share (0.20–0.45) from the decaying kick fundamental.  Filtering by the
+    combination of temporal proximity to a kick + elevated sub_share removes phantom stacked snares
+    without affecting legitimate simultaneous or near-simultaneous kick+snare pairs.
+    """
+    if not cfg.enable_kick_reverb_snare_filter:
+        return events
+    kick_times = [e.time_sec for e in events if e.role == "drums_kick"]
+    if not kick_times:
+        return events
+    filtered: list[EmittedEvent] = []
+    for e in events:
+        if e.role != "drums_snare":
+            filtered.append(e)
+            continue
+        # Check proximity to any kick (snare must be within [kick, kick + window])
+        near_kick = any(
+            abs(e.time_sec - kt) <= cfg.kick_reverb_window_sec
+            for kt in kick_times
+        )
+        if near_kick and e.sub_share >= cfg.kick_reverb_max_snare_sub:
+            continue  # suppress: likely kick resonance
+        filtered.append(e)
+    return filtered
+
+
 def infer_events(
     posteriors: list[RolePosterior],
     cfg: EngineConfig,
@@ -657,8 +689,10 @@ def infer_events(
         out = _role_nms(events, cfg, bpm, nms_diag=nms_diag, hint_grid=hint_grid)
         diagnostics["nms"] = nms_diag
         diagnostics["events_after_nms_count"] = len(out)
+        out = _kick_reverb_snare_filter(out, cfg)
+        diagnostics["events_after_reverb_filter_count"] = len(out)
         return out
-    return _role_nms(events, cfg, bpm, hint_grid=hint_grid)
+    return _kick_reverb_snare_filter(_role_nms(events, cfg, bpm, hint_grid=hint_grid), cfg)
 
 
 def to_by_role(events: list[EmittedEvent], min_velocity_threshold: int = 1) -> dict[RoleName, list[tuple[float, int]]]:

@@ -50,6 +50,8 @@ def run_engine(
     enable_asymmetric_precision_gate: bool = False,
     use_backend_hints: bool = False,
     use_real_backend: bool = False,
+    use_onset_suppressor: bool = False,
+    enable_kick_reverb_snare_filter: bool = False,
 ) -> tuple[dict[str, str] | None, str]:
     try:
         payload = {
@@ -60,6 +62,10 @@ def run_engine(
             "minVelocityThreshold": int(min_velocity_threshold),
             "enableAsymmetricPrecisionGate": bool(enable_asymmetric_precision_gate),
         }
+        if use_onset_suppressor:
+            payload["useOnsetSuppressor"] = True
+        if enable_kick_reverb_snare_filter:
+            payload["enableKickReverbSnareFilter"] = True
         if use_real_backend:
             payload["useRealBackend"] = True
         elif use_backend_hints:
@@ -187,6 +193,16 @@ def main() -> int:
         help="Enable Demucs stem separation + Omnizart CNN + DrummerKnowledgeRescue (Phase 3)",
     )
     ap.add_argument(
+        "--use-onset-suppressor",
+        action="store_true",
+        help="Enable Phase 4 onset-level binary suppressor (trained logistic classifier)",
+    )
+    ap.add_argument(
+        "--enable-kick-reverb-snare-filter",
+        action="store_true",
+        help="Enable kick-reverb snare filter (post-NMS: suppress high-sub snares near kicks)",
+    )
+    ap.add_argument(
         "--min-velocity-threshold",
         type=int,
         default=MAIN_MIN_VELOCITY_DEFAULT,
@@ -251,6 +267,8 @@ def main() -> int:
             args.enable_asymmetric_precision_gate,
             use_backend_hints=args.use_backend_hints,
             use_real_backend=args.use_real_backend,
+            use_onset_suppressor=args.use_onset_suppressor,
+            enable_kick_reverb_snare_filter=args.enable_kick_reverb_snare_filter,
         )
         if not engine_out:
             ledger_rows.append(

@@ -148,3 +148,22 @@ class EngineConfig:
     dk_fast_run_min_hits: int = 4         # min onsets in window to trigger rule 3
     dk_fast_run_kick_max: float = 0.50    # rule 3 only fires if kick_p < this
     dk_fast_run_snare_boost: float = 0.20 # additive boost to snare prob in fast runs
+
+    # Kick-reverb snare filter (post-NMS): suppress snare events that are simultaneous with or
+    # immediately after a kick event AND carry elevated sub_share — a spectral fingerprint of
+    # kick resonance misclassified as snare rather than a genuine simultaneous snare hit.
+    # Genuine simultaneous snares (separate instrument) have very low sub_share (0.05–0.15).
+    # Kick resonance classified as snare retains elevated sub_share (0.20–0.45) from kick decay.
+    # Disabled by default; enable by setting enable_kick_reverb_snare_filter=True.
+    enable_kick_reverb_snare_filter: bool = False
+    kick_reverb_window_sec: float = 0.080   # search window: snare within this after (or at) kick
+    kick_reverb_max_snare_sub: float = 0.35  # snares with sub_share >= this near a kick are suppressed
+
+    # Phase 4 — Onset-level binary suppressor (onset_suppressor.py).
+    # When enabled, a trained logistic classifier scores each onset candidate BEFORE
+    # classify.py.  Onsets below both kick and snare thresholds (and not ruled-in as
+    # tops by high_share) are dropped, eliminating 10-20x reverb-tail over-detection.
+    # Disabled by default; enable via useOnsetSuppressor JSON key or --use-onset-suppressor flag.
+    use_onset_suppressor: bool = False
+    onset_suppressor_min_kick_p: float = 0.65
+    onset_suppressor_min_snare_p: float = 0.60

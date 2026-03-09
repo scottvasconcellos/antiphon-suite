@@ -289,6 +289,8 @@ def run(
     use_backend_hints_inline: bool = False,
     use_drummer_knowledge: bool = False,
     use_real_backend: bool = False,
+    use_onset_suppressor: bool = False,
+    enable_kick_reverb_snare_filter: bool = False,
 ) -> dict[str, str]:
     try:
         import librosa
@@ -303,6 +305,10 @@ def run(
         cfg_kwargs["enable_asymmetric_precision_gate"] = bool(enable_asymmetric_precision_gate)
     if use_drummer_knowledge:
         cfg_kwargs["use_drummer_knowledge"] = True
+    if use_onset_suppressor:
+        cfg_kwargs["use_onset_suppressor"] = True
+    if enable_kick_reverb_snare_filter:
+        cfg_kwargs["enable_kick_reverb_snare_filter"] = True
     cfg = EngineConfig(**cfg_kwargs)
 
     # Phase 3: real backend (Demucs → Omnizart CNN → DrummerKnowledgeRescue).
@@ -409,6 +415,24 @@ def run(
     # Real drum hits have a steep energy increase (ratio >> 1.5).
     if cfg.min_onset_transient_ratio > 0:
         filtered = [f for f in filtered if f.transient_ratio >= cfg.min_onset_transient_ratio]
+    # Phase 4: onset-level binary suppressor — drop reverb-tail / room-mode false positives
+    # BEFORE classify.  Trained on ENST+A2MD real data; keeps real kicks, snares, and tops.
+    if cfg.use_onset_suppressor and filtered:
+        try:
+            from drum_engine.onset_suppressor import load_or_train, apply_suppressor
+            _manifest_path = Path(__file__).resolve().parent.parent / ".internal_eval" / "real_stems" / "manifest.json"
+            _model_path = Path(__file__).resolve().parent / "drum_engine" / "onset_suppressor_model.pkl"
+            _suppressor = load_or_train(_manifest_path, _model_path)
+            if _suppressor is not None:
+                filtered = apply_suppressor(
+                    filtered,
+                    _suppressor,
+                    min_kick_p=cfg.onset_suppressor_min_kick_p,
+                    min_snare_p=cfg.onset_suppressor_min_snare_p,
+                    tops_high_share_min=cfg.tops_high_share_min,
+                )
+        except Exception:
+            pass  # suppressor failure is non-fatal; continue with unfiltered candidates
     if not filtered:
         out_paths = _write_empty_outputs(
             audio_path=audio_path,
@@ -536,6 +560,10 @@ def main() -> None:
     use_backend_hints_inline = bool(data.get("useBackendHintsInline", False))
     use_drummer_knowledge = bool(data.get("useDrummerKnowledge", False))
     use_real_backend = bool(data.get("useRealBackend", False))
+    use_onset_suppressor = bool(data.get("useOnsetSuppressor", False))
+    if not use_onset_suppressor and os.environ.get("STEMFORGE_DRUM_USE_ONSET_SUPPRESSOR") == "1":
+        use_onset_suppressor = True
+    enable_kick_reverb_snare_filter = bool(data.get("enableKickReverbSnareFilter", False))
     if not use_backend_hints and os.environ.get("STEMFORGE_DRUM_USE_BACKEND_HINTS") == "1":
         use_backend_hints = True
     if not use_backend_hints_inline and os.environ.get("STEMFORGE_DRUM_USE_BACKEND_HINTS_INLINE") == "1":
@@ -589,6 +617,8 @@ def main() -> None:
         use_backend_hints_inline=use_backend_hints_inline,
         use_drummer_knowledge=use_drummer_knowledge,
         use_real_backend=use_real_backend,
+        use_onset_suppressor=use_onset_suppressor,
+        enable_kick_reverb_snare_filter=enable_kick_reverb_snare_filter,
     )
     print(json.dumps(out_paths))
 

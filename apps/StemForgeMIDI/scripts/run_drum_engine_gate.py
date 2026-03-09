@@ -96,6 +96,16 @@ def main() -> int:
         action="store_true",
         help="Run all eval steps with Demucs stem separation + Omnizart CNN + DrummerKnowledgeRescue (Phase 3)",
     )
+    ap.add_argument(
+        "--use-onset-suppressor",
+        action="store_true",
+        help="Run all eval steps with Phase 4 onset-level binary suppressor enabled",
+    )
+    ap.add_argument(
+        "--enable-kick-reverb-snare-filter",
+        action="store_true",
+        help="Enable kick-reverb snare filter (post-NMS: suppress high-sub snares near kicks)",
+    )
     args = ap.parse_args()
 
     synth_ledger = APP_ROOT / ".internal_eval" / "gate_synthetic_ledger.json"
@@ -114,6 +124,10 @@ def main() -> int:
         synth_cmd += ["--use-real-backend"]
     elif args.use_backend_hints:
         synth_cmd += ["--use-backend-hints"]
+    if args.use_onset_suppressor:
+        synth_cmd += ["--use-onset-suppressor"]
+    if args.enable_kick_reverb_snare_filter:
+        synth_cmd += ["--enable-kick-reverb-snare-filter"]
     rc, out, err = _run(synth_cmd)
     if out:
         print(out.strip())
@@ -181,6 +195,10 @@ def main() -> int:
             real_cmd += ["--use-real-backend", "--engine-timeout-sec", "900"]
         elif args.use_backend_hints:
             real_cmd += ["--use-backend-hints"]
+        if args.use_onset_suppressor:
+            real_cmd += ["--use-onset-suppressor"]
+        if args.enable_kick_reverb_snare_filter:
+            real_cmd += ["--enable-kick-reverb-snare-filter"]
         rc2, out2, err2 = _run(real_cmd)
         if out2:
             print(out2.strip())

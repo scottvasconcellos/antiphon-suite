@@ -41,6 +41,8 @@ def run_engine(
     sample_dir: Path | None = None,
     use_backend_hints: bool = False,
     use_real_backend: bool = False,
+    use_onset_suppressor: bool = False,
+    enable_kick_reverb_snare_filter: bool = False,
 ) -> dict[str, str] | None:
     try:
         payload: dict = {
@@ -52,6 +54,10 @@ def run_engine(
         }
         if sample_dir is not None:
             payload["sampleDir"] = str(sample_dir)
+        if use_onset_suppressor:
+            payload["useOnsetSuppressor"] = True
+        if enable_kick_reverb_snare_filter:
+            payload["enableKickReverbSnareFilter"] = True
         if use_real_backend:
             payload["useRealBackend"] = True
         elif use_backend_hints:
@@ -167,6 +173,16 @@ def main() -> int:
         action="store_true",
         help="Enable Demucs stem separation + Omnizart CNN + DrummerKnowledgeRescue (Phase 3)",
     )
+    ap.add_argument(
+        "--use-onset-suppressor",
+        action="store_true",
+        help="Enable Phase 4 onset-level binary suppressor",
+    )
+    ap.add_argument(
+        "--enable-kick-reverb-snare-filter",
+        action="store_true",
+        help="Enable kick-reverb snare filter (post-NMS)",
+    )
     args = ap.parse_args()
     sample_dir: Path | None = None
     if args.sample_dir:
@@ -196,7 +212,7 @@ def main() -> int:
             continue
         out_dir = packs_dir / "out" / pid
         out_dir.mkdir(parents=True, exist_ok=True)
-        paths = run_engine(wav_path, out_dir, key["bpm"], args.min_velocity_threshold, sample_dir=sample_dir, use_backend_hints=args.use_backend_hints, use_real_backend=args.use_real_backend)
+        paths = run_engine(wav_path, out_dir, key["bpm"], args.min_velocity_threshold, sample_dir=sample_dir, use_backend_hints=args.use_backend_hints, use_real_backend=args.use_real_backend, use_onset_suppressor=args.use_onset_suppressor, enable_kick_reverb_snare_filter=args.enable_kick_reverb_snare_filter)
         if not paths:
             ledger.append({"id": pid, "style": key.get("style"), "pass": False, "error": "engine_failed"})
             continue

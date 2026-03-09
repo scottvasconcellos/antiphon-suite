@@ -93,12 +93,70 @@
       "tops_labels": ["c1", "o1", "rc", "cc"]
     },
     {
+      "id": "ENST_REAL_002",
+      "title": "ENST_drummer1_wet_mix_phrase044",
+      "style": "ENST_wet_mix",
+      "meter": "4/4",
+      "audioPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/ENST-drums-public/drummer_1/audio/wet_mix/044_phrase_rock_simple_fast_rods.wav",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/ENST-drums-public/drummer_1/annotation/044_phrase_rock_simple_fast_rods.txt",
+      "annotation_format": "enst_txt",
+      "kick_labels": ["bd"],
+      "snare_labels": ["sd"],
+      "tops_labels": ["c1", "o1", "rc", "cc"]
+    },
+    {
+      "id": "ENST_REAL_003",
+      "title": "ENST_drummer1_wet_mix_phrase046",
+      "style": "ENST_wet_mix",
+      "meter": "4/4",
+      "audioPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/ENST-drums-public/drummer_1/audio/wet_mix/046_phrase_rock_complex_medium_rods.wav",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/ENST-drums-public/drummer_1/annotation/046_phrase_rock_complex_medium_rods.txt",
+      "annotation_format": "enst_txt",
+      "kick_labels": ["bd"],
+      "snare_labels": ["sd"],
+      "tops_labels": ["c1", "o1", "rc", "cc"]
+    },
+    {
+      "id": "ENST_REAL_004",
+      "title": "ENST_drummer1_wet_mix_phrase036",
+      "style": "ENST_wet_mix",
+      "meter": "4/4",
+      "audioPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/ENST-drums-public/drummer_1/audio/wet_mix/036_phrase_disco_simple_slow_sticks.wav",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/ENST-drums-public/drummer_1/annotation/036_phrase_disco_simple_slow_sticks.txt",
+      "annotation_format": "enst_txt",
+      "kick_labels": ["bd"],
+      "snare_labels": ["sd"],
+      "tops_labels": ["c1", "o1", "rc", "cc"]
+    },
+    {
+      "id": "ENST_REAL_005",
+      "title": "ENST_drummer1_wet_mix_phrase069",
+      "style": "ENST_wet_mix",
+      "meter": "4/4",
+      "audioPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/ENST-drums-public/drummer_1/audio/wet_mix/069_phrase_shuffle-blues_complex_slow_brushes.wav",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/ENST-drums-public/drummer_1/annotation/069_phrase_shuffle-blues_complex_slow_brushes.txt",
+      "annotation_format": "enst_txt",
+      "kick_labels": ["bd"],
+      "snare_labels": ["sd"],
+      "tops_labels": ["c1", "o1", "rc", "cc"]
+    },
+    {
       "id": "A2MD_REAL_001",
       "title": "A2MD_dist0p00_00000",
       "style": "A2MD_dist0p00",
       "meter": "4/4",
       "audioPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/a2md_public/ytd_audio/dist0p00/ytd_audio_00000_TRRORHF128E0786C6F.mp3",
       "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/a2md_public/align_mid/dist0p00/align_mid_00000_TRRORHF128E0786C6F.mid",
+      "kick_pitches": [35, 36],
+      "snare_pitches": [38, 40]
+    },
+    {
+      "id": "A2MD_REAL_002",
+      "title": "A2MD_dist0p00_00003",
+      "style": "A2MD_dist0p00",
+      "meter": "4/4",
+      "audioPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/a2md_public/ytd_audio/dist0p00/ytd_audio_00003_TRHPTQV128F14A2C78.mp3",
+      "midiPath": "/Volumes/MediaDrive/DRUM TRAINING/extracted/a2md_public/align_mid/dist0p00/align_mid_00003_TRHPTQV128F14A2C78.mid",
       "kick_pitches": [35, 36],
       "snare_pitches": [38, 40]
     }
