@@ -27,6 +27,22 @@ python3 -m venv .venv
     --bpm    120
 ```
 
+## Skeleton UI (browser)
+
+A minimal, ugly-but-interactive web UI lets you upload audio and download MIDI from the browser.
+
+1. **Install Flask** (once):  
+   `./.venv/bin/pip install flask`
+
+2. **Start the server** (from this directory):  
+   `./.venv/bin/python scripts/skeleton_server.py`
+
+3. **Open** in your browser: [http://localhost:9876](http://localhost:9876)
+
+4. **Test:** Choose an audio file (WAV/FLAC/MP3), optionally enter BPM, click **Transcribe**, then use the download links for the MIDI lanes. Open the MIDI in your DAW or editor to preview.
+
+Uploads and temp outputs live under `.skeleton_uploads/` (ephemeral).
+
 ## Sample kit layout
 
 When using `--samples`, the directory should contain one-shot WAVs matched by name prefix:

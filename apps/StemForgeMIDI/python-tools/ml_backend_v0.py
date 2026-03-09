@@ -134,7 +134,8 @@ def train_from_packs(match_sec: float = 0.08) -> BackendModelV0 | None:
             continue
         y_kick = _frame_labels_for_times(frame_times, key.get("kick_times", []), match_sec)
         y_snare = _frame_labels_for_times(frame_times, key.get("snare_times", []), match_sec)
-        Y = np.stack([y_kick, y_snare], axis=1)  # (T, 2)
+        y_tops = _frame_labels_for_times(frame_times, key.get("tops_times", []), match_sec)
+        Y = np.stack([y_kick, y_snare, y_tops], axis=1)  # (T, 3)
         X_list.append(feats)
         Y_list.append(Y)
 
@@ -145,7 +146,7 @@ def train_from_packs(match_sec: float = 0.08) -> BackendModelV0 | None:
     Y = np.concatenate(Y_list, axis=0)
 
     # Add small L2-regularized logistic regression via gradient descent.
-    roles: tuple[RoleName, ...] = ("drums_kick", "drums_snare")
+    roles: tuple[RoleName, ...] = ("drums_kick", "drums_snare", "drums_tops")
     R = len(roles)
     D = X.shape[1]
     W = np.zeros((R, D), dtype=np.float32)
@@ -205,14 +206,17 @@ def cli_infer(audio_path: str, out_path: str | None = None) -> None:
         print("No frames extracted; not writing hints.", flush=True)
         return
 
-    probs_roles = model.predict_proba(feats).astype(np.float32)  # (T, 2)
-    # Map to [kick, snare, tops, perc]; tops/perc left at zero for v0.
+    probs_roles = model.predict_proba(feats).astype(np.float32)  # (T, R) where R=3
     T = probs_roles.shape[0]
     probs = np.zeros((T, 4), dtype=np.float32)
-    probs[:, 0] = probs_roles[:, 0]  # kick
-    probs[:, 1] = probs_roles[:, 1]  # snare
+    role_list = list(model.roles)
+    for lane_idx, role in enumerate(["drums_kick", "drums_snare", "drums_tops"]):
+        if role in role_list:
+            probs[:, lane_idx] = probs_roles[:, role_list.index(role)]
+    # perc = residual headroom
+    probs[:, 3] = np.clip(1.0 - probs[:, :3].max(axis=1), 0.0, 1.0)
 
-    onset = probs_roles.max(axis=1).astype(np.float32)
+    onset = probs[:, :3].max(axis=1).astype(np.float32)
 
     out_npz = Path(out_path) if out_path else wav.with_name(f"{wav.stem}_backend_hints.npz")
     np.savez_compressed(

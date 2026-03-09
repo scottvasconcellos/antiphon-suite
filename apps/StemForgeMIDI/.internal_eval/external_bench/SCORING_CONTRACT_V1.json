@@ -11,6 +11,18 @@
   "thresholdPct": 35.0,
   "seed": 4242,
   "holdoutRatio": 0.3,
+  "pitchMapping": {
+    "kick": [35, 36],
+    "snare": [38, 40],
+    "tops": [42, 43, 44, 45, 46],
+    "perc": [49, 50, 51]
+  },
+  "pitchMappingNotes": [
+    "kick: 35=Acoustic Bass Drum (A2MD), 36=Bass Drum 1 (GM standard)",
+    "snare: 38=Acoustic Snare, 40=Electric Snare",
+    "tops: 42=Closed HH, 43=High Floor Tom, 44=Pedal HH, 45=Low Tom, 46=Open HH",
+    "perc: 49=Crash Cymbal 1, 50=High Tom, 51=Ride Cymbal 1"
+  ],
   "notes": [
     "Promotion is based on real blind holdout improvement.",
     "Synthetic pass rate is a regression guard only (>=90%).",

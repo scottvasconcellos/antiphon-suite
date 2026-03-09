@@ -11,7 +11,7 @@
     "blindCopy": true,
     "syncAlign": true,
     "syncAlignMode": "affine",
-    "threshold": 0.0,
+    "threshold": 90.0,
     "minVelocityThreshold": 40,
     "enableAsymmetricPrecisionGate": false,
     "emitEngineDebug": false,

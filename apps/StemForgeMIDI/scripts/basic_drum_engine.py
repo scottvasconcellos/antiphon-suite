@@ -72,6 +72,35 @@ def _quantize_to_beat(t: float, beat_times: list[float]) -> float:
     return best
 
 
+def _grid_filter_onsets(
+    onset_times: list[float],
+    bpm: float,
+    duration_sec: float,
+    subdivision: int = 16,
+) -> list[float]:
+    """When BPM is known, snap each onset to the nearest sub-beat grid position
+    and drop anything that lands more than one 32nd note away from any grid point.
+    This eliminates arrhythmic reverb tails / room resonance candidates that the
+    onset detector fires on in real acoustic drum recordings.
+    subdivision=16 → 16th-note grid; tol = half of that (32nd note).
+    """
+    if bpm <= 0 or duration_sec <= 0:
+        return onset_times
+    sub_sec = 60.0 / bpm / (subdivision / 4)  # duration of one subdivided step
+    tol = sub_sec / 2.0  # tolerance = half a subdivision (32nd note for 16ths)
+
+    out: list[float] = []
+    seen: set[int] = set()
+    for t in onset_times:
+        # nearest grid slot index
+        slot = round(t / sub_sec)
+        grid_t = slot * sub_sec
+        if abs(t - grid_t) <= tol and slot not in seen:
+            seen.add(slot)
+            out.append(t)  # keep original time so low_origin_set lookups still match
+    return sorted(out)
+
+
 def _set_tempo_map(pm, bpm: float, beat_times: list[float] | None, duration_sec: float) -> None:
     """Write tempo from audio into the MIDI so the DAW grid matches."""
     res = pm.resolution
@@ -257,6 +286,9 @@ def run(
     hint_grid: BackendHintGrid | None = None,
     audio_override: Path | None = None,
     sample_dir: Path | None = None,
+    use_backend_hints_inline: bool = False,
+    use_drummer_knowledge: bool = False,
+    use_real_backend: bool = False,
 ) -> dict[str, str]:
     try:
         import librosa
@@ -269,7 +301,41 @@ def run(
         cfg_kwargs["min_velocity_threshold"] = max(1, min(127, int(min_velocity_threshold)))
     if enable_asymmetric_precision_gate is not None:
         cfg_kwargs["enable_asymmetric_precision_gate"] = bool(enable_asymmetric_precision_gate)
+    if use_drummer_knowledge:
+        cfg_kwargs["use_drummer_knowledge"] = True
     cfg = EngineConfig(**cfg_kwargs)
+
+    # Phase 3: real backend (Demucs → Omnizart CNN → DrummerKnowledgeRescue).
+    # Demucs drum stem separation only helps full-mix audio; drum-only stems
+    # are passed through unchanged (Demucs still runs but produces the same signal).
+    if use_real_backend and hint_grid is None:
+        try:
+            from drum_engine.stem_separator import separate_drums
+            stem_out_dir = output_dir / "_demucs"
+            stem_path, sep_err = separate_drums(audio_override or audio_path, output_dir=stem_out_dir)
+            if stem_path is not None and stem_path.is_file():
+                audio_override = stem_path  # engine will load the drum stem
+        except Exception:
+            pass  # stem separation failure is non-fatal; fall through to original audio
+        # Regardless of stem success, always run the Omnizart CNN backend.
+        try:
+            from drum_engine.backend_omnizart import run_inference as _omnizart_infer
+            hint_grid = _omnizart_infer(audio_override or audio_path)
+        except Exception:
+            pass
+        # Always apply DrummerKnowledgeRescue when real backend is active.
+        if not use_drummer_knowledge:
+            use_drummer_knowledge = True
+            cfg_kwargs["use_drummer_knowledge"] = True
+            cfg = EngineConfig(**cfg_kwargs)
+
+    # Phase 2: auto-generate hint grid from backend when requested and not already loaded.
+    elif use_backend_hints_inline and hint_grid is None:
+        try:
+            from drum_engine.backend_mlv0 import run_inference as _backend_infer
+            hint_grid = _backend_infer(audio_override or audio_path)
+        except Exception:
+            pass
 
     sr = 22050
     load_path = audio_override or audio_path
@@ -283,7 +349,8 @@ def run(
 
     duration_sec = float(len(y)) / sr
 
-    if bpm is None or bpm <= 0:
+    bpm_explicit = bpm is not None and bpm > 0
+    if not bpm_explicit:
         bpm = _estimate_bpm(y, sr)
     bpm = max(40.0, min(300.0, float(bpm)))
 
@@ -305,6 +372,12 @@ def run(
                 seen.add(key)
                 unique.append(t)
         onset_times = unique
+    elif bpm_explicit:
+        # BPM was provided by the user: snap all candidates to a 16th-note grid
+        # and drop anything that doesn't land near a grid position.  This is the
+        # single most effective filter against arrhythmic reverb-tail / room-
+        # resonance false positives in real acoustic drum recordings.
+        onset_times = _grid_filter_onsets(onset_times, bpm, duration_sec, subdivision=16)
 
     if not onset_times:
         out_paths = _write_empty_outputs(
@@ -320,9 +393,22 @@ def run(
             _write_event_debug(debug_events_path, audio_path, bpm, duration_sec, [])
         return out_paths
 
+    # Phase 2: apply DrummerKnowledgeRescue to hint grid using detected onset_times.
+    if hint_grid is not None and cfg.use_drummer_knowledge:
+        try:
+            from drum_engine.drummer_knowledge import apply_drummer_knowledge
+            hint_grid = apply_drummer_knowledge(hint_grid, bpm, onset_times, cfg)
+        except Exception:
+            pass  # Never let DrummerKnowledge failure block MIDI output
+
     features = extract_onset_features(y, sr, onset_times, cfg)
     scales = compute_scales(features)
     filtered = filter_by_energy(features, scales, cfg)
+    # Transient gate: drop candidates whose energy does not rise sharply at onset.
+    # Reverb tails / room modes have rms_after ≈ rms_before (ratio ≈ 1.0).
+    # Real drum hits have a steep energy increase (ratio >> 1.5).
+    if cfg.min_onset_transient_ratio > 0:
+        filtered = [f for f in filtered if f.transient_ratio >= cfg.min_onset_transient_ratio]
     if not filtered:
         out_paths = _write_empty_outputs(
             audio_path=audio_path,
@@ -447,8 +533,13 @@ def main() -> None:
     hint_grid: BackendHintGrid | None = None
     backend_hint_npz_raw = data.get("backendHintNpzPath")
     use_backend_hints = bool(data.get("useBackendHints", False))
+    use_backend_hints_inline = bool(data.get("useBackendHintsInline", False))
+    use_drummer_knowledge = bool(data.get("useDrummerKnowledge", False))
+    use_real_backend = bool(data.get("useRealBackend", False))
     if not use_backend_hints and os.environ.get("STEMFORGE_DRUM_USE_BACKEND_HINTS") == "1":
         use_backend_hints = True
+    if not use_backend_hints_inline and os.environ.get("STEMFORGE_DRUM_USE_BACKEND_HINTS_INLINE") == "1":
+        use_backend_hints_inline = True
     backend_hint_npz_path: Path | None = None
     if backend_hint_npz_raw:
         backend_hint_npz_path = Path(str(backend_hint_npz_raw)).resolve()
@@ -495,6 +586,9 @@ def main() -> None:
         hint_grid=hint_grid,
         audio_override=audio_override,
         sample_dir=sample_dir,
+        use_backend_hints_inline=use_backend_hints_inline,
+        use_drummer_knowledge=use_drummer_knowledge,
+        use_real_backend=use_real_backend,
     )
     print(json.dumps(out_paths))
 

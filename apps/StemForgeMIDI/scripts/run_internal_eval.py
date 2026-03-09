@@ -39,6 +39,8 @@ def run_engine(
     bpm: float,
     min_velocity_threshold: int,
     sample_dir: Path | None = None,
+    use_backend_hints: bool = False,
+    use_real_backend: bool = False,
 ) -> dict[str, str] | None:
     try:
         payload: dict = {
@@ -50,6 +52,11 @@ def run_engine(
         }
         if sample_dir is not None:
             payload["sampleDir"] = str(sample_dir)
+        if use_real_backend:
+            payload["useRealBackend"] = True
+        elif use_backend_hints:
+            payload["useBackendHintsInline"] = True
+            payload["useDrummerKnowledge"] = True
         inp = json.dumps(payload)
         r = subprocess.run(
             [ENGINE_PYTHON, str(SCRIPT_DIR / "basic_drum_engine.py")],
@@ -150,6 +157,16 @@ def main() -> int:
         default="",
         help="Optional sample kit directory; if set, passes sampleDir to engine for resynth smoke-test",
     )
+    ap.add_argument(
+        "--use-backend-hints",
+        action="store_true",
+        help="Enable inline backend hints + DrummerKnowledgeRescue (Phase 2)",
+    )
+    ap.add_argument(
+        "--use-real-backend",
+        action="store_true",
+        help="Enable Demucs stem separation + Omnizart CNN + DrummerKnowledgeRescue (Phase 3)",
+    )
     args = ap.parse_args()
     sample_dir: Path | None = None
     if args.sample_dir:
@@ -179,7 +196,7 @@ def main() -> int:
             continue
         out_dir = packs_dir / "out" / pid
         out_dir.mkdir(parents=True, exist_ok=True)
-        paths = run_engine(wav_path, out_dir, key["bpm"], args.min_velocity_threshold, sample_dir=sample_dir)
+        paths = run_engine(wav_path, out_dir, key["bpm"], args.min_velocity_threshold, sample_dir=sample_dir, use_backend_hints=args.use_backend_hints, use_real_backend=args.use_real_backend)
         if not paths:
             ledger.append({"id": pid, "style": key.get("style"), "pass": False, "error": "engine_failed"})
             continue

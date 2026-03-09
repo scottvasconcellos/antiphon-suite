@@ -86,6 +86,16 @@ def main() -> int:
         default="",
         help="Optional: sample kit directory; if present, run_internal_eval uses it for a resynth smoke-test",
     )
+    ap.add_argument(
+        "--use-backend-hints",
+        action="store_true",
+        help="Run all eval steps with inline backend hints + DrummerKnowledgeRescue enabled (Phase 2 A/B test)",
+    )
+    ap.add_argument(
+        "--use-real-backend",
+        action="store_true",
+        help="Run all eval steps with Demucs stem separation + Omnizart CNN + DrummerKnowledgeRescue (Phase 3)",
+    )
     args = ap.parse_args()
 
     synth_ledger = APP_ROOT / ".internal_eval" / "gate_synthetic_ledger.json"
@@ -100,6 +110,10 @@ def main() -> int:
         sample_dir = Path(args.sample_dir).resolve()
         if sample_dir.is_dir():
             synth_cmd += ["--sample-dir", str(sample_dir)]
+    if args.use_real_backend:
+        synth_cmd += ["--use-real-backend"]
+    elif args.use_backend_hints:
+        synth_cmd += ["--use-backend-hints"]
     rc, out, err = _run(synth_cmd)
     if out:
         print(out.strip())
@@ -154,17 +168,20 @@ def main() -> int:
     real_pct = 0.0
     if real_manifest.is_file():
         print("Running real-stem eval...")
-        rc2, out2, err2 = _run(
-            [
-                _engine_python(),
-                str(SCRIPT_DIR / "run_real_stem_eval.py"),
-                "--manifest",
-                str(real_manifest),
-                "--ledger",
-                str(real_ledger),
-                "--require",
-            ]
-        )
+        real_cmd = [
+            _engine_python(),
+            str(SCRIPT_DIR / "run_real_stem_eval.py"),
+            "--manifest",
+            str(real_manifest),
+            "--ledger",
+            str(real_ledger),
+            "--require",
+        ]
+        if args.use_real_backend:
+            real_cmd += ["--use-real-backend", "--engine-timeout-sec", "900"]
+        elif args.use_backend_hints:
+            real_cmd += ["--use-backend-hints"]
+        rc2, out2, err2 = _run(real_cmd)
         if out2:
             print(out2.strip())
         if err2:

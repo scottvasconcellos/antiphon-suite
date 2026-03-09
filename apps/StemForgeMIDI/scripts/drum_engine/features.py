@@ -68,7 +68,10 @@ def extract_onset_features(
 
         rms_after = _safe_rms(y[after_start:after_end])
         rms_before = _safe_rms(y[before_start:before_end])
-        transient_ratio = rms_after / rms_before if rms_before > 0 else 1.0
+        # rms_before == 0.0 only when before_start == before_end (onset at/near t=0,
+        # no audio before it).  That is a genuine onset from silence — ratio is
+        # effectively infinite; use 1e9 so the transient gate always passes it.
+        transient_ratio = (rms_after / rms_before) if rms_before > 0.0 else 1e9
 
         attack_end = min(len(y), t_center + attack_w)
         attack_energy = _safe_rms(y[after_start:attack_end])

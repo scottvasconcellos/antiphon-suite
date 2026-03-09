@@ -48,6 +48,8 @@ def run_engine(
     timeout_sec: int,
     min_velocity_threshold: int,
     enable_asymmetric_precision_gate: bool = False,
+    use_backend_hints: bool = False,
+    use_real_backend: bool = False,
 ) -> tuple[dict[str, str] | None, str]:
     try:
         payload = {
@@ -58,6 +60,11 @@ def run_engine(
             "minVelocityThreshold": int(min_velocity_threshold),
             "enableAsymmetricPrecisionGate": bool(enable_asymmetric_precision_gate),
         }
+        if use_real_backend:
+            payload["useRealBackend"] = True
+        elif use_backend_hints:
+            payload["useBackendHintsInline"] = True
+            payload["useDrummerKnowledge"] = True
         inp = json.dumps(payload)
         r = subprocess.run(
             [ENGINE_PYTHON, str(SCRIPT_DIR / "basic_drum_engine.py")],
@@ -170,6 +177,16 @@ def main() -> int:
     )
     ap.add_argument("--require", action="store_true", help="Fail if manifest missing/empty")
     ap.add_argument(
+        "--use-backend-hints",
+        action="store_true",
+        help="Enable inline backend hints + DrummerKnowledgeRescue (Phase 2)",
+    )
+    ap.add_argument(
+        "--use-real-backend",
+        action="store_true",
+        help="Enable Demucs stem separation + Omnizart CNN + DrummerKnowledgeRescue (Phase 3)",
+    )
+    ap.add_argument(
         "--min-velocity-threshold",
         type=int,
         default=MAIN_MIN_VELOCITY_DEFAULT,
@@ -232,6 +249,8 @@ def main() -> int:
             args.engine_timeout_sec,
             args.min_velocity_threshold,
             args.enable_asymmetric_precision_gate,
+            use_backend_hints=args.use_backend_hints,
+            use_real_backend=args.use_real_backend,
         )
         if not engine_out:
             ledger_rows.append(
@@ -248,10 +267,12 @@ def main() -> int:
             continue
 
         annotation_format = clip.get("annotation_format", "midi")
-        kick_pitches = clip.get("kick_pitches", [36])
-        snare_pitches = clip.get("snare_pitches", [38])
-        # Standard GM hi-hat pitches: 42=closed HH, 46=open HH, 44=pedal HH, 51=ride, 49=crash
-        tops_pitches = clip.get("tops_pitches", [42, 46, 44, 51, 49])
+        # Contract V1 pitch mapping: kick=35+36, snare=38+40, tops=42-46, perc=49-51
+        kick_pitches = clip.get("kick_pitches", [35, 36])
+        snare_pitches = clip.get("snare_pitches", [38, 40])
+        # Standard GM hi-hat/cymbal pitches: 42=closed HH, 43=high floor tom, 44=pedal HH,
+        # 45=low tom, 46=open HH; perc (crash/ride) handled separately
+        tops_pitches = clip.get("tops_pitches", [42, 43, 44, 45, 46])
         kick_labels = clip.get("kick_labels", ["bd"])
         snare_labels = clip.get("snare_labels", ["sd"])
         tops_labels = clip.get("tops_labels", ["c1", "o1", "rc", "cc"])

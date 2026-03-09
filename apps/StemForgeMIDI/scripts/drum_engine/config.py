@@ -115,7 +115,36 @@ class EngineConfig:
     # Hi-hats: centroid ~5000-8000 Hz; snares: centroid ~300-2000 Hz; safe boundary at 4000 Hz.
     tops_centroid_abs_hz: float = 4000.0
 
+    # Transient gate: drop onset candidates whose raw transient_ratio (rms_after/rms_before)
+    # is below this value.  Set to 0.0 to disable.
+    # NOTE: This gate is DISABLED by default.  The onset detector fires slightly after the
+    # actual transient peak, so the "before" window often captures the loudest part of
+    # a short hit (hi-hats, light snares), yielding ratio < 1.0 for real events.
+    # The grid filter (when BPM is provided) is the preferred tool for false-onset removal.
+    min_onset_transient_ratio: float = 0.0
+
+    # In classify.py: raw transient_ratio threshold that confirms a real sharp onset for the
+    # snare rule, bypassing the max_transient normalization problem (avoids trans_n ≈ 0 when
+    # max_transient is inflated by kick-from-silence values ~200 billion).
+    snare_raw_transient_min: float = 3.0
+
     # Feature windows
     feature_win_sec: float = 0.10
     transient_win_sec: float = 0.02
     attack_win_sec: float = 0.005
+
+    # DrummerKnowledgeRescue (Phase 2): top-down musical priors applied to BackendHintGrid.
+    # Disabled by default; enable via useDrummerKnowledge in JSON input or --use-backend-hints gate flag.
+    # Rule 1: boost snare at backbeat positions (beats 2, 4) when hint margin is low.
+    # Rule 2: boost kick at downbeat positions (beats 1, 3) when model already suggests kick.
+    # Rule 3: boost snare in fast-run clusters (trap rolls, funk ghost notes, hi-hat patterns).
+    use_drummer_knowledge: bool = False
+    dk_backbeat_tol_frac: float = 0.05   # ±5% of beat_sec treated as "at backbeat"
+    dk_backbeat_max_margin: float = 0.35  # boost only when snare margin < this
+    dk_backbeat_boost: float = 0.25       # additive boost to snare prob at backbeats
+    dk_kick_downbeat_min_p: float = 0.20  # only boost kick if model already ≥ this
+    dk_kick_downbeat_boost: float = 0.15  # additive boost to kick prob at downbeats
+    dk_fast_run_window_sec: float = 0.40  # sliding window for fast-run detection
+    dk_fast_run_min_hits: int = 4         # min onsets in window to trigger rule 3
+    dk_fast_run_kick_max: float = 0.50    # rule 3 only fires if kick_p < this
+    dk_fast_run_snare_boost: float = 0.20 # additive boost to snare prob in fast runs
