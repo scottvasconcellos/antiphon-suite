@@ -32,7 +32,7 @@ Last updated: 2026-03-14 (iter 041)
 - Result: ENST kick precision +0.06/+0.05/+0.02 on clips 001-003. Synthetic 100%.
 - 808 kick path tested (--enable-808-kick-path): NO EFFECT on ENST_004. Root cause is onset detection failure (continuous sub-bass masks kick onsets), not classification.
 
-**Recommended eval flags:** `--use-onset-suppressor --enable-kick-reverb-snare-filter --enable-kick-sub-share-gate`
+**Recommended eval flags:** `--use-real-backend --use-onset-suppressor --enable-kick-reverb-snare-filter --enable-kick-sub-share-gate`
 
 ---
 
@@ -82,16 +82,16 @@ Last updated: 2026-03-14 (iter 041)
 
 ---
 
-## Real holdout per-clip snapshot (iter 041 flags: --use-onset-suppressor --enable-kick-reverb-snare-filter --enable-kick-sub-share-gate)
+## Real holdout per-clip snapshot (iter 041, canonical flags: --use-real-backend --use-onset-suppressor --enable-kick-reverb-snare-filter --enable-kick-sub-share-gate)
 
 | Clip | K R | K P | S R | S P | Blocker |
 |------|-----|-----|-----|-----|---------|
 | ENST_REAL_001 | 0.91 | 0.48 | 1.00 | 0.83 | kick P (need +0.37) |
 | ENST_REAL_002 | 0.77 | 0.53 | 0.90 | 0.82 | kick P, snare P borderline |
-| ENST_REAL_003 | 0.83 | 0.60 | 0.73 | 0.73 | kick P, snare R+P |
+| ENST_REAL_003 | 0.83 | 0.60 | 0.77 | 0.74 | kick P, snare R+P |
 | ENST_REAL_004 | 0.06 | 1.00 | 0.89 | 0.64 | kick R=0.06 (onset detection failure) |
 | ENST_REAL_005 | 0.87 | 0.79 | 0.52 | 0.54 | kick P +0.06, snare large gap |
-| A2MD_REAL_001 | 0.88 | 0.62 | 1.00 | 0.26 | snare P crater |
+| A2MD_REAL_001 | 0.88 | 0.62 | 1.00 | 0.25 | snare P crater |
 | A2MD_REAL_002 | 0.76 | 0.51 | 0.95 | 0.08 | snare P crater, kick P |
 
 Target: R ≥ 0.90, P ≥ 0.85 per lane. 10 STAR clips excluded (eval mismatch, non-GM MIDI pitches).
