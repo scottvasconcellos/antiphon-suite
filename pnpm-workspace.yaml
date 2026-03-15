@@ -1,5 +1,7 @@
 packages:
   - "packages/*"
+  - "apps/*"
+  - "apps/StemForgeMIDI/stemforge-engine/packages/harmonic-engine"
   - "antiphon-hub-v2"
   - "shared/*"
   - "docs"

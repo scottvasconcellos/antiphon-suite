@@ -5,6 +5,12 @@
 
 ---
 
+## Implementation status (reconciliation)
+
+**Current implementation:** Electron (React + Vite + Electron). The spec below describes the target architecture with Tauri. **Decision:** Keep Electron for Layer 0 MVP; treat Tauri migration as Layer 2. Update auth stub + registry reading first; port to Tauri when binary size and native integration become priorities.
+
+---
+
 ## Executive Summary
 
 The **Antiphon Hub** is the central manager app for the Antiphon music production suite. It handles:
