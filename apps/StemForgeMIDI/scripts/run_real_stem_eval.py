@@ -52,6 +52,12 @@ def run_engine(
     use_real_backend: bool = False,
     use_onset_suppressor: bool = False,
     enable_kick_reverb_snare_filter: bool = False,
+    kick_reverb_low_sub_max: float = 0.0,
+    enable_kick_grid_suppressor: bool = False,
+    enable_kick_sub_share_gate: bool = False,
+    enable_snare_sub_share_gate: bool = False,
+    enable_808_kick_path: bool = False,
+    debug_events_path: Path | None = None,
 ) -> tuple[dict[str, str] | None, str]:
     try:
         payload = {
@@ -66,6 +72,18 @@ def run_engine(
             payload["useOnsetSuppressor"] = True
         if enable_kick_reverb_snare_filter:
             payload["enableKickReverbSnareFilter"] = True
+        if kick_reverb_low_sub_max > 0.0:
+            payload["kickReverbLowSubMax"] = kick_reverb_low_sub_max
+        if enable_kick_grid_suppressor:
+            payload["enableKickGridSuppressor"] = True
+        if enable_kick_sub_share_gate:
+            payload["enableKickSubShareGate"] = True
+        if enable_snare_sub_share_gate:
+            payload["enableSnareSubShareGate"] = True
+        if enable_808_kick_path:
+            payload["enable808KickPath"] = True
+        if debug_events_path is not None:
+            payload["debugEventsPath"] = str(debug_events_path)
         if use_real_backend:
             payload["useRealBackend"] = True
         elif use_backend_hints:
@@ -203,6 +221,42 @@ def main() -> int:
         help="Enable kick-reverb snare filter (post-NMS: suppress high-sub snares near kicks)",
     )
     ap.add_argument(
+        "--kick-reverb-low-sub-max",
+        type=float,
+        default=0.0,
+        help="Arm B of kick-reverb snare filter: also suppress near-kick snares with sub_share < this (0=disabled)",
+    )
+    ap.add_argument(
+        "--enable-kick-grid-suppressor",
+        action="store_true",
+        help="Enable beat-grid kick suppressor (suppress off-grid kick FPs when BPM known)",
+    )
+    ap.add_argument(
+        "--enable-kick-sub-share-gate",
+        action="store_true",
+        help="Enable post-NMS kick sub_share floor gate (suppress low-sub FP kicks from resonance/toms)",
+    )
+    ap.add_argument(
+        "--enable-snare-sub-share-gate",
+        action="store_true",
+        help="Enable post-NMS snare sub_share ceiling gate (suppress high-sub FP snares from bass bleed)",
+    )
+    ap.add_argument(
+        "--enable-808-kick-path",
+        action="store_true",
+        help="Enable secondary 808/electronic kick classify path (high-attack, mid-present kicks)",
+    )
+    ap.add_argument(
+        "--dump-kick-events",
+        action="store_true",
+        help="Dump per-event kick diagnostic CSV (clip, time_sec, sub_share, mid_share, velocity, matched_to_gt)",
+    )
+    ap.add_argument(
+        "--dump-snare-events",
+        action="store_true",
+        help="Dump per-event snare diagnostic CSV (clip, time_sec, sub_share, mid_share, velocity, matched_to_gt)",
+    )
+    ap.add_argument(
         "--min-velocity-threshold",
         type=int,
         default=MAIN_MIN_VELOCITY_DEFAULT,
@@ -236,9 +290,33 @@ def main() -> int:
     base_dir = manifest_path.parent
     ledger_rows: list[dict] = []
     passed = 0
+    scored_total = 0  # excludes eval_excluded clips
+
+    dump_kick = getattr(args, "dump_kick_events", False)
+    dump_snare = getattr(args, "dump_snare_events", False)
+    if dump_kick:
+        print("clip,time_sec,sub_share,mid_share,velocity,matched_to_gt", flush=True)
+    if dump_snare and not dump_kick:
+        print("clip,time_sec,sub_share,mid_share,velocity,matched_to_gt", flush=True)
 
     for idx, clip in enumerate(clips, start=1):
         cid = str(clip.get("id") or f"clip_{idx:03d}")
+        is_excluded = bool(clip.get("eval_excluded", False))
+
+        if is_excluded:
+            print(f"[{idx}/{len(clips)}] {cid} [EXCLUDED] {clip.get('exclusion_reason', '')}", flush=True)
+            ledger_rows.append(
+                {
+                    "id": cid,
+                    "title": clip.get("title"),
+                    "meter": clip.get("meter"),
+                    "style": clip.get("style"),
+                    "eval_excluded": True,
+                    "exclusion_reason": clip.get("exclusion_reason", ""),
+                }
+            )
+            continue
+
         print(f"[{idx}/{len(clips)}] {cid}", flush=True)
         audio_path = _resolve(clip["audioPath"], base_dir)
         midi_path = _resolve(clip["midiPath"], base_dir)
@@ -254,10 +332,14 @@ def main() -> int:
                     "error": "missing_audio_or_midi",
                 }
             )
+            scored_total += 1
             continue
 
         out_dir = (manifest_path.parent / "out" / cid).resolve()
         out_dir.mkdir(parents=True, exist_ok=True)
+        debug_events_path = None
+        if dump_kick or dump_snare:
+            debug_events_path = out_dir / f"{cid}_events_debug.json"
         engine_out, engine_err = run_engine(
             audio_path,
             out_dir,
@@ -269,6 +351,12 @@ def main() -> int:
             use_real_backend=args.use_real_backend,
             use_onset_suppressor=args.use_onset_suppressor,
             enable_kick_reverb_snare_filter=args.enable_kick_reverb_snare_filter,
+            kick_reverb_low_sub_max=getattr(args, "kick_reverb_low_sub_max", 0.0),
+            enable_kick_grid_suppressor=args.enable_kick_grid_suppressor,
+            enable_kick_sub_share_gate=getattr(args, "enable_kick_sub_share_gate", False),
+            enable_snare_sub_share_gate=getattr(args, "enable_snare_sub_share_gate", False),
+            enable_808_kick_path=getattr(args, "enable_808_kick_path", False),
+            debug_events_path=debug_events_path,
         )
         if not engine_out:
             ledger_rows.append(
@@ -282,6 +370,7 @@ def main() -> int:
                     "engineError": engine_err,
                 }
             )
+            scored_total += 1
             continue
 
         annotation_format = clip.get("annotation_format", "midi")
@@ -324,6 +413,37 @@ def main() -> int:
         ok = pass_kick and pass_snare
         if ok:
             passed += 1
+        scored_total += 1
+
+        # Diagnostic: emit per-event CSV for kick and/or snare when requested
+        if (dump_kick or dump_snare) and debug_events_path is not None and debug_events_path.is_file():
+            import json as _json
+            try:
+                with open(debug_events_path) as _df:
+                    _dbg = _json.load(_df)
+                _all_events = _dbg.get("events", [])
+                if dump_kick:
+                    _kick_events = [e for e in _all_events if e.get("role") == "drums_kick"]
+                    for _e in _kick_events:
+                        _t = float(_e["time_sec"])
+                        _matched = any(abs(_t - _gt) <= MATCH_SEC for _gt in kick_gt)
+                        print(
+                            f"{cid},{_t:.4f},{_e.get('sub_share',0):.4f},"
+                            f"{_e.get('mid_share',0):.4f},{_e.get('velocity',0)},{int(_matched)}",
+                            flush=True,
+                        )
+                if dump_snare:
+                    _snare_events = [e for e in _all_events if e.get("role") == "drums_snare"]
+                    for _e in _snare_events:
+                        _t = float(_e["time_sec"])
+                        _matched = any(abs(_t - _gt) <= MATCH_SEC for _gt in snare_gt)
+                        print(
+                            f"{cid},{_t:.4f},{_e.get('sub_share',0):.4f},"
+                            f"{_e.get('mid_share',0):.4f},{_e.get('velocity',0)},{int(_matched)}",
+                            flush=True,
+                        )
+            except Exception:
+                pass
 
         ledger_rows.append(
             {
@@ -352,7 +472,7 @@ def main() -> int:
             flush=True,
         )
 
-    total = len(ledger_rows)
+    total = scored_total  # excludes eval_excluded clips
     pct = round(100.0 * passed / total, 1) if total else 0.0
     ledger = {
         "summary": {"passed": passed, "total": total, "pct": pct},
@@ -376,8 +496,10 @@ def main() -> int:
     ledger_path.parent.mkdir(parents=True, exist_ok=True)
     with open(ledger_path, "w") as f:
         json.dump(ledger, f, indent=2)
+    excluded_count = len(clips) - scored_total
     print(f"Ledger written to {ledger_path}")
-    print(f"\n=== REAL STEM EVAL: {passed}/{total} passed ({pct:.1f}%) ===")
+    excluded_note = f" ({excluded_count} excluded from scoring)" if excluded_count else ""
+    print(f"\n=== REAL STEM EVAL: {passed}/{total} passed ({pct:.1f}%){excluded_note} ===")
     return 0 if pct >= args.threshold else 1
 
 

@@ -43,6 +43,10 @@ def run_engine(
     use_real_backend: bool = False,
     use_onset_suppressor: bool = False,
     enable_kick_reverb_snare_filter: bool = False,
+    enable_kick_grid_suppressor: bool = False,
+    enable_kick_sub_share_gate: bool = False,
+    enable_snare_sub_share_gate: bool = False,
+    enable_808_kick_path: bool = False,
 ) -> dict[str, str] | None:
     try:
         payload: dict = {
@@ -58,6 +62,14 @@ def run_engine(
             payload["useOnsetSuppressor"] = True
         if enable_kick_reverb_snare_filter:
             payload["enableKickReverbSnareFilter"] = True
+        if enable_kick_grid_suppressor:
+            payload["enableKickGridSuppressor"] = True
+        if enable_kick_sub_share_gate:
+            payload["enableKickSubShareGate"] = True
+        if enable_snare_sub_share_gate:
+            payload["enableSnareSubShareGate"] = True
+        if enable_808_kick_path:
+            payload["enable808KickPath"] = True
         if use_real_backend:
             payload["useRealBackend"] = True
         elif use_backend_hints:
@@ -183,6 +195,26 @@ def main() -> int:
         action="store_true",
         help="Enable kick-reverb snare filter (post-NMS)",
     )
+    ap.add_argument(
+        "--enable-kick-grid-suppressor",
+        action="store_true",
+        help="Enable beat-grid kick suppressor (suppress off-grid kick FPs when BPM known)",
+    )
+    ap.add_argument(
+        "--enable-kick-sub-share-gate",
+        action="store_true",
+        help="Enable post-NMS kick resonance gate (high-sub + low-mid signature)",
+    )
+    ap.add_argument(
+        "--enable-snare-sub-share-gate",
+        action="store_true",
+        help="Enable post-NMS snare sub_share ceiling gate (suppress high-sub FP snares)",
+    )
+    ap.add_argument(
+        "--enable-808-kick-path",
+        action="store_true",
+        help="Enable secondary 808/electronic kick classify path",
+    )
     args = ap.parse_args()
     sample_dir: Path | None = None
     if args.sample_dir:
@@ -212,7 +244,7 @@ def main() -> int:
             continue
         out_dir = packs_dir / "out" / pid
         out_dir.mkdir(parents=True, exist_ok=True)
-        paths = run_engine(wav_path, out_dir, key["bpm"], args.min_velocity_threshold, sample_dir=sample_dir, use_backend_hints=args.use_backend_hints, use_real_backend=args.use_real_backend, use_onset_suppressor=args.use_onset_suppressor, enable_kick_reverb_snare_filter=args.enable_kick_reverb_snare_filter)
+        paths = run_engine(wav_path, out_dir, key["bpm"], args.min_velocity_threshold, sample_dir=sample_dir, use_backend_hints=args.use_backend_hints, use_real_backend=args.use_real_backend, use_onset_suppressor=args.use_onset_suppressor, enable_kick_reverb_snare_filter=args.enable_kick_reverb_snare_filter, enable_kick_grid_suppressor=args.enable_kick_grid_suppressor, enable_kick_sub_share_gate=args.enable_kick_sub_share_gate, enable_snare_sub_share_gate=args.enable_snare_sub_share_gate, enable_808_kick_path=args.enable_808_kick_path)
         if not paths:
             ledger.append({"id": pid, "style": key.get("style"), "pass": False, "error": "engine_failed"})
             continue

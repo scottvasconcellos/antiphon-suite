@@ -623,16 +623,69 @@ def _role_nms(
     return out
 
 
+def _kick_grid_suppressor(
+    events: list[EmittedEvent],
+    cfg: EngineConfig,
+    bpm: float | None,
+    hint_grid: "BackendHintGrid | None" = None,
+) -> list[EmittedEvent]:
+    """
+    Post-NMS filter: suppress kick events that are far from the BPM beat grid.
+
+    Real kicks land on beat positions or simple subdivisions (8th/16th notes).
+    Resonance FPs from tom hits, floor decay, or room noise tend to fall off-grid.
+    A kick event is suppressed when:
+      - enable_kick_grid_suppressor is True
+      - BPM is provided and > 0
+      - distance to nearest beat-subdivision grid point > kick_grid_tol_frac * beat_sec
+      - AND backend hint kick prob (if available) < kick_grid_hint_rescue_prob
+
+    Grid points checked: every 16th-note (beat/4), so kicks on beats 1-4 plus
+    downbeats, upbeats, and 16th-note offsets all pass. Only events landing between
+    16th-note positions are suppressed.
+    """
+    if not cfg.enable_kick_grid_suppressor or not bpm or bpm <= 0:
+        return events
+    beat_sec = 60.0 / bpm
+    # 16th-note grid step (beat / 4); tolerance is fraction of a full beat
+    grid_step = beat_sec / 4.0
+    tol = cfg.kick_grid_tol_frac * beat_sec
+    filtered: list[EmittedEvent] = []
+    for e in events:
+        if e.role != "drums_kick":
+            filtered.append(e)
+            continue
+        # Distance to nearest 16th-note grid position
+        pos_in_beat = e.time_sec % grid_step
+        dist = min(pos_in_beat, grid_step - pos_in_beat)
+        if dist <= tol:
+            filtered.append(e)
+            continue
+        # Off-grid — rescue via backend hint if prob is high enough
+        if hint_grid is not None:
+            h_kick, _h_snare, _h_tops, _h_perc = hint_grid.probs_at_time(e.time_sec)
+            if h_kick >= cfg.kick_grid_hint_rescue_prob:
+                filtered.append(e)
+                continue
+        # Suppress: off-grid kick with no strong hint support
+    return filtered
+
+
 def _kick_reverb_snare_filter(events: list[EmittedEvent], cfg: EngineConfig) -> list[EmittedEvent]:
     """
-    Post-NMS filter: suppress snare events that fall within kick_reverb_window_sec of a kick
-    event AND carry sub_share >= kick_reverb_max_snare_sub.
+    Post-NMS filter: suppress snare events near a kick with two independent arms.
 
-    Rationale: genuine simultaneous snares (separate instrument from the kick) have low sub_share
-    (0.05–0.15) because they are mid/high-band sounds.  Kick body resonance misclassified as snare
-    retains elevated sub_share (0.20–0.45) from the decaying kick fundamental.  Filtering by the
-    combination of temporal proximity to a kick + elevated sub_share removes phantom stacked snares
-    without affecting legitimate simultaneous or near-simultaneous kick+snare pairs.
+    Arm A (high-sub / kick resonance):
+        near kick AND sub_share >= kick_reverb_max_snare_sub (default 0.35)
+        Rationale: kick body resonance misclassified as snare retains elevated sub_share (0.20–0.45)
+        from the decaying kick fundamental.  Genuine simultaneous snares have sub_share 0.05–0.18.
+
+    Arm B (low-sub / bleed, disabled by default: kick_reverb_low_sub_max = 0.0):
+        near kick AND sub_share < kick_reverb_low_sub_max
+        Rationale: non-drum bleed events (guitar, bass) near kicks have extremely low sub_share
+        (0.03–0.12) and high mid_share (0.55–0.83) — spectral fingerprint of a string/vocal event
+        misclassified as snare via the dual_ok path.  Genuine simultaneous snares have sub_share
+        0.05–0.25, so set kick_reverb_low_sub_max BELOW the observed minimum TP snare sub_share.
     """
     if not cfg.enable_kick_reverb_snare_filter:
         return events
@@ -644,13 +697,69 @@ def _kick_reverb_snare_filter(events: list[EmittedEvent], cfg: EngineConfig) -> 
         if e.role != "drums_snare":
             filtered.append(e)
             continue
-        # Check proximity to any kick (snare must be within [kick, kick + window])
         near_kick = any(
             abs(e.time_sec - kt) <= cfg.kick_reverb_window_sec
             for kt in kick_times
         )
         if near_kick and e.sub_share >= cfg.kick_reverb_max_snare_sub:
-            continue  # suppress: likely kick resonance
+            continue  # Arm A: suppress kick resonance (high sub)
+        if near_kick and cfg.kick_reverb_low_sub_max > 0.0 and e.sub_share < cfg.kick_reverb_low_sub_max:
+            continue  # Arm B: suppress bleed event (very low sub, likely guitar/instrument bleed)
+        filtered.append(e)
+    return filtered
+
+
+def _kick_sub_share_gate(events: list[EmittedEvent], cfg: EngineConfig) -> list[EmittedEvent]:
+    """
+    Post-NMS filter: suppress kick events matching the resonance-tail spectral signature.
+
+    Resonance tails (kick re-detections 100–500ms after the true kick) have:
+      - HIGH sub_share (>= kick_min_sub_share): the decaying kick fundamental is still present
+      - LOW mid_share (<= kick_resonance_max_mid): the beater-impact attack transient is gone
+
+    Genuine bass-drum hits also have high sub_share but RETAIN mid energy from the beater snap.
+    The combined gate (high sub AND low mid) targets resonance tails without suppressing true kicks.
+    A sub_share-only floor does not work — TP and FP distributions overlap significantly.
+
+    Diagnostic basis (ENST): FP kicks have sub_share 0.57–0.69; TP kicks overlap at 0.47–0.68.
+    FP kicks are resonance re-detections, not spectrally weak events.
+
+    Disabled by default; enable via enableKickSubShareGate JSON key or --enable-kick-sub-share-gate.
+    """
+    if not cfg.enable_kick_sub_share_gate:
+        return events
+    filtered: list[EmittedEvent] = []
+    for e in events:
+        if (
+            e.role == "drums_kick"
+            and e.sub_share >= cfg.kick_min_sub_share
+            and e.mid_share <= cfg.kick_resonance_max_mid
+        ):
+            continue  # suppress: resonance tail (high sub, low mid — attack gone)
+        filtered.append(e)
+    return filtered
+
+
+def _snare_sub_share_gate(events: list[EmittedEvent], cfg: EngineConfig) -> list[EmittedEvent]:
+    """
+    Post-NMS filter: suppress snare events whose sub_share is above snare_max_sub_share.
+
+    FP snares from bass bleed or floor resonance carry heavy low-frequency energy that
+    should not be present in a genuine snare hit.  Genuine snares are mid-dominant
+    (sub_share 0.05–0.25); bass-bleed FPs have sub_share 0.30+.
+
+    This is complementary to _kick_reverb_snare_filter: that filter covers snares
+    temporally near a kick; this gate covers far-from-kick high-sub FP snares.
+
+    Disabled by default; enable via enableSnareSubShareGate JSON key or --enable-snare-sub-share-gate.
+    Threshold (snare_max_sub_share) should be set from a diagnostic run on A2MD clips.
+    """
+    if not cfg.enable_snare_sub_share_gate:
+        return events
+    filtered: list[EmittedEvent] = []
+    for e in events:
+        if e.role == "drums_snare" and e.sub_share >= cfg.snare_max_sub_share:
+            continue  # suppress: high-sub snare (bass bleed / floor resonance FP)
         filtered.append(e)
     return filtered
 
@@ -695,8 +804,23 @@ def infer_events(
         diagnostics["events_after_nms_count"] = len(out)
         out = _kick_reverb_snare_filter(out, cfg)
         diagnostics["events_after_reverb_filter_count"] = len(out)
+        out = _kick_grid_suppressor(out, cfg, bpm, hint_grid=hint_grid)
+        diagnostics["events_after_kick_grid_count"] = len(out)
+        out = _kick_sub_share_gate(out, cfg)
+        diagnostics["events_after_kick_sub_share_gate_count"] = len(out)
+        out = _snare_sub_share_gate(out, cfg)
+        diagnostics["events_after_snare_sub_share_gate_count"] = len(out)
         return out
-    return _kick_reverb_snare_filter(_role_nms(events, cfg, bpm, hint_grid=hint_grid), cfg)
+    return _snare_sub_share_gate(
+        _kick_sub_share_gate(
+            _kick_grid_suppressor(
+                _kick_reverb_snare_filter(_role_nms(events, cfg, bpm, hint_grid=hint_grid), cfg),
+                cfg, bpm, hint_grid=hint_grid,
+            ),
+            cfg,
+        ),
+        cfg,
+    )
 
 
 def to_by_role(events: list[EmittedEvent], min_velocity_threshold: int = 1) -> dict[RoleName, list[tuple[float, int]]]:

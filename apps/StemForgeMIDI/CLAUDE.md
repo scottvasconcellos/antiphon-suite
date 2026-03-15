@@ -64,6 +64,7 @@ When off track, re-read the summary table and exit conditions there.
 - **Eval data & config:** `.internal_eval/` — packs (synthetic), manifests (manual_tests, real_stems), ledgers, BACKEND_HINT_SPEC.md, ML_BACKEND_V0_SPEC.md.
 - **Backend v0:** `python-tools/ml_backend_v0.py` — train/infer backend hints (train from packs, infer to .npz); model in `python-tools/ml_backend_models/`.
 - **Contract & plan:** `GROUND_ZERO_STEMFORGE_MIDI.md`, `docs/DRUM_ENGINE_PLAN_OF_ATTACK.md`.
+- **Live status:** `CURRENT.md` — updated each iteration; read this first when resuming work.
 
 ---
 
@@ -84,11 +85,7 @@ Sample kit layout expected by `--samples`: one-shot WAV files named `kick*.wav`,
 
 ---
 
-## Current state (as of iter 028)
+## Current state
 
-- **Phase 1 MVP: COMPLETE** — synthetic gate 100% (50/50) with full K/S/T scoring.
-- **Phase 2:** ML backend v0 wired (neutral A/B). Need precision tuning on real stems before revisiting.
-- **Phase 3:** Engine accepts drumStemPath/useDrumStem. No Demucs-in-pipeline yet.
-- **Phase 4:** STAR + ENST + A2MD in manifests. Real holdout 0% — precision ~0.04–0.53 (over-detection on full-mix; needs ML or stem separation).
-
-**Next focus:** Precision tuning in merge/classify (reduce over-firing on real full-mix stems), then merged holdout report and more dataset families.
+See **CURRENT.md** (same directory) for the live "what's in flight" snapshot.
+It is updated each iteration and is the authoritative status document.

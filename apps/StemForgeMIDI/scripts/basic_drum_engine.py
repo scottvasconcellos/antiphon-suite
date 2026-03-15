@@ -291,6 +291,11 @@ def run(
     use_real_backend: bool = False,
     use_onset_suppressor: bool = False,
     enable_kick_reverb_snare_filter: bool = False,
+    kick_reverb_low_sub_max: float = 0.0,
+    enable_kick_grid_suppressor: bool = False,
+    enable_kick_sub_share_gate: bool = False,
+    enable_snare_sub_share_gate: bool = False,
+    enable_808_kick_path: bool = False,
 ) -> dict[str, str]:
     try:
         import librosa
@@ -309,6 +314,16 @@ def run(
         cfg_kwargs["use_onset_suppressor"] = True
     if enable_kick_reverb_snare_filter:
         cfg_kwargs["enable_kick_reverb_snare_filter"] = True
+    if kick_reverb_low_sub_max > 0.0:
+        cfg_kwargs["kick_reverb_low_sub_max"] = kick_reverb_low_sub_max
+    if enable_kick_grid_suppressor:
+        cfg_kwargs["enable_kick_grid_suppressor"] = True
+    if enable_kick_sub_share_gate:
+        cfg_kwargs["enable_kick_sub_share_gate"] = True
+    if enable_snare_sub_share_gate:
+        cfg_kwargs["enable_snare_sub_share_gate"] = True
+    if enable_808_kick_path:
+        cfg_kwargs["enable_808_kick_path"] = True
     cfg = EngineConfig(**cfg_kwargs)
 
     # Phase 3: real backend (Demucs → Omnizart CNN → DrummerKnowledgeRescue).
@@ -564,6 +579,11 @@ def main() -> None:
     if not use_onset_suppressor and os.environ.get("STEMFORGE_DRUM_USE_ONSET_SUPPRESSOR") == "1":
         use_onset_suppressor = True
     enable_kick_reverb_snare_filter = bool(data.get("enableKickReverbSnareFilter", False))
+    kick_reverb_low_sub_max = float(data.get("kickReverbLowSubMax", 0.0))
+    enable_kick_grid_suppressor = bool(data.get("enableKickGridSuppressor", False))
+    enable_kick_sub_share_gate = bool(data.get("enableKickSubShareGate", False))
+    enable_snare_sub_share_gate = bool(data.get("enableSnareSubShareGate", False))
+    enable_808_kick_path = bool(data.get("enable808KickPath", False))
     if not use_backend_hints and os.environ.get("STEMFORGE_DRUM_USE_BACKEND_HINTS") == "1":
         use_backend_hints = True
     if not use_backend_hints_inline and os.environ.get("STEMFORGE_DRUM_USE_BACKEND_HINTS_INLINE") == "1":
@@ -619,6 +639,11 @@ def main() -> None:
         use_real_backend=use_real_backend,
         use_onset_suppressor=use_onset_suppressor,
         enable_kick_reverb_snare_filter=enable_kick_reverb_snare_filter,
+        kick_reverb_low_sub_max=kick_reverb_low_sub_max,
+        enable_kick_grid_suppressor=enable_kick_grid_suppressor,
+        enable_kick_sub_share_gate=enable_kick_sub_share_gate,
+        enable_snare_sub_share_gate=enable_snare_sub_share_gate,
+        enable_808_kick_path=enable_808_kick_path,
     )
     print(json.dumps(out_paths))
 

@@ -153,15 +153,26 @@ class EngineConfig:
     dk_fast_run_kick_max: float = 0.50    # rule 3 only fires if kick_p < this
     dk_fast_run_snare_boost: float = 0.20 # additive boost to snare prob in fast runs
 
-    # Kick-reverb snare filter (post-NMS): suppress snare events that are simultaneous with or
-    # immediately after a kick event AND carry elevated sub_share — a spectral fingerprint of
-    # kick resonance misclassified as snare rather than a genuine simultaneous snare hit.
-    # Genuine simultaneous snares (separate instrument) have very low sub_share (0.05–0.15).
-    # Kick resonance classified as snare retains elevated sub_share (0.20–0.45) from kick decay.
+    # Kick-reverb snare filter (post-NMS): suppress snare events near a kick with two separate arms:
+    #   Arm A (high sub): snare has sub_share >= kick_reverb_max_snare_sub (0.35) — kick resonance
+    #     classified as snare; retains elevated sub_share from kick fundamental decay.
+    #   Arm B (low sub / bleed): snare has sub_share < kick_reverb_low_sub_max (disabled by default) —
+    #     non-drum bleed events (guitar, bass) near a kick; sub_share extremely low (0.03–0.12).
+    #     Genuine simultaneous snares have sub_share 0.05–0.25; bleed events cluster at 0.03–0.12.
+    #     Use with caution: set kick_reverb_low_sub_max BELOW the minimum observed TP snare sub_share.
     # Disabled by default; enable by setting enable_kick_reverb_snare_filter=True.
     enable_kick_reverb_snare_filter: bool = False
     kick_reverb_window_sec: float = 0.080   # search window: snare within this after (or at) kick
-    kick_reverb_max_snare_sub: float = 0.35  # snares with sub_share >= this near a kick are suppressed
+    kick_reverb_max_snare_sub: float = 0.35  # Arm A: suppress snares with sub_share >= this near a kick
+    kick_reverb_low_sub_max: float = 0.0    # Arm B: suppress snares with sub_share < this near a kick (0.0=disabled)
+
+    # Beat-grid kick suppressor (post-NMS): suppress kick events that are far from the BPM grid.
+    # Real kicks land on beat subdivisions; resonance FPs from toms / floor decay / room often don't.
+    # Only active when BPM is provided. Suppressed kicks can be rescued by a high backend-hint prob.
+    # Disabled by default; enable via enableKickGridSuppressor JSON key or --enable-kick-grid-suppressor.
+    enable_kick_grid_suppressor: bool = False
+    kick_grid_tol_frac: float = 0.08       # ±8% of beat_sec treated as "on-grid" (semiquaver resolution)
+    kick_grid_hint_rescue_prob: float = 0.70  # backend kick prob above this rescues an off-grid kick
 
     # Phase 4 — Onset-level binary suppressor (onset_suppressor.py).
     # When enabled, a trained logistic classifier scores each onset candidate BEFORE
@@ -171,3 +182,37 @@ class EngineConfig:
     use_onset_suppressor: bool = False
     onset_suppressor_min_kick_p: float = 0.65
     onset_suppressor_min_snare_p: float = 0.60
+
+    # Post-NMS kick resonance gate (iter 041).
+    # Suppresses kick events whose spectral profile matches a resonance tail rather than a genuine hit:
+    #   sub_share >= kick_min_sub_share (decaying kick fundamental still present)
+    #   AND mid_share <= kick_resonance_max_mid (attack transient is gone — no mid snap)
+    # Diagnostic finding (ENST): FP kicks have HIGH sub_share (0.57–0.69), not low.
+    # They are resonance re-detections 100–500ms after the true kick.  TP kicks have sub_share 0.47–0.68
+    # but retain mid energy from the beater impact.  The combined gate separates them;
+    # a sub_share-only floor does not (distributions overlap).
+    # Disabled by default; enable via enableKickSubShareGate JSON key or --enable-kick-sub-share-gate.
+    enable_kick_sub_share_gate: bool = False
+    kick_min_sub_share: float = 0.65      # resonance tail: sub_share >= this (decaying fundamental)
+    kick_resonance_max_mid: float = 0.26  # resonance tail: mid_share <= this (attack gone)
+
+    # Post-NMS snare sub_share ceiling gate (iter 043).
+    # Suppresses snare events with sub_share above the ceiling — catches bass-bleed FPs
+    # that are routed to snare despite carrying heavy low-frequency energy.
+    # Genuine snares: sub_share 0.05–0.25; bass-bleed FPs: sub_share 0.30+.
+    # NOTE: diagnostic on A2MD shows FP snares have LOW sub_share (0.03–0.25) and HIGH mid_share
+    # (0.55–0.83) — they are mid-dominant over-detections, not high-sub bass bleed.
+    # This ceiling gate therefore does NOT address A2MD snare FPs; it targets a different
+    # failure mode (high-sub bass bleed, which may occur in other clips).
+    # Disabled by default; threshold set after diagnostic run on A2MD clips.
+    enable_snare_sub_share_gate: bool = False
+    snare_max_sub_share: float = 0.40  # snares above this are suppressed as bass-bleed FPs
+
+    # Secondary 808/electronic kick classify path (iter 044 — Phase D, highest risk).
+    # Adds a classify.py rule for mid-heavy, impulsive kicks (808-style, synthetic kick drums)
+    # that fail the main kick rule (sub_mid_ratio >= 2.0 AND sub_share >= 0.45).
+    # Disabled by default; only attempt after Phases B+C are complete.
+    enable_808_kick_path: bool = False
+    kick_808_attack_min: float = 0.35   # high attack_n = impulsive onset (808 click transient)
+    kick_808_sub_share_min: float = 0.22  # lower sub floor than main path (808 mid-heavy body)
+    kick_808_centroid_max: float = 0.45   # centroid cap: above this → snare / tops, not kick

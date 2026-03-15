@@ -106,6 +106,32 @@ def main() -> int:
         action="store_true",
         help="Enable kick-reverb snare filter (post-NMS: suppress high-sub snares near kicks)",
     )
+    ap.add_argument(
+        "--kick-reverb-low-sub-max",
+        type=float,
+        default=0.0,
+        help="Arm B of kick-reverb snare filter: suppress near-kick snares with sub_share < this (0=disabled)",
+    )
+    ap.add_argument(
+        "--enable-kick-grid-suppressor",
+        action="store_true",
+        help="Enable beat-grid kick suppressor (suppress off-grid kick FPs when BPM known)",
+    )
+    ap.add_argument(
+        "--enable-kick-sub-share-gate",
+        action="store_true",
+        help="Enable post-NMS kick sub_share floor gate (suppress low-sub FP kicks)",
+    )
+    ap.add_argument(
+        "--enable-snare-sub-share-gate",
+        action="store_true",
+        help="Enable post-NMS snare sub_share ceiling gate (suppress high-sub FP snares)",
+    )
+    ap.add_argument(
+        "--enable-808-kick-path",
+        action="store_true",
+        help="Enable secondary 808/electronic kick classify path",
+    )
     args = ap.parse_args()
 
     synth_ledger = APP_ROOT / ".internal_eval" / "gate_synthetic_ledger.json"
@@ -128,6 +154,15 @@ def main() -> int:
         synth_cmd += ["--use-onset-suppressor"]
     if args.enable_kick_reverb_snare_filter:
         synth_cmd += ["--enable-kick-reverb-snare-filter"]
+    if args.enable_kick_grid_suppressor:
+        synth_cmd += ["--enable-kick-grid-suppressor"]
+    # NOTE: --enable-kick-sub-share-gate and --enable-snare-sub-share-gate are intentionally NOT
+    # propagated to the synthetic eval.  Synthetic packs are clean (no room acoustics, no resonance
+    # tails) so these post-NMS gates only apply to real recordings.  Applying them to synthetic packs
+    # would suppress genuine synthesized kicks that happen to be sub-dominant (low mid content), which
+    # is not the failure mode these gates target.
+    if args.enable_808_kick_path:
+        synth_cmd += ["--enable-808-kick-path"]
     rc, out, err = _run(synth_cmd)
     if out:
         print(out.strip())
@@ -199,6 +234,16 @@ def main() -> int:
             real_cmd += ["--use-onset-suppressor"]
         if args.enable_kick_reverb_snare_filter:
             real_cmd += ["--enable-kick-reverb-snare-filter"]
+        if args.kick_reverb_low_sub_max > 0.0:
+            real_cmd += ["--kick-reverb-low-sub-max", str(args.kick_reverb_low_sub_max)]
+        if args.enable_kick_grid_suppressor:
+            real_cmd += ["--enable-kick-grid-suppressor"]
+        if args.enable_kick_sub_share_gate:
+            real_cmd += ["--enable-kick-sub-share-gate"]
+        if args.enable_snare_sub_share_gate:
+            real_cmd += ["--enable-snare-sub-share-gate"]
+        if args.enable_808_kick_path:
+            real_cmd += ["--enable-808-kick-path"]
         rc2, out2, err2 = _run(real_cmd)
         if out2:
             print(out2.strip())

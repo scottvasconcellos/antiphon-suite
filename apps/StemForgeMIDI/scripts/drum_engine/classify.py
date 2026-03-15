@@ -57,8 +57,21 @@ def classify_feature(
     )
     perc_conf = max(0.05, 1.0 - max(kick_conf, snare_conf, tops_conf))
 
+    # Secondary 808/electronic kick path (Phase D): impulsive, mid-present kicks that fail the
+    # main sub-dominant rule.  Must appear BEFORE the main rule so strong sub kicks still take
+    # the primary path; this only catches mid-heavy kicks that would otherwise fall through to snare.
+    # Disabled by default — enable_808_kick_path must be True AND the main kick rule must NOT fire.
+    _808_kick = (
+        cfg.enable_808_kick_path
+        and not (sub_mid_ratio >= cfg.kick_sub_mid_ratio_min and sub_share >= cfg.kick_sub_share_min)
+        and attack_n >= cfg.kick_808_attack_min
+        and sub_share >= cfg.kick_808_sub_share_min
+        and centroid_n <= cfg.kick_808_centroid_max
+    )
     if sub_mid_ratio >= cfg.kick_sub_mid_ratio_min and sub_share >= cfg.kick_sub_share_min:
         chosen_role: RoleName = "drums_kick"
+    elif _808_kick:
+        chosen_role = "drums_kick"
     elif high_share >= cfg.tops_high_share_min:
         # High-band energy check fires before snare: hi-hats and cymbals have
         # high_share >> 0.36 while snares stay below (mid-frequency dominant).
